@@ -299,11 +299,11 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             />
           )} */}
           {/* Logo */}
-          <div className="flex justify-between logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
+          <div className="flex  logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
             <span className="mr-1">
               <GiChefToque />
             </span>
-            <span className="whitespace-nowrap">THE TROFI</span>
+            <span className="whitespace-nowrap font-sans italic">TROFI</span>
           </div>
 
           {/* Navigation */}

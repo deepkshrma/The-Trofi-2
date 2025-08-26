@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { HiMenu } from "react-icons/hi";
 import profilePhoto from "../../assets/images/loginImage.jpg";
 import { FaChevronDown } from "react-icons/fa";
-import headerlogo from "/favicon.png";
+import headerlogo from "/trofititle.png";
 import { GoBellFill } from "react-icons/go";
 import NotificationBell from "./NotificationBell";
 import UserDropdown from "../common/UserDropdown/UserDropdown";
@@ -82,7 +82,7 @@ function Header({ setIs_Toggle, isToggle }) {
             />
           )} */}
           <div>
-            <img src={headerlogo} alt="" />
+            <img src={headerlogo} className="w-10 h-10 translate-y-[-10%]" alt="" />
           </div>
         </span>
 
