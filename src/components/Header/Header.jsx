@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiMenu } from "react-icons/hi";
-import profilePhoto from "../../assets/images/loginImage.jpg";
+import profilePhoto from "../../assets/images/guest.png";
 import { FaChevronDown } from "react-icons/fa";
 import headerlogo from "/trofititle.png";
 import { GoBellFill } from "react-icons/go";
@@ -82,7 +82,11 @@ function Header({ setIs_Toggle, isToggle }) {
             />
           )} */}
           <div>
-            <img src={headerlogo} className="w-10 h-10 translate-y-[-10%]" alt="" />
+            <img
+              src={headerlogo}
+              className="w-10 h-10 translate-y-[-10%]"
+              alt=""
+            />
           </div>
         </span>
 
@@ -90,21 +94,22 @@ function Header({ setIs_Toggle, isToggle }) {
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-3 cursor-pointer px-3 py-1 rounded-[8px]">
               <NotificationBell />
-
+              <div>
+                <p className="text-[14px] font-Montserrat font-[500] ">Admin</p>
+                <p className="text-[12px] font-Montserrat font-[400] text-[#9C9C9C]">
+                  manager
+                </p>
+              </div>
               <div className="rounded-full bg-[#D8D8D8] overflow-hidden">
                 <img
                   src={profilePhoto}
                   className="w-11 h-11 object-cover"
+                  onClick={handleUserDropdown}
                   alt="profile_pic"
                 />
               </div>
-              <div>
-                <p className="text-[14px] font-Montserrat font-[500] ">Admin</p>
-                {/* <p className="text-[12px] font-Montserrat font-[400] text-[#9C9C9C]">
-                  {roleName}
-                </p> */}
-              </div>
-              <div
+
+              {/* <div
                 className="w-5 h-5 rounded-full  bg-[#F9832B] flex items-center justify-center transition-all duration-300 ease-out"
                 onClick={handleUserDropdown}
               >
@@ -116,7 +121,7 @@ function Header({ setIs_Toggle, isToggle }) {
                     size={9}
                   />
                 </span>
-              </div>
+              </div> */}
             </div>
             <UserDropdown
               userDropdown={userDropdown}
