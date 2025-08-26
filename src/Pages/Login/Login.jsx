@@ -1,16 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import trofilogo from "../../assets/images/trofititle.png";
-import loginbg from "../../assets/images/loginimage.jpg"
-import loginleftbg from "../../assets/images/loginleftbg.jpg"
+import loginbg from "../../assets/images/loginimage.jpg";
+import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 export default function Login() {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative px-4"
       style={{
-        backgroundImage:
-          `url(${loginbg})`
+        backgroundImage: `url(${loginbg})`,
       }}
     >
       {/* Blur Overlay for Page */}
@@ -25,8 +24,7 @@ export default function Login() {
           <div
             className="absolute inset-0 bg-cover bg-center filter blur-sm"
             style={{
-              backgroundImage:
-                `url(${loginleftbg})`
+              backgroundImage: `url(${loginleftbg})`,
             }}
           ></div>
           {/* Overlay for readability */}
@@ -40,7 +38,7 @@ export default function Login() {
                   <img
                     src={trofilogo}
                     alt="Trofi Icon"
-                    className="w-6 h-6 object-cover"
+                    className="w-10 h-10 object-content translate-y-[-10%]"
                   />
                 </div>
                 <h2 className="ml-1 text-2xl font-bold">Trofi</h2>
@@ -94,7 +92,7 @@ export default function Login() {
               Sign in by entering information below
             </p>
 
-            <form className="space-y-4">
+            <form className="space-y-4 translate-y-1/6">
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Email *
