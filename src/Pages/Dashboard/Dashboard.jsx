@@ -209,23 +209,10 @@ const DropdownPill = ({ label, onChange }) => (
   </div>
 );
 
-const StatCard = React.memo(function StatCard({
-  title,
-  value,
-  change,
-  changeType,
-  Icon,
-  data,
-  gid,
-  brand,
-}) {
+const StatCard = React.memo(function StatCard({ title, value, change, changeType, Icon, data, gid, brand }) {
   return (
     <div className="bg-white rounded-2xl shadow-md p-4 border-l-4"
          style={{ borderLeftColor: brand }}>
-    <div
-      className="bg-white rounded-2xl  p-4"
-      style={{ boxShadow: "-12px 0px 12px rgba(249,131,43,0.25)" }}
-    >
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-baseline gap-2">
@@ -247,7 +234,6 @@ const StatCard = React.memo(function StatCard({
     </div>
   );
 });
-
 
 
 export default function Dashboard() {
