@@ -1,0 +1,133 @@
+export const permissionSections = [
+  {
+    key: "dashboard",
+    label: "Dashboard",
+    // manageFields: ["add", "update", "delete", "export", "status", "approveOrDeny"],
+  },
+  {
+    key: "bookingManagement",
+    label: "Booking Management",
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "transactionManagement",
+    label: "Transaction Management",
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "promotionManagement",
+    label: "Promotion Management",
+    extraFields: [
+      { key: "is_disc", label: "Discounts" },
+      { key: "coupons", label: "Coupons" },
+      { key: "walletBonus", label: "Wallet Bonus" },
+      { key: "advertisements", label: "Advertisements" },
+      { key: "promoBanners", label: "Promo Banners" },
+      { key: "sendNotifications", label: "Send Notifications" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "providerManagement",
+    label: "Provider Management",
+    extraFields: [
+      { key: "onboardingRequest", label: "Onboarding Request" },
+      { key: "providers", label: "Providers" },
+      { key: "withdraws", label: "Withdraws" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "serviceManagement",
+    label: "Service Management",
+    extraFields: [
+      { key: "category", label: "Category" },
+      { key: "services", label: "Services" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "customerManagement",
+    label: "Customer Management",
+    extraFields: [
+      { key: "customers", label: "Customers" },
+      { key: "customerWallet", label: "Customer Wallet" },
+      { key: "loyaltyPoint", label: "Loyalty Points" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "employeeManagement",
+    label: "Admin Management",
+    extraFields: [
+      { key: "roleSetup", label: "Role Setup" },
+      { key: "employeeList", label: "Admin List" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+  {
+    key: "reportManagement",
+    label: "Report Management",
+    extraFields: [
+      { key: "reports", label: "Reports" },
+      { key: "analytics", label: "Analytics" },
+    ],
+    manageFields: [
+      "add",
+      "update",
+      "delete",
+      "export",
+      "status",
+      "approveOrDeny",
+    ],
+  },
+];
