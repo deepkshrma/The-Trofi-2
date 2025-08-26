@@ -284,7 +284,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
 
   return (
     <>
-      <div className="flex">
+      <div className="flex bg-[#F9832B]">
         <div
           className={`sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
     transition-all duration-800 z-11 
@@ -380,9 +380,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         )}
                     </li>
                   ))}
-                  {/* {section.border && (
-                    <span className="flex my-2 border-t-1 border-gray-200"></span>
-                  )} */}
+                  {section.border && <span className="flex my-2 "></span>}
                 </React.Fragment>
               ))}
             </ul>
