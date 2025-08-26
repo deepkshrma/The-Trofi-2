@@ -13,7 +13,13 @@ import {
   Bar,
   Legend,
 } from "recharts";
-import { FiCoffee, FiFileText, FiUsers, FiDollarSign, FiChevronDown } from "react-icons/fi";
+import {
+  FiCoffee,
+  FiFileText,
+  FiUsers,
+  FiDollarSign,
+  FiChevronDown,
+} from "react-icons/fi";
 
 import image1 from "../../assets/images/pizza1.jpg";
 import image2 from "../../assets/images/pizza2.jpg";
@@ -24,11 +30,18 @@ import pizza4 from "../../assets/images/pizza4.jpg";
 import pizza1 from "../../assets/images/pizza1.jpg";
 import pizza2 from "../../assets/images/pizza2.jpg";
 
-
-const SPARK_MENUS = [10, 18, 14, 22, 19, 30, 24, 28, 22, 26, 20, 24].map((v, i) => ({ i, v }));
-const SPARK_ORDERS = [24, 28, 20, 34, 30, 26, 32, 18, 22, 20, 16, 24].map((v, i) => ({ i, v }));
-const SPARK_CUSTOMERS = [12, 20, 26, 22, 28, 24, 20, 18, 22, 16, 14, 10].map((v, i) => ({ i, v }));
-const SPARK_INCOME = [18, 16, 22, 24, 28, 26, 30, 34, 28, 32, 30, 36].map((v, i) => ({ i, v }));
+const SPARK_MENUS = [10, 18, 14, 22, 19, 30, 24, 28, 22, 26, 20, 24].map(
+  (v, i) => ({ i, v })
+);
+const SPARK_ORDERS = [24, 28, 20, 34, 30, 26, 32, 18, 22, 20, 16, 24].map(
+  (v, i) => ({ i, v })
+);
+const SPARK_CUSTOMERS = [12, 20, 26, 22, 28, 24, 20, 18, 22, 16, 14, 10].map(
+  (v, i) => ({ i, v })
+);
+const SPARK_INCOME = [18, 16, 22, 24, 28, 26, 30, 34, 28, 32, 30, 36].map(
+  (v, i) => ({ i, v })
+);
 
 // Revenue + Profit series for filters
 const REVENUE_DATA = {
@@ -158,14 +171,20 @@ const REVIEWS = [
 /***************************
  * UI SUB-COMPONENTS
  ***************************/
-const FilterPills = ({ active, onChange, labels = ["Monthly", "Weekly", "Today"] }) => (
+const FilterPills = ({
+  active,
+  onChange,
+  labels = ["Monthly", "Weekly", "Today"],
+}) => (
   <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
     {labels.map((label) => (
       <button
         key={label}
         onClick={() => onChange(label)}
         className={`px-3 py-1 text-sm rounded-full transition ${
-          active === label ? "bg-gray-800 text-white" : "text-gray-600 hover:text-gray-900"
+          active === label
+            ? "bg-gray-800 text-white"
+            : "text-gray-600 hover:text-gray-900"
         }`}
         type="button"
       >
@@ -190,14 +209,32 @@ const DropdownPill = ({ label, onChange }) => (
   </div>
 );
 
-const StatCard = React.memo(function StatCard({ title, value, change, changeType, Icon, data, gid, brand }) {
+const StatCard = React.memo(function StatCard({
+  title,
+  value,
+  change,
+  changeType,
+  Icon,
+  data,
+  gid,
+  brand,
+}) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4">
+    <div
+      className="bg-white rounded-2xl  p-4"
+      style={{ boxShadow: "-12px 0px 12px rgba(249,131,43,0.25)" }}
+    >
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-baseline gap-2">
             <h3 className="text-3xl font-bold leading-none">{value}</h3>
-            <span className={`text-sm ${changeType === "up" ? "text-green-600" : "text-red-500"}`}>{change}</span>
+            <span
+              className={`text-sm ${
+                changeType === "up" ? "text-green-600" : "text-red-500"
+              }`}
+            >
+              {change}
+            </span>
           </div>
           <p className="mt-2 text-gray-600">{title}</p>
         </div>
@@ -225,10 +262,8 @@ const StatCard = React.memo(function StatCard({ title, value, change, changeType
   );
 });
 
-
 export default function Dashboard() {
   const BRAND = "#F9832B"; // theme color
-
 
   const [revenueFilter, setRevenueFilter] = useState("Monthly");
   const [customerFilter, setCustomerFilter] = useState("Monthly");
@@ -237,8 +272,14 @@ export default function Dashboard() {
   const [reviewsSort, setReviewsSort] = useState("Newest");
 
   // Derived series from static pools
-  const revenueSeries = useMemo(() => REVENUE_DATA[revenueFilter] || [], [revenueFilter]);
-  const customerSeries = useMemo(() => CUSTOMER_DATA[customerFilter] || [], [customerFilter]);
+  const revenueSeries = useMemo(
+    () => REVENUE_DATA[revenueFilter] || [],
+    [revenueFilter]
+  );
+  const customerSeries = useMemo(
+    () => CUSTOMER_DATA[customerFilter] || [],
+    [customerFilter]
+  );
 
   // Sort reviews based on choice (static data, but dynamic ordering)
   const sortedReviews = useMemo(() => {
@@ -255,10 +296,38 @@ export default function Dashboard() {
     <div className="p-6 bg-gray-50 main main_page min-h-screen">
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
-        <StatCard title="Menus" value="56"  changeType="up" Icon={FiCoffee}  gid="menus" brand={BRAND} />
-        <StatCard title="Orders" value="785"  changeType="up" Icon={FiFileText}  gid="orders" brand={BRAND} />
-        <StatCard title="Customers" value="56"  changeType="down" Icon={FiUsers}  gid="customers" brand={BRAND} />
-        <StatCard title="Income" value="$6231"  changeType="down" Icon={FiDollarSign}  gid="income" brand={BRAND} />
+        <StatCard
+          title="Menus"
+          value="56"
+          changeType="up"
+          Icon={FiCoffee}
+          gid="menus"
+          brand={BRAND}
+        />
+        <StatCard
+          title="Orders"
+          value="785"
+          changeType="up"
+          Icon={FiFileText}
+          gid="orders"
+          brand={BRAND}
+        />
+        <StatCard
+          title="Customers"
+          value="56"
+          changeType="down"
+          Icon={FiUsers}
+          gid="customers"
+          brand={BRAND}
+        />
+        <StatCard
+          title="Income"
+          value="$6231"
+          changeType="down"
+          Icon={FiDollarSign}
+          gid="income"
+          brand={BRAND}
+        />
       </div>
 
       {/* Middle Graphs */}
@@ -268,9 +337,14 @@ export default function Dashboard() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h3 className="text-xl font-semibold">Revenue</h3>
-              <p className="text-sm text-gray-400">Performance based on {revenueFilter}</p>
+              <p className="text-sm text-gray-400">
+                Performance based on {revenueFilter}
+              </p>
             </div>
-            <DropdownPill label={revenueFilter} onChange={(val) => setRevenueFilter(val)} />
+            <DropdownPill
+              label={revenueFilter}
+              onChange={(val) => setRevenueFilter(val)}
+            />
           </div>
 
           {/* KPIs */}
@@ -287,7 +361,10 @@ export default function Dashboard() {
 
           <div className="mt-4 h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <AreaChart
+                data={revenueSeries}
+                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="grad-revenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor={BRAND} stopOpacity={0.8} />
@@ -302,8 +379,18 @@ export default function Dashboard() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Area type="monotone" dataKey="profit" stroke="#C084FC" fill="url(#grad-profit)" />
-                <Area type="monotone" dataKey="revenue" stroke={BRAND} fill="url(#grad-revenue)" />
+                <Area
+                  type="monotone"
+                  dataKey="profit"
+                  stroke="#C084FC"
+                  fill="url(#grad-profit)"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke={BRAND}
+                  fill="url(#grad-revenue)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -311,11 +398,17 @@ export default function Dashboard() {
           {/* Legend */}
           <div className="mt-3 flex items-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-full" style={{ background: "#C084FC" }}></span>
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{ background: "#C084FC" }}
+              ></span>
               <span className="text-gray-600">Net Profit</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-full" style={{ background: BRAND }}></span>
+              <span
+                className="inline-block w-3 h-3 rounded-full"
+                style={{ background: BRAND }}
+              ></span>
               <span className="text-gray-600">Revenue</span>
             </div>
           </div>
@@ -326,14 +419,22 @@ export default function Dashboard() {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h3 className="text-xl font-semibold">Customer Map</h3>
-              <p className="text-sm text-gray-400">Data based on {customerFilter}</p>
+              <p className="text-sm text-gray-400">
+                Data based on {customerFilter}
+              </p>
             </div>
-            <FilterPills active={customerFilter} onChange={(val) => setCustomerFilter(val)} />
+            <FilterPills
+              active={customerFilter}
+              onChange={(val) => setCustomerFilter(val)}
+            />
           </div>
 
           <div className="mt-4 h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={customerSeries} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <BarChart
+                data={customerSeries}
+                margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
@@ -353,14 +454,22 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h3 className="text-xl font-semibold">Recent Reviews</h3>
-            <FilterPills active={reviewsSort} onChange={(val) => setReviewsSort(val)} labels={["Newest", "Oldest"]} />
+            <FilterPills
+              active={reviewsSort}
+              onChange={(val) => setReviewsSort(val)}
+              labels={["Newest", "Oldest"]}
+            />
           </div>
 
           <ul className="divide-y">
             {sortedReviews.map((r) => (
               <li key={r.id} className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
-                  <img src={r.img} alt="menu" className="w-12 h-12 rounded-full object-cover" />
+                  <img
+                    src={r.img}
+                    alt="menu"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
                   <div>
                     <p className="font-semibold">{r.menu}</p>
                     <p className="text-xs text-gray-400">{r.orderId}</p>
@@ -368,11 +477,15 @@ export default function Dashboard() {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold">{r.reviewer}</p>
-                  <p className="text-xs text-gray-400">{"⭐".repeat(r.rating)}</p>
+                  <p className="text-xs text-gray-400">
+                    {"⭐".repeat(r.rating)}
+                  </p>
                 </div>
                 <span
                   className={`px-3 py-1 rounded-md text-xs ${
-                    r.sentiment === "POSITIVE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                    r.sentiment === "POSITIVE"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-600"
                   }`}
                 >
                   {r.sentiment}
@@ -382,7 +495,10 @@ export default function Dashboard() {
           </ul>
 
           <div className="text-center mt-4">
-            <a href="#" className="text-[color:var(--brand,#F9832B)] font-medium hover:underline">
+            <a
+              href="#"
+              className="text-[color:var(--brand,#F9832B)] font-medium hover:underline"
+            >
               View More
             </a>
           </div>
@@ -394,7 +510,11 @@ export default function Dashboard() {
           <ul className="divide-y">
             <li className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
-                <img src={image1} alt="menu" className="w-12 h-12 rounded-full object-cover" />
+                <img
+                  src={image1}
+                  alt="menu"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold">Watermelon juice with ice</p>
                   <p className="text-xs text-gray-400">⭐ 4.8 avg</p>
@@ -404,7 +524,11 @@ export default function Dashboard() {
             </li>
             <li className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
-                <img src={image2} alt="menu" className="w-12 h-12 rounded-full object-cover" />
+                <img
+                  src={image2}
+                  alt="menu"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold">Italiano pizza with garlic</p>
                   <p className="text-xs text-gray-400">⭐ 4.6 avg</p>
@@ -414,9 +538,15 @@ export default function Dashboard() {
             </li>
             <li className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
-                <img src={image3} alt="menu" className="w-12 h-12 rounded-full object-cover" />
+                <img
+                  src={image3}
+                  alt="menu"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
                 <div>
-                  <p className="font-semibold">Tuna soup spinach with himalaya</p>
+                  <p className="font-semibold">
+                    Tuna soup spinach with himalaya
+                  </p>
                   <p className="text-xs text-gray-400">⭐ 4.2 avg</p>
                 </div>
               </div>
