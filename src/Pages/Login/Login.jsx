@@ -1,5 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import trofilogo from "../../assets/images/trofititle.png";
+import loginbg from "../../assets/images/loginimage.jpg"
+import loginleftbg from "../../assets/images/loginleftbg.jpg"
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 export default function Login() {
   return (
@@ -7,7 +10,7 @@ export default function Login() {
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative px-4"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5')",
+          `url(${loginbg})`
       }}
     >
       {/* Blur Overlay for Page */}
@@ -23,7 +26,7 @@ export default function Login() {
             className="absolute inset-0 bg-cover bg-center filter blur-sm"
             style={{
               backgroundImage:
-                "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836')",
+                `url(${loginleftbg})`
             }}
           ></div>
           {/* Overlay for readability */}
@@ -33,11 +36,16 @@ export default function Login() {
           <div className="relative p-8 flex flex-col justify-center h-full">
             <div className="mb-10">
               <div className="flex items-center mb-6">
-                <div className="bg-[#F9832B] p-2 rounded-lg">
-                  <span className="text-white font-bold text-lg">🍴</span>
+                <div className=" p-2 rounded-lg flex items-center justify-center">
+                  <img
+                    src={trofilogo}
+                    alt="Trofi Icon"
+                    className="w-6 h-6 object-cover"
+                  />
                 </div>
-                <h2 className="ml-2 text-2xl font-bold">Trofi</h2>
+                <h2 className="ml-1 text-2xl font-bold">Trofi</h2>
               </div>
+
               <div className="translate-y-1/2">
                 <h3 className="text-2xl font-semibold mb-4">Eat The Best</h3>
                 <p className="text-gray-700 mb-6">
@@ -117,19 +125,19 @@ export default function Login() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-white/90 cursor-pointer text-[#F9832B] font-semibold py-2 rounded-lg hover:bg-gray-100 transition"
+                className="w-full bg-white/90 cursor-pointer  text-[#F9832B] font-semibold py-2 rounded-lg hover:bg-gray-100 transition"
               >
                 Sign In
               </button>
             </form>
           </div>
 
-          <p className="mt-6 text-center text-sm">
+          {/* <p className="mt-6 text-center text-sm">
             Don’t have an account?{" "}
-            <Link to="#" className="underline">
+            <Link to="#" className="no-underline">
               Sign up
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>
