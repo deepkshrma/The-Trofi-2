@@ -37,7 +37,7 @@ function AdminProfile() {
             <div className="flex flex-col items-center md:items-start space-y-4">
               <img
                 src={
-                profile_picture
+                profile_image
                   // ? `${BASE_URL}/${profile_picture}`
                  
               }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaInbox } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import ContextApi from "../../../ContextApi";
 import DeleteModel from "../DeleteModel/DeleteModel";
@@ -58,35 +58,49 @@ const UserDropdown = ({
         ref={dropdownRef}
         className={`relative ${userDropdown ? "block" : "hidden"}`}
       >
-        <div className="absolute right-0 top-2 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px]">
+        <div className="absolute right-0 top-4 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px]">
           {/* Center fullName and role */}
-          <div className="w-full flex flex-col justify-center items-center text-center py-2">
+          {/* <div className="w-full flex flex-col justify-center items-center text-center py-2">
             <span className="block font-medium text-gray-700 text-sm">
               {fullName}
             </span>
             <span className="mt-0.5 block text-sm text-gray-500">{role}</span>
-          </div>
+          </div> */}
 
-          <hr className="text-[#E0E0E0]" />
-          <ul className="flex flex-col  ">
+          {/* <hr className="text-[#E0E0E0]" /> */}
+          <ul className="flex flex-col ">
+            {/* Profile */}
             <li onClick={handleuserDropdown}>
               <Link
                 to="/AdminProfile"
-                className="flex items-center gap-3 py-2 px-5 text-gray-700  group text-[14px] hover:bg-gray-100"
+                className="flex items-center gap-3 py-2 px-5 text-gray-700 group text-[14px] hover:bg-gray-100"
               >
-                <FaUser size={13} />
-                <span className="whitespace-nowrap">My profile</span>
+                <FaUser size={16} className="text-orange-500" />
+                <span className="whitespace-nowrap">Profile</span>
+              </Link>
+            </li>
+
+            <hr className="text-[#E0E0E0]" />
+
+            {/* Inbox */}
+            <li>
+              <Link
+                to="/AdminInbox"
+                className="flex items-center gap-3 py-2 px-5 text-gray-700 group text-[14px] hover:bg-gray-100"
+              >
+                <FaInbox size={16} className="text-green-500" />
+                <span className="whitespace-nowrap">Inbox</span>
               </Link>
             </li>
             <hr className="text-[#E0E0E0]" />
-
+            {/* Logout */}
             <li>
               <button
-                className="flex w-full items-center gap-3 py-2 px-5 text-red-700  group text-[14px] hover:bg-gray-100 cursor-pointer rounded-b-xl"
+                className="flex w-full items-center gap-3 py-2 px-5 text-red-700 group text-[14px] hover:bg-gray-100 cursor-pointer rounded-b-xl"
                 onClick={() => setShowDeleteModal(true)}
               >
-                <FiLogOut className="w-4" />
-                <span className="whitespace-nowrap ">Logout</span>
+                <FiLogOut size={16} className="text-red-500" />
+                <span className="whitespace-nowrap">Logout</span>
               </button>
             </li>
           </ul>
