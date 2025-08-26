@@ -38,8 +38,8 @@ function AdminProfile() {
               <img
                 src={
                 profile_picture
-                  ? `${BASE_URL}/${profile_picture}`
-                  : profile_image
+                  // ? `${BASE_URL}/${profile_picture}`
+                 
               }
                 alt="Profile"
                 className="w-32 h-32 rounded-full shadow-lg object-cover"

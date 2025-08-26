@@ -70,61 +70,61 @@ const AdminList = () => {
   const [selectedAdminForRoleChange, setSelectedAdminForRoleChange] =
     useState(null);
 
-  const fetchAdminDetails = async (empId) => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+  // const fetchAdminDetails = async (empId) => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
 
-      const res = await axios.get(`${BASE_URL}/admin/get-admin-byId/${empId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //     const res = await axios.get(`${BASE_URL}/admin/get-admin-byId/${empId}`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
-      const admin = res.data.data;
+  //     const admin = res.data.data;
 
-      setSelectedAdmin({
-        empId: admin._id,
-        status: admin.status,
-        status_reason: admin.status_reason || "",
-      });
+  //     setSelectedAdmin({
+  //       empId: admin._id,
+  //       status: admin.status,
+  //       status_reason: admin.status_reason || "",
+  //     });
 
-      setShowStatusModal(true);
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to fetch admin details";
-      toast.error(errorMessage);
-    }
-  };
+  //     setShowStatusModal(true);
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error?.response?.data?.message || "Failed to fetch admin details";
+  //     toast.error(errorMessage);
+  //   }
+  // };
 
-  const handleStatusChangeConfirm = async (newStatus) => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+  // const handleStatusChangeConfirm = async (newStatus) => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
 
-      await axios.put(
-        `${BASE_URL}/admin/update-admin-status/${currentStatusAdmin.empId}`,
-        {
-          status: newStatus,
-          status_reason: "",
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  //     await axios.put(
+  //       `${BASE_URL}/admin/update-admin-status/${currentStatusAdmin.empId}`,
+  //       {
+  //         status: newStatus,
+  //         status_reason: "",
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
 
-      setAdmins((prevAdmins) =>
-        prevAdmins.map((admin) =>
-          admin.empId === currentStatusAdmin.empId
-            ? { ...admin, status: newStatus }
-            : admin
-        )
-      );
-    } catch (error) {
-      toast.error("Failed to change status !");
-    } finally {
-      setShowStatusModal(false);
-      setCurrentStatusAdmin(null);
-    }
-  };
+  //     setAdmins((prevAdmins) =>
+  //       prevAdmins.map((admin) =>
+  //         admin.empId === currentStatusAdmin.empId
+  //           ? { ...admin, status: newStatus }
+  //           : admin
+  //       )
+  //     );
+  //   } catch (error) {
+  //     toast.error("Failed to change status !");
+  //   } finally {
+  //     setShowStatusModal(false);
+  //     setCurrentStatusAdmin(null);
+  //   }
+  // };
 
   {
     showStatusModal && (
@@ -137,63 +137,63 @@ const AdminList = () => {
     );
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const authData = JSON.parse(localStorage.getItem("broom_auth"));
-        const token = authData?.token;
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //       const token = authData?.token;
 
-        if (!token) {
-          // toast.error("Token not found !! login again ");
-          return;
-        }
+  //       if (!token) {
+  //         // toast.error("Token not found !! login again ");
+  //         return;
+  //       }
 
-        const [adminRes, rolesRes] = await Promise.all([
-          axios.get(`${BASE_URL}/admin/get-all-admins`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${BASE_URL}/admin/get-all-roles`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-        setAllRoles(rolesRes.data.data);
-        // Build role map
-        const roleMap = {};
-        rolesRes.data.data.forEach((role) => {
-          roleMap[role._id] = role.name;
-        });
-        setRolesMap(roleMap);
+  //       const [adminRes, rolesRes] = await Promise.all([
+  //         axios.get(`${BASE_URL}/admin/get-all-admins`, {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }),
+  //         axios.get(`${BASE_URL}/admin/get-all-roles`, {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }),
+  //       ]);
+  //       setAllRoles(rolesRes.data.data);
+  //       // Build role map
+  //       const roleMap = {};
+  //       rolesRes.data.data.forEach((role) => {
+  //         roleMap[role._id] = role.name;
+  //       });
+  //       setRolesMap(roleMap);
 
-        // Transform admins
-        const transformedAdmins = adminRes.data.data.map((admin) => ({
-          name: `${admin.first_name} ${admin.last_name}`,
-          email: admin.email,
-          empId: admin._id,
-          role:
-            typeof admin.role === "string"
-              ? roleMap[admin.role] || "Unknown"
-              : admin.role?.name || roleMap[admin.role?._id] || "Unknown",
-          profilePhoto: admin.profile_picture
-            ? `${BASE_URL}/${admin.profile_picture}`
-            : guestImg,
-          status: admin.status,
-        }));
+  //       // Transform admins
+  //       const transformedAdmins = adminRes.data.data.map((admin) => ({
+  //         name: `${admin.first_name} ${admin.last_name}`,
+  //         email: admin.email,
+  //         empId: admin._id,
+  //         role:
+  //           typeof admin.role === "string"
+  //             ? roleMap[admin.role] || "Unknown"
+  //             : admin.role?.name || roleMap[admin.role?._id] || "Unknown",
+  //         profilePhoto: admin.profile_picture
+  //           ? `${BASE_URL}/${admin.profile_picture}`
+  //           : guestImg,
+  //         status: admin.status,
+  //       }));
 
-        setAdmins(transformedAdmins);
-      } catch (error) {
-        const errorMessage =
-          error?.response?.data?.message ||
-          "failed to fetch admins and roles !";
-        // toast.error(errorMessage);
-      }
-    };
+  //       setAdmins(transformedAdmins);
+  //     } catch (error) {
+  //       const errorMessage =
+  //         error?.response?.data?.message ||
+  //         "failed to fetch admins and roles !";
+  //       // toast.error(errorMessage);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter]);
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [search, statusFilter]);
 
   const openDeleteModal = (empId) => {
     setSelectedAdmin(empId);
@@ -206,25 +206,29 @@ const AdminList = () => {
   };
 
   const confirmDelete = async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+    
+  }
 
-      await axios.delete(`${BASE_URL}/admin/delete-admin/${selectedAdmin}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success("Admin Successfully Delete !");
-      // Remove the deleted admin from local state
-      setAdmins((prevAdmins) =>
-        prevAdmins.filter((admin) => admin.empId !== selectedAdmin)
-      );
-    } catch (error) {
-      const errorMessage = error?.response?.data?.message || "failed to delete";
-      // toast.error(errorMessage);
-    } finally {
-      closeDeleteModal();
-    }
-  };
+  // const confirmDelete = async () => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
+
+  //     await axios.delete(`${BASE_URL}/admin/delete-admin/${selectedAdmin}`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     toast.success("Admin Successfully Delete !");
+  //     // Remove the deleted admin from local state
+  //     setAdmins((prevAdmins) =>
+  //       prevAdmins.filter((admin) => admin.empId !== selectedAdmin)
+  //     );
+  //   } catch (error) {
+  //     const errorMessage = error?.response?.data?.message || "failed to delete";
+  //     // toast.error(errorMessage);
+  //   } finally {
+  //     closeDeleteModal();
+  //   }
+  // };
 
   const columns = useMemo(
     () => [

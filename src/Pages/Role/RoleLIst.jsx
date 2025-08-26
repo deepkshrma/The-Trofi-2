@@ -55,43 +55,43 @@ function RoleList() {
   const navigate = useNavigate();
 
   // Fetch all roles
-  const fetchRoles = async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+  // const fetchRoles = async () => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
 
-      if (!token) {
-        // toast.error("Token not found!");
-        return;
-      }
+  //     if (!token) {
+  //       // toast.error("Token not found!");
+  //       return;
+  //     }
 
-      const res = await axios.get(`${BASE_URL}/admin/get-all-roles`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //     const res = await axios.get(`${BASE_URL}/admin/get-all-roles`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
-      const rolesData = res.data.data.map((role) => ({
-        id: role._id,
-        name: role.name,
-        description: role.description || "-",
-        status: role.isActive ? "active" : "inactive",
-      }));
+  //     const rolesData = res.data.data.map((role) => ({
+  //       id: role._id,
+  //       name: role.name,
+  //       description: role.description || "-",
+  //       status: role.isActive ? "active" : "inactive",
+  //     }));
 
-      setRoles(rolesData);
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || "failed to fetch  roles !";
-      // toast.error(errorMessage);
-    }
-  };
+  //     setRoles(rolesData);
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error?.response?.data?.message || "failed to fetch  roles !";
+  //     // toast.error(errorMessage);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchRoles();
-  }, []);
+  // useEffect(() => {
+  //   fetchRoles();
+  // }, []);
 
-  //pagination
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter]);
+  // //pagination
+  // useEffect(() => {
+  //   setCurrentPage(1);
+  // }, [search, statusFilter]);
 
   // Filtered roles by status
   const filteredRoles = useMemo(() => {
@@ -118,61 +118,67 @@ function RoleList() {
   };
 
   const confirmDelete = async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
-
-      await axios.delete(`${BASE_URL}/admin/delete-role/${selectedRoleId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      fetchRoles();
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "failed to delete role , please try again !";
-      toast.error(errorMessage);
-    } finally {
-      closeDeleteModal();
-    }
+    
   };
+  // const confirmDelete = async () => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
+
+  //     await axios.delete(`${BASE_URL}/admin/delete-role/${selectedRoleId}`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+
+  //     fetchRoles();
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error?.response?.data?.message ||
+  //       "failed to delete role , please try again !";
+  //     toast.error(errorMessage);
+  //   } finally {
+  //     closeDeleteModal();
+  //   }
+  // };
+
+  // const toggleRoleStatus = async (roleId, currentStatus) => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
+
+  //     if (!token) return toast.error("Unauthorized");
+
+  //     const newStatus = currentStatus === "active" ? false : true;
+
+  //     await axios.patch(
+  //       `${BASE_URL}/admin/change-status/${roleId}`,
+  //       { isActive: newStatus },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+
+  //     toast.success(`Role is now ${newStatus ? "active" : "deactive"}`);
+
+  //     setRoles((prev) =>
+  //       prev.map((role) =>
+  //         role.id === roleId
+  //           ? {
+  //               ...role,
+  //               status: newStatus ? "active" : "inactive",
+  //             }
+  //           : role
+  //       )
+  //     );
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error?.response?.data?.message || "Failed to change status!";
+  //     // toast.error(errorMessage);
+  //   }
+  // };
 
   const toggleRoleStatus = async (roleId, currentStatus) => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
 
-      if (!token) return toast.error("Unauthorized");
-
-      const newStatus = currentStatus === "active" ? false : true;
-
-      await axios.patch(
-        `${BASE_URL}/admin/change-status/${roleId}`,
-        { isActive: newStatus },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      toast.success(`Role is now ${newStatus ? "active" : "deactive"}`);
-
-      setRoles((prev) =>
-        prev.map((role) =>
-          role.id === roleId
-            ? {
-                ...role,
-                status: newStatus ? "active" : "inactive",
-              }
-            : role
-        )
-      );
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || "Failed to change status!";
-      // toast.error(errorMessage);
-    }
   };
-
   const columns = useMemo(() => {
     return [
       {

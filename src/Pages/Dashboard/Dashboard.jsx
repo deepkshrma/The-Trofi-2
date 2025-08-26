@@ -192,12 +192,19 @@ const DropdownPill = ({ label, onChange }) => (
 
 const StatCard = React.memo(function StatCard({ title, value, change, changeType, Icon, data, gid, brand }) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4">
+    <div className="bg-white rounded-2xl shadow-md p-4 border-l-4"
+         style={{ borderLeftColor: brand }}>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-baseline gap-2">
             <h3 className="text-3xl font-bold leading-none">{value}</h3>
-            <span className={`text-sm ${changeType === "up" ? "text-green-600" : "text-red-500"}`}>{change}</span>
+            <span
+              className={`text-sm ${
+                changeType === "up" ? "text-green-600" : "text-red-500"
+              }`}
+            >
+              {change}
+            </span>
           </div>
           <p className="mt-2 text-gray-600">{title}</p>
         </div>
@@ -205,25 +212,10 @@ const StatCard = React.memo(function StatCard({ title, value, change, changeType
           <Icon color={brand} size={20} />
         </div>
       </div>
-
-      {/* Sparkline
-      <div className="mt-3 h-16">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
-            <defs>
-              <linearGradient id={`spark-${gid}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={brand} stopOpacity={0.45} />
-                <stop offset="95%" stopColor={brand} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Tooltip cursor={{ stroke: "#eee" }} />
-            <Area type="monotone" dataKey="v" stroke={brand} strokeWidth={2} fill={`url(#spark-${gid})`} dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div> */}
     </div>
   );
 });
+
 
 
 export default function Dashboard() {

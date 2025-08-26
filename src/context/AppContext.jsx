@@ -1,23 +1,39 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import {
+  getMessaging,
+  getToken,
+  onMessage,
+  isSupported,
+} from "firebase/messaging";
 
 // Create Context
 const AppContext = createContext();
 
-//  Firebase Config (replace with your Firebase credentials)
+//  Firebase Config (replace with your Firebase credentials in future)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_SENDER_ID || "",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
 };
 
-// Initialize Firebase
-const firebaseApp = initializeApp(firebaseConfig);
-const messaging = getMessaging(firebaseApp);
+let messaging = null;
+(async () => {
+  try {
+    const supported = await isSupported();
+    if (supported && firebaseConfig.apiKey) {
+      const firebaseApp = initializeApp(firebaseConfig);
+      messaging = getMessaging(firebaseApp);
+    } else {
+      console.warn("Firebase Messaging not supported or config missing.");
+    }
+  } catch (err) {
+    console.warn("Firebase init skipped:", err.message);
+  }
+})();
 
 export const AppProvider = ({ children }) => {
   // Auth state
@@ -42,50 +58,55 @@ export const AppProvider = ({ children }) => {
     }
   }, [authToken]);
 
-  const login = (token) => {
-    setAuthToken(token);
-  };
-
-  const logout = () => {
-    setAuthToken(null);
-  };
+  const login = (token) => setAuthToken(token);
+  const logout = () => setAuthToken(null);
 
   // Request Firebase notification permission
   const requestNotificationPermission = async () => {
-  try {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-      //  First register the service worker
-      const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js"
-      );
+    try {
+      const supported = await isSupported();
+      if (!supported || !messaging) {
+        console.warn("Notifications not supported in this environment.");
+        return;
+      }
 
-      //  Then get the FCM token with service worker
-      const token = await getToken(messaging, {
-        vapidKey: "YOUR_WEB_PUSH_CERTIFICATE_KEY_PAIR",
-        serviceWorkerRegistration: registration,
-      });
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const registration = await navigator.serviceWorker.register(
+          "/firebase-messaging-sw.js"
+        );
 
-      console.log("FCM Token:", token);
-      setFcmToken(token);
+        const token = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || "",
+          serviceWorkerRegistration: registration,
+        });
 
-      // TODO: Later send this token to backend linked with authToken
-    } else {
-      console.warn("Notification permission not granted.");
+        console.log("FCM Token:", token);
+        setFcmToken(token);
+      } else {
+        console.warn("Notification permission not granted.");
+      }
+    } catch (err) {
+      console.error("Error getting FCM token:", err);
     }
-  } catch (err) {
-    console.error("Error getting FCM token:", err);
-  }
-};
-
+  };
 
   // Listen for foreground notifications
   useEffect(() => {
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Foreground notification:", payload);
-      setNotifications((prev) => [...prev, payload.notification]);
-    });
-    return unsubscribe;
+    let unsubscribe = () => {};
+    (async () => {
+      const supported = await isSupported();
+      if (!supported || !messaging) return;
+
+      unsubscribe = onMessage(messaging, (payload) => {
+        console.log("Foreground notification:", payload);
+        if (payload?.notification) {
+          setNotifications((prev) => [...prev, payload.notification]);
+        }
+      });
+    })();
+
+    return () => unsubscribe && unsubscribe();
   }, []);
 
   return (
@@ -95,7 +116,6 @@ export const AppProvider = ({ children }) => {
         authToken,
         login,
         logout,
-
         // Notifications
         fcmToken,
         requestNotificationPermission,

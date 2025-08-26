@@ -94,30 +94,30 @@ function UserList() {
 
   const navigate = useNavigate();
 
-  const fetchUsers = async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+  // const fetchUsers = async () => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
 
-      const response = await axios.get(
-        `${USER_BASE_URL}/get-all-users?role=user`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  //     const response = await axios.get(
+  //       `${USER_BASE_URL}/get-all-users?role=user`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
 
-      if (response.data.success) {
-        setUsers(response.data.data);
-        setPagination(response.data.pagination);
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+  //     if (response.data.success) {
+  //       setUsers(response.data.data);
+  //       setPagination(response.data.pagination);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchUsers(pagination.currentPage);
-  }, [pagination.currentPage]);
+  // useEffect(() => {
+  //   fetchUsers(pagination.currentPage);
+  // }, [pagination.currentPage]);
 
   const renderStatusBadge = (user) => {
     const colorMap = {
@@ -159,34 +159,39 @@ function UserList() {
     setSelectedCustomerId(null);
     setShowDeleteModal(false);
   };
-  const confirmDelete = async () => {
-    try {
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
-      const token = authData?.token;
+  const confirmDelete = () => {
+      setUsers((prevUsers) =>
+           prevUsers.filter((user) => user._id !== selectedCustomerId)
+    )
+  }
+  // const confirmDelete = async () => {
+  //   try {
+  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
+  //     const token = authData?.token;
 
-      const response = await axios.delete(
-        `${USER_BASE_URL}/delete-user/${selectedCustomerId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  //     const response = await axios.delete(
+  //       `${USER_BASE_URL}/delete-user/${selectedCustomerId}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
 
-      if (response.data.success) {
-        toast.success("User deleted successfully.");
-        setUsers((prevUsers) =>
-          prevUsers.filter((user) => user._id !== selectedCustomerId)
-        );
-      } else {
-        toast.error("Failed to delete user.");
-      }
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message || "failed to delete !";
-      toast.error(errorMessage);
-    } finally {
-      closeDeleteModal();
-    }
-  };
+  //     if (response.data.success) {
+  //       toast.success("User deleted successfully.");
+  //       setUsers((prevUsers) =>
+  //         prevUsers.filter((user) => user._id !== selectedCustomerId)
+  //       );
+  //     } else {
+  //       toast.error("Failed to delete user.");
+  //     }
+  //   } catch (error) {
+  //     const errorMessage =
+  //       error?.response?.data?.message || "failed to delete !";
+  //     toast.error(errorMessage);
+  //   } finally {
+  //     closeDeleteModal();
+  //   }
+  // };
 
   const handleExport = () => {
     const exportData = users.map((user, index) => ({
