@@ -102,6 +102,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       ],
       border: true,
     },
+
     {
       section: "Role Management",
       items: [
@@ -286,7 +287,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
     <>
       <div className="flex bg-[#F9832B]">
         <div
-          className={`sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
+          className={` sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
     transition-all duration-800 z-11 
     ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
         >
@@ -307,10 +308,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
 
           {/* Navigation */}
           <nav className="relative">
-            <ul
-              className="flex flex-col h-[82vh] overflow-y-auto scrollbar scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200
- "
-            >
+            <ul className="flex flex-col h-[82vh] overflow-y-auto">
               {filteredSidebarData.map((section, sectionIndex) => (
                 <React.Fragment key={sectionIndex}>
                   {section.section && (
@@ -380,7 +378,9 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         )}
                     </li>
                   ))}
-                  {section.border && <span className="flex my-2 "></span>}
+                  {/* {section.border && (
+                    <span className="flex my-2 border-t-1 border-gray-200"></span>
+                  )} */}
                 </React.Fragment>
               ))}
             </ul>
