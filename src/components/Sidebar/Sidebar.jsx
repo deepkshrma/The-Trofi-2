@@ -125,6 +125,26 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           icon: <LocalDiningIcon />,
           link: "RestroList",
         },
+        {
+          name: " Restaurant Amenity",
+          icon: <LocalDiningIcon />,
+          link: "RestroAmenity",
+        },
+        {
+          name: " Restaurant Type",
+          icon: <LocalDiningIcon />,
+          link: "RestroType",
+        },
+        {
+          name: " Restaurant Good For",
+          icon: <LocalDiningIcon />,
+          link: "RestroGoodFor",
+        },
+        {
+          name: " Restaurant Cuisine",
+          icon: <LocalDiningIcon />,
+          link: "RestroCuisine",
+        },
       ],
       border: true,
     },
@@ -299,11 +319,11 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             />
           )} */}
           {/* Logo */}
-          <div className="flex  logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
+          <div className="flex justify-between logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
             <span className="mr-1">
               <GiChefToque />
             </span>
-            <span className="whitespace-nowrap font-sans italic">TROFI</span>
+            <span className="whitespace-nowrap">THE TROFI</span>
           </div>
 
           {/* Navigation */}
