@@ -39,7 +39,30 @@ function Header({ setIs_Toggle, isToggle }) {
             isToggle ? "translate-x-[260px]" : ""
           } flex gap-5 items-center`}
         >
-          {isToggle ? (
+          <button
+            onClick={handleToggle}
+            className="relative w-8 h-14 flex flex-col justify-center items-center group"
+          >
+            {/* Top line → rotates down to form arrow head */}
+            <span
+              className={`block h-0.5   bg-[#F9832B] transition-all duration-300 ${
+                isToggle ? "w-6" : "rotate-30 translate-y-1 translate-x-2 w-3"
+              } group-hover:rotate-30 group-hover:translate-y-1 group-hover:translate-x-2 group-hover:w-3`}
+            ></span>
+
+            {/* Middle line → stays as arrow shaft */}
+            <span className="block h-0.5 w-6 bg-[#F9832B] my-1.5 transition-all duration-300 "></span>
+
+            {/* Bottom line → rotates up to form arrow head */}
+            <span
+              className={`block h-0.5   bg-[#F9832B] transition-all duration-300
+              ${
+                isToggle ? "w-6" : "-rotate-40 -translate-y-1 translate-x-2 w-3"
+              } group-hover:-rotate-40 group-hover:-translate-y-1 group-hover:translate-x-2 group-hover:w-3`}
+            ></span>
+          </button>
+
+          {/* {isToggle ? (
             <HiMenu
               size={25}
               onClick={handleToggle}
@@ -57,7 +80,7 @@ function Header({ setIs_Toggle, isToggle }) {
               onClick={handleToggle}
               className="scale-x-100 w-8 cursor-pointer  rounded text-[#F9832B] hover:text-[#0A2C38]  bg-white"
             />
-          )}
+          )} */}
           <div>
             <img src={headerlogo} alt="" />
           </div>

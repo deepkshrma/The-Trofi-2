@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { GoBellFill } from "react-icons/go";
+import { IoNotificationsOutline } from "react-icons/io5";
 
 function NotificationBell() {
   const [count, setCount] = useState(9);
@@ -43,8 +44,8 @@ function NotificationBell() {
           </div>
         )}
 
-        <GoBellFill
-          className="w-7 h-7 text-blue-500 
+        <IoNotificationsOutline
+          className="w-7 h-7 text-gray-400
             transition-transform duration-200 
             hover:scale-110 hover:rotate-6 hover:drop-shadow-lg"
         />

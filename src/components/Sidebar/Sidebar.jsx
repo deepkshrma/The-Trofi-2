@@ -284,7 +284,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
 
   return (
     <>
-      <div className="flex">
+      <div className="flex bg-[#F9832B]">
         <div
           className={`sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
     transition-all duration-800 z-11 
@@ -326,7 +326,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown ? (
                         <div
                           onClick={() => handleMainClick(item)}
-                          className={`flex justify-between items-center pl-3  pr-3 rounded cursor-pointer  hover:bg-[#ffe0cc] text-gray-800`}
+                          className={`flex justify-between items-center pl-3  pr-3 py-4 rounded cursor-pointer  hover:bg-[#ffe0cc] text-gray-800`}
                         >
                           <div className="flex items-center gap-3 font-medium">
                             {item.icon}
@@ -354,7 +354,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         </Link>
                       )}
 
-                      {/* {item.dropdown &&
+                      {item.dropdown &&
                         openDropdown === item.name &&
                         item.subItems && (
                           <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-6">
@@ -377,12 +377,10 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                               </li>
                             ))}
                           </ul>
-                        )} */}
+                        )}
                     </li>
                   ))}
-                  {/* {section.border && (
-                    <span className="flex my-2 border-t-1 border-gray-200"></span>
-                  )} */}
+                  {section.border && <span className="flex my-2 "></span>}
                 </React.Fragment>
               ))}
             </ul>
