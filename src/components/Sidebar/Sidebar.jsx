@@ -326,7 +326,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown ? (
                         <div
                           onClick={() => handleMainClick(item)}
-                          className={`flex justify-between items-center pl-3  pr-3 rounded cursor-pointer  hover:bg-[#ffe0cc] text-gray-800`}
+                          className={`flex justify-between items-center pl-3  pr-3 py-4 rounded cursor-pointer  hover:bg-[#ffe0cc] text-gray-800`}
                         >
                           <div className="flex items-center gap-3 font-medium">
                             {item.icon}
@@ -354,7 +354,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         </Link>
                       )}
 
-                      {/* {item.dropdown &&
+                      {item.dropdown &&
                         openDropdown === item.name &&
                         item.subItems && (
                           <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-6">
@@ -377,7 +377,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                               </li>
                             ))}
                           </ul>
-                        )} */}
+                        )}
                     </li>
                   ))}
                   {/* {section.border && (
