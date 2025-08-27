@@ -14,6 +14,10 @@ import AdminList from "./Pages/Admin/AdminList";
 import UserList from "./Pages/User/UserLIst";
 import RestroList from "./Pages/Restaurant/RestroList";
 import UserProfile from "./Pages/User/UserProfile";
+import RestroAmenity from "./Pages/Restaurant/RestroAmenity";
+import RestroType from "./Pages/Restaurant/RestroType";
+import RestroGoodFor from "./Pages/Restaurant/RestroGoodFor";
+import RestroCuisine from "./Pages/Restaurant/RestroCuisine";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -35,6 +39,10 @@ const Allroutes = () => {
             <Route path="/RestroAdd" element={<RestroAdd />} />
             <Route path="/RestroList" element={<RestroList />} />
             <Route path="/UserProfile" element={<UserProfile />} />
+            <Route path="/RestroAmenity" element={<RestroAmenity />} />
+            <Route path="/RestroType" element={<RestroType />} />
+            <Route path="/RestroGoodFor" element={<RestroGoodFor />} />
+            <Route path="/RestroCuisine" element={<RestroCuisine />} />
           </Route>
         </Routes>
       </Router>
