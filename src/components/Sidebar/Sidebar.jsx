@@ -73,27 +73,17 @@ function Sidebar({ setIs_Toggle, isToggle }) {
   }, []);
 
   return (
-    <>
-      <div className="flex bg-[#F9832B]">
-        <div
-          className={` sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
-    transition-all duration-800 z-11 
-    ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
-        >
-          {/* {isToggle && (
-            <FaCaretLeft
-              size={25}
-              onClick={handleToggle}
-              className="scale-x-100 w-8 cursor-pointer  rounded text-white hover:text-[#0A2C38]  bg-[#F9832B] translate-x-[235px] mt-5 mb-3"
-            />
-          )} */}
-          {/* Logo */}
-          <div className="flex justify-between logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
-            <span className="mr-1">
-              <GiChefToque />
-            </span>
-            <span className="whitespace-nowrap">THE TROFI</span>
-          </div>
+    <div className="flex bg-[#F9832B]">
+      <div
+        className={`sidebar bg-[#F9832B] h-screen fixed left-0 top-0 
+        transition-all duration-500 z-20 
+        ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
+      >
+        {/* Logo */}
+        <div className="flex items-center text-white font-extrabold text-2xl px-5 py-6">
+          <GiChefToque className="mr-2 text-3xl" />
+          <span className="italic tracking-wide">TROFI</span>
+        </div>
 
         {/* Navigation */}
         <nav className="relative">
