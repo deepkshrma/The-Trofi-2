@@ -350,8 +350,8 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       <div className="flex bg-[#F9832B]">
         <div
           className={` sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
-    transition-transform duration-800 z-11 
-    ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
+    transition-transform duration-800  z-11
+    ${isToggle ? "translate-x-0 " : "-translate-x-full "} shadow-lg`}
         >
           {/* {isToggle && (
             <FaCaretLeft
@@ -403,8 +403,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         <Link
                           to={item.link}
                           onClick={() => handleMainClick(item)}
-                          className={`flex w-full justify-between items-center pl-2 py-2  rounded-tl-full rounded-bl-full cursor-pointer hover:bg-[#ffffff] text-white group 
-                              hover:text-[#F9832B]`}
+                          className={`flex w-full justify-between items-center pl-2 py-2  rounded-tl-full rounded-bl-full cursor-pointer hover:bg-[#ffffff] text-white group hover:text-[#F9832B]`}
                         >
                           <div className="flex items-center justify-between gap-5 font-medium">
                             <span className="text-white  pl-3 py-3  group-hover:text-[#F9832B] transition-colors">
@@ -418,14 +417,14 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown &&
                         openDropdown === item.name &&
                         item.subItems && (
-                          <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-9">
+                          <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-9 ">
                             {item.subItems.map((subItem, subIndex) => (
                               <li
                                 key={subIndex}
                                 className={` font-medium  cursor-pointer rounded ${
                                   activePath === subItem.link
                                     ? "text-white font-semibold"
-                                    : "text-white hover:text-white"
+                                    : "text-white  hover:text-gray-300"
                                 }`}
                                 onClick={() => handleSubClick(subItem.link)}
                               >

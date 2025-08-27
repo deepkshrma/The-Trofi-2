@@ -6,7 +6,7 @@ function DeleteModel({ isOpen, onClose, onConfirm, redbutton, para }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full bg-black/60 flex justify-center items-center z-50">
+    <div className="fixed top-0 left-0 w-screen h-screen bg-black/60 flex justify-center items-center z-[9999]">
       <div className="w-[90%] max-w-md bg-white rounded-lg p-6 relative">
         {/* Close button */}
         <div className="absolute top-2 right-2">
