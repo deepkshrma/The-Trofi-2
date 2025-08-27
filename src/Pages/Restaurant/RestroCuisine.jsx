@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 
 function RestroCuisine() {
-  const [iconName, setIconName] = useState("");
+  const [cuisine, setCuisine] = useState("");
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -15,7 +15,7 @@ function RestroCuisine() {
   // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Icon Name: ${iconName}`);
+    alert(`Cuisine Name: ${cuisine}`);
     // Here you would send form data to backend (API)
   };
   return (
@@ -33,8 +33,8 @@ function RestroCuisine() {
             </label>
             <input
               type="text"
-              value={iconName}
-              onChange={(e) => setIconName(e.target.value)}
+              value={cuisine}
+              onChange={(e) => setCuisine(e.target.value)}
               placeholder="Enter Restaurant Cuisine"
               className="w-full rounded-xl border border-gray-300 px-4 py-2 text-gray-700 
                  shadow-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-300 

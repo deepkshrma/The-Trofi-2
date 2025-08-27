@@ -131,9 +131,19 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           link: "RestroAmenity",
         },
         {
+          name: " Restaurant Amenity List",
+          icon: <LocalDiningIcon />,
+          link: "RestroAmenityList",
+        },
+        {
           name: " Restaurant Type",
           icon: <LocalDiningIcon />,
           link: "RestroType",
+        },
+        {
+          name: " Restaurant Type List",
+          icon: <LocalDiningIcon />,
+          link: "RestroTypeList",
         },
         {
           name: " Restaurant Good For",
@@ -141,9 +151,19 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           link: "RestroGoodFor",
         },
         {
+          name: " Restaurant Good For List",
+          icon: <LocalDiningIcon />,
+          link: "RestroGoodForList",
+        },
+        {
           name: " Restaurant Cuisine",
           icon: <LocalDiningIcon />,
           link: "RestroCuisine",
+        },
+        {
+          name: " Restaurant Cuisine List",
+          icon: <LocalDiningIcon />,
+          link: "RestroCuisineList",
         },
       ],
       border: true,
