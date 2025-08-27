@@ -9,7 +9,7 @@ const BreadcrumbsNav = ({ customTrail = [] }) => {
         {/* Home Link */}
         <li>
           <RouterLink
-            to="/"
+            to="/Dashboard"
             className="flex items-center space-x-1 hover:text-primary transition-colors"
           >
             <Home className="w-4 h-4" />

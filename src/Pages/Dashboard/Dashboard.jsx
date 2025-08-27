@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from "react";
+import PageTitle from "../../components/PageTitle/PageTitle";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import {
   LineChart,
   Line,
@@ -209,10 +211,21 @@ const DropdownPill = ({ label, onChange }) => (
   </div>
 );
 
-const StatCard = React.memo(function StatCard({ title, value, change, changeType, Icon, data, gid, brand }) {
+const StatCard = React.memo(function StatCard({
+  title,
+  value,
+  change,
+  changeType,
+  Icon,
+  data,
+  gid,
+  brand,
+}) {
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 border-l-4"
-         style={{ borderLeftColor: brand }}>
+    <div
+      className="bg-white rounded-2xl shadow-md p-4 border-l-4"
+      style={{ borderLeftColor: brand }}
+    >
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-baseline gap-2">
@@ -234,7 +247,6 @@ const StatCard = React.memo(function StatCard({ title, value, change, changeType
     </div>
   );
 });
-
 
 export default function Dashboard() {
   const BRAND = "#F9832B"; // theme color
@@ -268,8 +280,10 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 bg-gray-50 main main_page min-h-screen">
+      <BreadcrumbsNav />
+      <PageTitle title={"DashBoard"} />
       {/* Top KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 mt-4">
         <StatCard
           title="Menus"
           value="56"
@@ -303,7 +317,7 @@ export default function Dashboard() {
           brand={BRAND}
         />
       </div>
-
+  
       {/* Middle Graphs */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
         {/* Revenue Area Chart */}
