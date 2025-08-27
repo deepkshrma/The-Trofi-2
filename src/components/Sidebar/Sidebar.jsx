@@ -73,8 +73,9 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               {
                 name: "Dashboard",
                 icon: <DashboardIcon className="w-4 h-4" />,
-                link: "/Dashboard",
-                dropdown: false,
+                link: "#",
+                dropdown: true,
+                subItems: [{ name: "Dashboard", link: "/Dashboard" }],
               },
             ]
           : []),
@@ -83,8 +84,9 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               {
                 name: "Dashboard",
                 icon: <DashboardIcon className="w-4 h-4" />,
-                link: "/Dashboard",
-                dropdown: false,
+                link: "#",
+                dropdown: true,
+                subItems: [{ name: "Dashboard", link: "/Dashboard" }],
               },
             ]
           : []),
@@ -92,78 +94,98 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       border: true,
     },
     {
-      section: "Admin Management",
+      section: "",
       items: [
         {
-          name: "Admin List",
+          name: "Admin Management",
           icon: <AdminPanelSettingsIcon />,
-          link: "AdminList",
+          link: "#",
+          dropdown: true,
+          subItems: [{ name: "Admin List", link: "AdminList" }],
         },
       ],
       border: true,
     },
 
     {
-      section: "Role Management",
+      section: "",
       items: [
-        { name: "Add Role", icon: <GroupWorkIcon />, link: "RoleCreate" },
-        { name: "Role List", icon: <ListAltIcon />, link: "RoleList" },
+        {
+          name: "Role Management",
+          icon: <GroupWorkIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            { name: "Add Role", link: "RoleCreate" },
+            { name: "Role List", link: "RoleList" },
+          ],
+        },
       ],
       border: true,
     },
     {
-      section: "User Management",
-      items: [{ name: "User List", icon: <PeopleIcon />, link: "UserList" }],
+      section: "",
+      items: [
+        {
+          name: "User Management",
+          icon: <PeopleIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [{ name: "User List", link: "UserList" }],
+        },
+      ],
       border: true,
     },
     {
-      section: "Restaurant Management",
+      section: "",
       items: [
-        { name: "Add Restaurant", icon: <RestaurantIcon />, link: "RestroAdd" },
         {
-          name: " Restaurant List",
-          icon: <LocalDiningIcon />,
-          link: "RestroList",
-        },
-        {
-          name: " Restaurant Amenity",
-          icon: <LocalDiningIcon />,
-          link: "RestroAmenity",
-        },
-        {
-          name: " Restaurant Amenity List",
-          icon: <LocalDiningIcon />,
-          link: "RestroAmenityList",
-        },
-        {
-          name: " Restaurant Type",
-          icon: <LocalDiningIcon />,
-          link: "RestroType",
-        },
-        {
-          name: " Restaurant Type List",
-          icon: <LocalDiningIcon />,
-          link: "RestroTypeList",
-        },
-        {
-          name: " Restaurant Good For",
-          icon: <LocalDiningIcon />,
-          link: "RestroGoodFor",
-        },
-        {
-          name: " Restaurant Good For List",
-          icon: <LocalDiningIcon />,
-          link: "RestroGoodForList",
-        },
-        {
-          name: " Restaurant Cuisine",
-          icon: <LocalDiningIcon />,
-          link: "RestroCuisine",
-        },
-        {
-          name: " Restaurant Cuisine List",
-          icon: <LocalDiningIcon />,
-          link: "RestroCuisineList",
+          name: "Restaurant Management",
+          icon: <RestaurantIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            {
+              name: "Add Restaurant",
+              link: "RestroAdd",
+            },
+            {
+              name: " Restaurant List",
+              link: "RestroList",
+            },
+            {
+              name: " Restaurant Amenity",
+              link: "RestroAmenity",
+            },
+            {
+              name: " Restaurant Amenity List",
+              link: "RestroAmenityList",
+            },
+            {
+              name: " Restaurant Type",
+              link: "RestroType",
+            },
+            {
+              name: " Restaurant Type List",
+              link: "RestroTypeList",
+            },
+            {
+              name: " Restaurant Good For",
+              link: "RestroGoodFor",
+            },
+            {
+              name: " Restaurant Good For List",
+              link: "RestroGoodForList",
+            },
+            {
+              name: " Restaurant Cuisine",
+              link: "RestroCuisine",
+            },
+            {
+              name: " Restaurant Cuisine List",
+              link: "RestroCuisineList",
+            },
+          ],
         },
       ],
       border: true,
@@ -328,7 +350,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       <div className="flex bg-[#F9832B]">
         <div
           className={` sidebar bg-[#F9832B] h-screen fixed  left-0 top-0 
-    transition-all duration-800 z-11 
+    transition-transform duration-800 z-11 
     ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
         >
           {/* {isToggle && (
@@ -339,11 +361,11 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             />
           )} */}
           {/* Logo */}
-          <div className="flex justify-between logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
+          <div className="flex logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
             <span className="mr-1">
               <GiChefToque />
             </span>
-            <span className="whitespace-nowrap">THE TROFI</span>
+            <span className="whitespace-nowrap">TROFI</span>
           </div>
 
           {/* Navigation */}
@@ -364,7 +386,8 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown ? (
                         <div
                           onClick={() => handleMainClick(item)}
-                          className={`flex justify-between items-center pl-3  pr-3 py-4 rounded cursor-pointer  hover:bg-[#ffe0cc] text-gray-800`}
+                          className={`flex w-full justify-between items-center pl-3  pr-3 py-4 rounded-tl-full rounded-bl-full cursor-pointer  hover:bg-[#ffffff] text-white group 
+                              hover:text-[#F9832B]`}
                         >
                           <div className="flex items-center gap-3 font-medium">
                             {item.icon}
@@ -395,14 +418,14 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown &&
                         openDropdown === item.name &&
                         item.subItems && (
-                          <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-6">
+                          <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-9">
                             {item.subItems.map((subItem, subIndex) => (
                               <li
                                 key={subIndex}
                                 className={` font-medium  cursor-pointer rounded ${
                                   activePath === subItem.link
-                                    ? "text-[#F9832B] font-semibold"
-                                    : "text-black hover:text-[#F9832B]"
+                                    ? "text-white font-semibold"
+                                    : "text-white hover:text-white"
                                 }`}
                                 onClick={() => handleSubClick(subItem.link)}
                               >
