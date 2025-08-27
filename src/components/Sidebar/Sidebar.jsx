@@ -389,7 +389,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                           className={`flex w-full justify-between items-center pl-3  pr-3 py-4 rounded-tl-full rounded-bl-full cursor-pointer  hover:bg-[#ffffff] text-white group 
                               hover:text-[#F9832B]`}
                         >
-                          <div className="flex items-center gap-3 font-medium">
+                          <div className="flex items-center gap-3 font-[400] text-lg ">
                             {item.icon}
                             {item.name}
                           </div>

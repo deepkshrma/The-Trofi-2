@@ -11,7 +11,7 @@ body {
 }
 .main.main_page {
   width: 100%;
-  padding: 2.5rem 1rem 1rem 20rem;
+  padding: 2.5rem 1rem 1rem 20.5rem;
 }
 .side_menu .main.main_page {
   padding-left: 1rem;
@@ -22,7 +22,7 @@ body {
 }
 
 .sidebar {
-  width: 300px;
+  width: 310px;
 }
 
 /* Autofill background override */
