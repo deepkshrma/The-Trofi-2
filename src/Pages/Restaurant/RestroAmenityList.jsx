@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
+import pizza from "../../assets/images/pizza1.jpg"
 
 function RestroAmenityList() {
   // Sample data (you can replace with API data later)
@@ -7,20 +8,17 @@ function RestroAmenityList() {
     {
       id: 1,
       name: "Italian Restaurant",
-      logo: "https://via.placeholder.com/50x50?text=Logo",
-      image: "https://via.placeholder.com/100x70?text=Image",
+      logo: pizza,
     },
     {
       id: 2,
       name: "Chinese Restaurant",
-      logo: "https://via.placeholder.com/50x50?text=Logo",
-      image: "https://via.placeholder.com/100x70?text=Image",
+      logo: pizza,
     },
     {
       id: 3,
       name: "Mexican Restaurant",
-      logo: "https://via.placeholder.com/50x50?text=Logo",
-      image: "https://via.placeholder.com/100x70?text=Image",
+      logo: pizza,
     },
   ]);
 
