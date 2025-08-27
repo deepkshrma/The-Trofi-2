@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 
 function RestroType() {
-  const [iconName, setIconName] = useState("");
+  const [type, setType] = useState("");
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -15,7 +15,7 @@ function RestroType() {
   // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Icon Name: ${iconName}`);
+    alert(`Type Name: ${type}`);
     // Here you would send form data to backend (API)
   };
 
@@ -27,15 +27,15 @@ function RestroType() {
         </h2> */}
         <PageTitle title={"Restaurant Type"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
-          {/* Icon Name */}
+          {/* Type Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Restaurant Type
             </label>
             <input
               type="text"
-              value={iconName}
-              onChange={(e) => setIconName(e.target.value)}
+              value={type}
+              onChange={(e) => setType(e.target.value)}
               placeholder="Enter Restaurant Type"
               className="w-full rounded-xl border border-gray-300 px-4 py-2 text-gray-700 
                  shadow-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-300 

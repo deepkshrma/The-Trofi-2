@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 
 function RestroGoodFor() {
-  const [iconName, setIconName] = useState("");
+  const [goodFor, setGoodFor] = useState("");
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -15,7 +15,7 @@ function RestroGoodFor() {
   // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(`Icon Name: ${iconName}`);
+    alert(`Restaurant Name: ${goodFor}`);
     // Here you would send form data to backend (API)
   };
 
@@ -27,15 +27,15 @@ function RestroGoodFor() {
         </h2> */}
         <PageTitle title={"Restaurant Good For"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
-          {/* Icon Name */}
+          {/* Restaurant Good Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Restaurant Good For
             </label>
             <input
               type="text"
-              value={iconName}
-              onChange={(e) => setIconName(e.target.value)}
+              value={goodFor}
+              onChange={(e) => setGoodFor(e.target.value)}
               placeholder="Enter Restaurant Good For"
               className="w-full rounded-xl border border-gray-300 px-4 py-2 text-gray-700 
                  shadow-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-300 
