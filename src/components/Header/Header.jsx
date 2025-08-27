@@ -36,7 +36,7 @@ function Header({ setIs_Toggle, isToggle }) {
       <div className="header header_top_menu fixed top-0 left-0 z-10  flex w-full py-2 items-center justify-between bg-white p-4 shadow-sm">
         <span
           className={`${
-            isToggle ? "translate-x-[305px]" : ""
+            isToggle ? "translate-x-[315px]" : ""
           } flex gap-5 items-center`}
         >
           <button
