@@ -370,7 +370,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
 
           {/* Navigation */}
           <nav className="relative">
-            <ul className="flex flex-col h-[82vh] overflow-y-auto">
+            <ul className="flex flex-col h-[90vh] overflow-y-auto scrollbar-thin-line">
               {filteredSidebarData.map((section, sectionIndex) => (
                 <React.Fragment key={sectionIndex}>
                   {section.section && (

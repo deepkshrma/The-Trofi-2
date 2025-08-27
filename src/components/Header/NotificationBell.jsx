@@ -92,7 +92,7 @@ function NotificationBell() {
             <div className="border-t border-orange-100 bg-orange-50 rounded-b-xl px-4 py-2 flex justify-center">
               <button
                 onClick={() => alert("Navigate to All Notifications Page")}
-                className="text-xs text-orange-500 hover:text-orange-600 font-medium"
+                className="text-xs text-orange-500 hover:text-orange-600 font-medium "
               >
                 Show All
               </button>
