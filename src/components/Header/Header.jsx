@@ -46,19 +46,21 @@ function Header({ setIs_Toggle, isToggle }) {
             {/* Top line → rotates down to form arrow head */}
             <span
               className={`block h-0.5   bg-[#F9832B] transition-all duration-300 ${
-                isToggle ? "w-6" : "rotate-30 translate-y-1 translate-x-2 w-3"
-              } group-hover:rotate-30 group-hover:translate-y-1 group-hover:translate-x-2 group-hover:w-3`}
+                isToggle ? "w-6.5" : "rotate-30 translate-y-1 translate-x-2 w-3"
+              } group-hover:rotate-40 group-hover:translate-y-1 group-hover:translate-x-2 group-hover:w-3  rounded-full`}
             ></span>
 
             {/* Middle line → stays as arrow shaft */}
-            <span className="block h-0.5 w-6.5 bg-[#F9832B] my-1.5 transition-all duration-300 "></span>
+            <span className="block h-0.5 w-6.5 bg-[#F9832B] my-1.5 transition-all duration-300  rounded-full"></span>
 
             {/* Bottom line → rotates up to form arrow head */}
             <span
               className={`block h-0.5   bg-[#F9832B] transition-all duration-300
               ${
-                isToggle ? "w-6" : "-rotate-40 -translate-y-1 translate-x-2 w-3"
-              } group-hover:-rotate-40 group-hover:-translate-y-1 group-hover:translate-x-2 group-hover:w-3`}
+                isToggle
+                  ? "w-6.5"
+                  : "-rotate-40 -translate-y-1 translate-x-2 w-3"
+              } group-hover:-rotate-40 group-hover:-translate-y-1 group-hover:translate-x-2 group-hover:w-3  rounded-full`}
             ></span>
           </button>
 
