@@ -23,6 +23,9 @@ import RestroTypeList from "./Pages/Restaurant/RestroTypeList";
 import RestroCuisineList from "./Pages/Restaurant/RestroCuisineList";
 import RestroGoodForList from "./Pages/Restaurant/RestroGoodForList";
 import AddDishes from "./Pages/Dishes/AddDishes";
+import RestroDishType from "./Pages/Dishes/RestroDishType";
+import RestroDishCategory from "./Pages/Dishes/RestroDishCategory";
+import RestroDishSubCategory from "./Pages/Dishes/RestroDishSubCategory";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -53,6 +56,15 @@ const Allroutes = () => {
             <Route path="/RestroCuisineList" element={<RestroCuisineList />} />
             <Route path="/RestroGoodForList" element={<RestroGoodForList />} />
             <Route path="/AddDishes" element={<AddDishes />} />
+            <Route path="/RestroDishType" element={<RestroDishType />} />
+            <Route
+              path="/RestroDishCategory"
+              element={<RestroDishCategory />}
+            />
+            <Route
+              path="/RestroDishSubCategory"
+              element={<RestroDishSubCategory />}
+            />
           </Route>
         </Routes>
       </Router>
