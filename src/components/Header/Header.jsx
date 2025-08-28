@@ -51,7 +51,7 @@ function Header({ setIs_Toggle, isToggle }) {
             ></span>
 
             {/* Middle line → stays as arrow shaft */}
-            <span className="block h-0.5 w-6 bg-[#F9832B] my-1.5 transition-all duration-300 "></span>
+            <span className="block h-0.5 w-6.5 bg-[#F9832B] my-1.5 transition-all duration-300 "></span>
 
             {/* Bottom line → rotates up to form arrow head */}
             <span
