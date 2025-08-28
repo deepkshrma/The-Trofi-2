@@ -6,9 +6,17 @@ function AddDishes() {
 
   // Add ingredient field
   const addIngredient = () => setIngredients([...ingredients, ""]);
+
+  // Update ingredient field
   const updateIngredient = (value, index) => {
     const updated = [...ingredients];
     updated[index] = value;
+    setIngredients(updated);
+  };
+
+  // Remove ingredient field
+  const removeIngredient = (index) => {
+    const updated = ingredients.filter((_, i) => i !== index);
     setIngredients(updated);
   };
 
@@ -20,12 +28,12 @@ function AddDishes() {
   // Handle submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted ✅");
+    console.log("Form submitted ✅", { ingredients, images });
   };
 
   return (
-    <div className="main main_page min-h-screen bg-gray-50 py-10 px-6 lg:px-20">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-2xl p-10">
+    <div className="main main_page min-h-screen bg-gray-50 py-10 px-6 lg:px-20 duration-900">
+      <div className=" bg-white shadow-lg rounded-2xl p-10">
         <h2 className="text-4xl font-bold text-orange-500 mb-10 text-center">
           🍴 Add New Dish
         </h2>
@@ -35,81 +43,91 @@ function AddDishes() {
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
           {/* Dish Name */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Dish Name
+            </label>
             <input
               type="text"
               name="dish_name"
-              className="peer w-full border border-gray-200 rounded-xl px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
-              placeholder=" "
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              placeholder="Enter dish name"
               required
             />
-            <label className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-orange-500">
-              Dish Name
-            </label>
           </div>
 
           {/* Price */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Price
+            </label>
             <input
               type="number"
               name="price"
-              className="peer w-full border border-gray-200 rounded-xl px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
-              placeholder=" "
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              placeholder="Enter price"
               required
             />
-            <label className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-orange-500">
-              Price
-            </label>
           </div>
 
           {/* Description */}
-          <div className="relative md:col-span-2">
+          <div className="md:col-span-2">
+            <label className="block text-gray-600 font-medium mb-2">
+              Description
+            </label>
             <textarea
               name="description"
               rows="4"
-              className="peer w-full border border-gray-200 rounded-xl px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-orange-400 transition resize-none"
-              placeholder=" "
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition resize-none"
+              placeholder="Enter dish description"
             ></textarea>
-            <label className="absolute left-3 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-orange-500">
-              Description
-            </label>
           </div>
 
           {/* Cuisine */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Cuisine
+            </label>
             <select
               name="cuisine"
-              className="w-full border border-gray-200 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
             >
               <option value="">Select Cuisine</option>
             </select>
           </div>
 
           {/* Category */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Category
+            </label>
             <select
               name="category"
-              className="w-full border border-gray-200 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
             >
               <option value="">Select Category</option>
             </select>
           </div>
 
           {/* Sub Category */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Sub Category
+            </label>
             <select
               name="subCategory"
-              className="w-full border border-gray-200 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
             >
               <option value="">Select Sub Category</option>
             </select>
           </div>
 
           {/* Dish Type */}
-          <div className="relative">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">Type</label>
             <select
               name="type"
-              className="w-full border border-gray-200 rounded-xl px-3 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 transition bg-white"
             >
               <option value="">Select Type</option>
             </select>
@@ -120,20 +138,38 @@ function AddDishes() {
             <label className="block text-gray-600 mb-2 font-medium">
               Ingredients
             </label>
-            {ingredients.map((ing, index) => (
-              <input
-                key={index}
-                type="text"
-                value={ing}
-                onChange={(e) => updateIngredient(e.target.value, index)}
-                className="w-full mb-2 border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder={`Ingredient ${index + 1}`}
-              />
-            ))}
+
+            <div className="flex flex-wrap gap-3">
+              {ingredients.map((ing, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2"
+                >
+                  <input
+                    type="text"
+                    value={ing}
+                    onChange={(e) => updateIngredient(e.target.value, index)}
+                    className="w-28 sm:w-40 border-none bg-transparent focus:outline-none focus:ring-0"
+                    placeholder={`Ingredient ${index + 1}`}
+                  />
+                  {ingredients.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeIngredient(index)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
             <button
               type="button"
               onClick={addIngredient}
-              className="text-sm text-orange-500 hover:underline"
+              className="mt-4 px-4 py-2 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 transition text-sm font-medium"
             >
               + Add Ingredient
             </button>
@@ -149,7 +185,7 @@ function AddDishes() {
               multiple
               accept="image/*"
               onChange={handleFileChange}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
