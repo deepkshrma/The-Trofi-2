@@ -190,6 +190,24 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       ],
       border: true,
     },
+    {
+      section: "",
+      items: [
+        {
+          name: "Dish Management",
+          icon: <RestaurantIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            { name: "Add Dish", link: "AddDishes" },
+            { name: "Dish Type", link: "RestroDishType" },
+            { name: "Dish Category", link: "RestroDishCategory" },
+            { name: "Dish Sub Category", link: "RestroDishSubCategory" },
+          ],
+        },
+      ],
+      border: true,
+    },
 
     // // Feedback & Reviews
     // {
