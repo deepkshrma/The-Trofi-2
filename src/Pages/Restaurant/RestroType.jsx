@@ -1,22 +1,31 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-
+import { BASE_URL } from "../../config/config";
+import axios from "axios";
 function RestroType() {
   const [type, setType] = useState("");
 
-  // Handle file input change
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
-  };
-
   // Handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Type Name: ${type}`);
-    // Here you would send form data to backend (API)
+    if (!type) {
+      alert("Please enter a type");
+    }
+
+    try {
+      const res = await axios.post(`${BASE_URL}/restro/create-restro-type`, {
+        name: type,
+      });
+      if (res.status === 201 || res.data?.status) {
+        alert(res.data?.message || "Restro-Type created successfully");
+        setType("");
+      } else {
+        alert(res.data?.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error while creating Restro-Type");
+    }
   };
 
   return (

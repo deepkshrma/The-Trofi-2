@@ -1,29 +1,40 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
+import { BASE_URL } from "../../config/config";
+import axios from "axios";
 
 function RestroCuisine() {
   const [cuisine, setCuisine] = useState("");
 
-  // Handle file input change
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!cuisine) {
+      alert("Please enter a cuisine name");
+      return;
+    }
+
+    try {
+      const res = await axios.post(`${BASE_URL}/restro/create-cusine`, {
+        name: cuisine,
+      });
+
+      if (res.status === 201 || res.data?.status) {
+        alert(res.data?.message || "Cuisine created successfully");
+        setCuisine("");
+      } else {
+        alert(res.data?.message || "Something went wrong");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error while creating cuisine");
     }
   };
 
-  // Handle form submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert(`Cuisine Name: ${cuisine}`);
-    // Here you would send form data to backend (API)
-  };
   return (
     <div className="main main_page p-6 w-full">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Add New Icon
-        </h2> */}
         <PageTitle title={"Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
           {/* Icon Name */}
@@ -46,7 +57,7 @@ function RestroCuisine() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-[10%] rounded-xl bg-orange-500 px-4 py-2 font-medium text-white 
+            className="w-[10%] rounded-xl bg-orange-500 px-4 py-2 cursor-pointer font-medium text-white 
                shadow-md transition hover:bg-orange-600 hover:shadow-lg 
                focus:ring-2 focus:ring-orange-300"
           >
