@@ -13,6 +13,9 @@ import {
   CalendarIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
+import { FaCog, FaConciergeBell } from "react-icons/fa";
+import { FaStore } from "react-icons/fa";
+import headerlogo from "/trofititle.png";
 
 // Import MUI icons
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -141,7 +144,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       items: [
         {
           name: "Restaurant Management",
-          icon: <RestaurantIcon />,
+          icon: <FaStore />,
           link: "#",
           dropdown: true,
           subItems: [
@@ -163,7 +166,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       items: [
         {
           name: "Restaurant Setting",
-          icon: <RestaurantIcon />,
+          icon: <FaCog />,
           link: "#",
           dropdown: true,
           subItems: [
@@ -212,7 +215,10 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           icon: <RestaurantIcon />,
           link: "#",
           dropdown: true,
-          subItems: [{ name: "Add Dish", link: "AddDishes" }],
+          subItems: [
+            { name: "Add Dish", link: "AddDishes" },
+            { name: "Dishes List", link: "DishesList" },
+          ],
         },
       ],
       border: true,
@@ -222,7 +228,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       items: [
         {
           name: "Dish Setting",
-          icon: <RestaurantIcon />,
+          icon: <FaConciergeBell />,
           link: "#",
           dropdown: true,
           subItems: [
@@ -405,10 +411,16 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             />
           )} */}
           {/* Logo */}
-          <div className="flex logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
-            <span className="mr-1">
-              <GiChefToque />
-            </span>
+          <div className="flex items-center gap-2 logo-container top-0 left-0 text-white font-[900] text-3xl px-4 py-5 z-10">
+            {/* <GiChefToque /> */}
+            <div className="bg-white p-2 rounded-full flex items-center justify-center shadow-[inset_0_0_10px_rgba(249,115,22,0.6)]">
+              <img
+                src={headerlogo}
+                alt=""
+                className="w-8 h-8 translate-y-[-10%]"
+              />
+            </div>
+
             <span className="whitespace-nowrap">TROFI</span>
           </div>
 
@@ -463,7 +475,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                       {item.dropdown &&
                         openDropdown === item.name &&
                         item.subItems && (
-                          <ul className="ml-6 mt-2 flex flex-col gap-1 list-disc pl-9 ">
+                          <ul className="ml-6 mt-2 flex flex-col gap-1  list-none pl-5 ">
                             {item.subItems.map((subItem, subIndex) => (
                               <li
                                 key={subIndex}
@@ -476,7 +488,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                               >
                                 <Link
                                   to={subItem.link}
-                                  className="block px-3 py-3"
+                                  className="block px-3 py-2"
                                 >
                                   {subItem.name}
                                 </Link>

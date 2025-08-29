@@ -26,6 +26,8 @@ import AddDishes from "./Pages/Dishes/AddDishes";
 import RestroDishType from "./Pages/Dishes/RestroDishType";
 import RestroDishCategory from "./Pages/Dishes/RestroDishCategory";
 import RestroDishSubCategory from "./Pages/Dishes/RestroDishSubCategory";
+import DishesList from "./Pages/Dishes/DishesList";
+import RestroProfile from "./Pages/Restaurant/RestroProfile";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -57,6 +59,8 @@ const Allroutes = () => {
             <Route path="/RestroGoodForList" element={<RestroGoodForList />} />
             <Route path="/AddDishes" element={<AddDishes />} />
             <Route path="/RestroDishType" element={<RestroDishType />} />
+            <Route path="/DishesList" element={<DishesList />} />
+            <Route path="/RestroProfile" element={<RestroProfile />} />
             <Route
               path="/RestroDishCategory"
               element={<RestroDishCategory />}
