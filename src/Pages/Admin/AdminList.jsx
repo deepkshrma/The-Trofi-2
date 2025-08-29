@@ -31,30 +31,32 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 const AdminList = () => {
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState([]);
-  const [admins, setAdmins] = useState([{
-    empId: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    role: "Super Admin",
-    profilePhoto: guestImg,
-    status: "active",
-  },
-  {
-    empId: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "Editor",
-    profilePhoto: guestImg,
-    status: "inactive",
-  },
-  {
-    empId: "3",
-    name: "Mike Johnson",
-    email: "mike@example.com",
-    role: "Manager",
-    profilePhoto: guestImg,
-    status: "suspended",
-  },]);
+  const [admins, setAdmins] = useState([
+    {
+      empId: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      role: "Super Admin",
+      profilePhoto: guestImg,
+      status: "active",
+    },
+    {
+      empId: "2",
+      name: "Jane Smith",
+      email: "jane@example.com",
+      role: "Editor",
+      profilePhoto: guestImg,
+      status: "inactive",
+    },
+    {
+      empId: "3",
+      name: "Mike Johnson",
+      email: "mike@example.com",
+      role: "Manager",
+      profilePhoto: guestImg,
+      status: "suspended",
+    },
+  ]);
   const [rolesMap, setRolesMap] = useState({});
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -205,9 +207,7 @@ const AdminList = () => {
     setSelectedAdmin(null);
   };
 
-  const confirmDelete = async () => {
-    
-  }
+  const confirmDelete = async () => {};
 
   // const confirmDelete = async () => {
   //   try {
@@ -339,12 +339,12 @@ const AdminList = () => {
 
           return (
             <div className="relative flex items-center gap-2 text-[14px]  py-2 text-left">
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative " ref={dropdownRef}>
                 <div
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
                   className={`flex justify-center items-center w-[40px] h-[25px] border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white rounded cursor-pointer ${
                     isDropdownOpen ? "bg-blue-400 text-white" : ""
-                  }`}
+                  } `}
                 >
                   <TfiLayoutMenuSeparated className="text-[15px]" />
                 </div>
@@ -433,7 +433,7 @@ const AdminList = () => {
   });
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4">
+    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[{ label: "Admin List", path: "/admin_list" }]}
       />

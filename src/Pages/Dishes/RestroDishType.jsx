@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { BASE_URL } from "../../config/config";
+import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 
 function RestroDishType() {
@@ -35,9 +35,13 @@ function RestroDishType() {
     formData.append("icon", file);
 
     try {
-      const res = await axios.post(`${BASE_URL}/restro/create-dish-type`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(
+        `${BASE_URL}/restro/create-dish-type`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       if (res.status === 201 || res.data?.status) {
         alert(res.data?.message || "Dish Type created successfully");
@@ -58,7 +62,7 @@ function RestroDishType() {
   };
 
   return (
-    <div className="main main_page p-6 w-full">
+    <div className="main main_page p-6 w-full duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={"Restaurant Dish Type"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

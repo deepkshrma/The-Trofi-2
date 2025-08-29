@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import pizza from "../../assets/images/pizza1.jpg"
+import pizza from "../../assets/images/pizza1.jpg";
 
 function RestroAmenityList() {
   // Sample data (you can replace with API data later)
@@ -23,7 +23,7 @@ function RestroAmenityList() {
   ]);
 
   return (
-    <div className="main main_page p-6 w-full">
+    <div className="main main_page p-6 w-full duration-900">
       <div className="bg-white rounded-2xl shadow-md p-4">
         <PageTitle title={"Restaurant Amenities List"} />
 

@@ -166,7 +166,7 @@ function RoleCreate() {
   };
 
   return (
-    <div className="main main_page w-full h-full p-5 box-border mb-[100px] bg-gray-50">
+    <div className="main main_page w-full h-full p-5 box-border mb-[100px] bg-gray-50 duration-900">
       <BreadcrumbsNav
         customTrail={[
           { label: "Role List", path: "/Roles" },

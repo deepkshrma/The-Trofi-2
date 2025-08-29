@@ -55,7 +55,7 @@ function RestroAdd() {
   };
 
   return (
-    <div className="main main_page p-6 min-h-screen bg-gray-50">
+    <div className="main main_page p-6 min-h-screen bg-gray-50 duration-900">
       <PageTitle title={"Add New Restaurant"} />
 
       {/*  Basic Info */}

@@ -19,7 +19,7 @@ function UserProfile() {
   };
 
   return (
-    <div className="main main_page min-h-screen  p-6">
+    <div className="main main_page min-h-screen  p-6 duration-900">
       <PageTitle title="My Profile" />
 
       {/* Profile Header */}

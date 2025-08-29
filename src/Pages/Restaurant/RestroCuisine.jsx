@@ -33,7 +33,7 @@ function RestroCuisine() {
   };
 
   return (
-    <div className="main main_page p-6 w-full">
+    <div className="main main_page p-6 w-full duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={"Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

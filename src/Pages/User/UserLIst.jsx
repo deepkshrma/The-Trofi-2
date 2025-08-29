@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { CiExport } from "react-icons/ci";
 import axios from "axios";
 import guest from "../../assets/images/guest.png";
-import { USER_BASE_URL } from "../../config/Config";
+import { USER_BASE_URL } from "../../config/config";
 import { toast } from "react-toastify";
 import { FiEye } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
@@ -160,10 +160,10 @@ function UserList() {
     setShowDeleteModal(false);
   };
   const confirmDelete = () => {
-      setUsers((prevUsers) =>
-           prevUsers.filter((user) => user._id !== selectedCustomerId)
-    )
-  }
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => user._id !== selectedCustomerId)
+    );
+  };
   // const confirmDelete = async () => {
   //   try {
   //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
@@ -219,7 +219,7 @@ function UserList() {
   };
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4">
+    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[{ label: "Users List", path: "/CustomerList" }]}
       />

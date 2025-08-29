@@ -117,9 +117,7 @@ function RoleList() {
     setSelectedRoleId(null);
   };
 
-  const confirmDelete = async () => {
-    
-  };
+  const confirmDelete = async () => {};
   // const confirmDelete = async () => {
   //   try {
   //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
@@ -176,9 +174,7 @@ function RoleList() {
   //   }
   // };
 
-  const toggleRoleStatus = async (roleId, currentStatus) => {
-
-  };
+  const toggleRoleStatus = async (roleId, currentStatus) => {};
   const columns = useMemo(() => {
     return [
       {
@@ -276,7 +272,7 @@ function RoleList() {
   });
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4">
+    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/Roles" }]} />
       <div className="flex justify-between items-center">
         <PageTitle title={"All Roles"} />

@@ -12,7 +12,7 @@ function AdminProfile() {
     gender: "Male",
     fullAddress: "123, Green Avenue, Jaipur, Rajasthan, India",
     role: "Admin",
-    profileImage: ""
+    profileImage: "",
   };
 
   const {
@@ -27,7 +27,7 @@ function AdminProfile() {
   } = profileData;
   return (
     <>
-      <div className="main main_page flex flex-col w-full h-screen">
+      <div className="main main_page flex flex-col w-full h-screen duration-900">
         <div className="w-full flex items-center justify-start translate-x-28">
           <PageTitle title={"Profile"} />
         </div>
@@ -37,10 +37,9 @@ function AdminProfile() {
             <div className="flex flex-col items-center md:items-start space-y-4">
               <img
                 src={
-                profile_image
+                  profile_image
                   // ? `${BASE_URL}/${profile_picture}`
-                 
-              }
+                }
                 alt="Profile"
                 className="w-32 h-32 rounded-full shadow-lg object-cover"
               />

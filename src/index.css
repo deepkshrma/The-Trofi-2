@@ -6,24 +6,24 @@
 /* Custom scrollbar styles */
 @layer utilities {
   .scrollbar-thin-line {
-    scrollbar-width: thin; /* Firefox */
+    scrollbar-width: none; /* Firefox */
     scrollbar-color: rgba(255, 255, 255, 0.4) transparent; /* thumb, track */
   }
-  
+
   /* Webkit browsers */
   .scrollbar-thin-line::-webkit-scrollbar {
     width: 4px;
   }
-  
+
   .scrollbar-thin-line::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   .scrollbar-thin-line::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.4);
     border-radius: 2px;
   }
-  
+
   .scrollbar-thin-line::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.8);
   }

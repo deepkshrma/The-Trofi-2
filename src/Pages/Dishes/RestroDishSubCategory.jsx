@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { BASE_URL } from "../../config/config";
+import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 
 function RestroDishSubCategory() {
@@ -53,9 +53,13 @@ function RestroDishSubCategory() {
     formData.append("icon", file);
 
     try {
-      const res = await axios.post(`${BASE_URL}/restro/create-dish-sub-category`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(
+        `${BASE_URL}/restro/create-dish-sub-category`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       if (res.status === 201 || res.data?.status) {
         alert(res.data?.message || "Dish Sub-Category created successfully");
@@ -77,7 +81,7 @@ function RestroDishSubCategory() {
   };
 
   return (
-    <div className="main main_page p-6 w-full">
+    <div className="main main_page p-6 w-full duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={"Restaurant Dish Sub Category"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

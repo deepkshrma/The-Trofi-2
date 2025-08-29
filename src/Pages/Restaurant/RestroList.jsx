@@ -89,7 +89,7 @@ function RestroList() {
   });
 
   return (
-    <div className="main main_page p-6 min-h-screen bg-gray-50">
+    <div className="main main_page p-6 min-h-screen bg-gray-50 duration-900">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <PageTitle title={"Restaurant List"} />

@@ -29,7 +29,7 @@ function RestroType() {
   };
 
   return (
-    <div className="main main_page p-6 w-full">
+    <div className="main main_page p-6 w-full duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Add New Icon

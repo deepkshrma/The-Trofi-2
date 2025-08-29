@@ -279,7 +279,7 @@ export default function Dashboard() {
   }, [reviewsSort]);
 
   return (
-    <div className="p-6 bg-gray-50 main main_page min-h-screen">
+    <div className="p-6 bg-gray-50 main main_page min-h-screen duration-900">
       <BreadcrumbsNav />
       <PageTitle title={"DashBoard"} />
       {/* Top KPI Cards */}
@@ -317,7 +317,7 @@ export default function Dashboard() {
           brand={BRAND}
         />
       </div>
-  
+
       {/* Middle Graphs */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
         {/* Revenue Area Chart */}
