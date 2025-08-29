@@ -4,7 +4,9 @@ import trofilogo from "../../assets/images/trofititle.png";
 import loginbg from "../../assets/images/loginimage.jpg";
 import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 export default function Login() {
+  const navigate = useNavigate();
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative px-4"
@@ -99,6 +101,7 @@ export default function Login() {
                 </label>
                 <input
                   type="email"
+                  placeholder="test@example.com"
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                 />
               </div>
@@ -108,6 +111,7 @@ export default function Login() {
                 </label>
                 <input
                   type="password"
+                  placeholder="12345678"
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                 />
               </div>
@@ -123,6 +127,7 @@ export default function Login() {
               </div>
               <button
                 type="submit"
+                onClick={() => navigate("/Dashboard")}
                 className="w-full bg-white/90 cursor-pointer  text-[#F9832B] font-semibold py-2 rounded-lg hover:bg-gray-100 transition"
               >
                 Sign In

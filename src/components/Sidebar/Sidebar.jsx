@@ -73,9 +73,9 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               {
                 name: "Dashboard",
                 icon: <DashboardIcon className="w-4 h-4" />,
-                link: "#",
+                link: "/Dashboard",
                 dropdown: true,
-                subItems: [{ name: "Dashboard", link: "/Dashboard" }],
+                // subItems: [{ name: "Dashboard", link: "/Dashboard" }],
               },
             ]
           : []),
@@ -153,6 +153,20 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               name: " Restaurant List",
               link: "RestroList",
             },
+          ],
+        },
+      ],
+      border: true,
+    },
+    {
+      section: "",
+      items: [
+        {
+          name: "Restaurant Setting",
+          icon: <RestaurantIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [
             {
               name: " Restaurant Amenity",
               link: "RestroAmenity",
@@ -198,8 +212,20 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           icon: <RestaurantIcon />,
           link: "#",
           dropdown: true,
+          subItems: [{ name: "Add Dish", link: "AddDishes" }],
+        },
+      ],
+      border: true,
+    },
+    {
+      section: "",
+      items: [
+        {
+          name: "Dish Setting",
+          icon: <RestaurantIcon />,
+          link: "#",
+          dropdown: true,
           subItems: [
-            { name: "Add Dish", link: "AddDishes" },
             { name: "Dish Type", link: "RestroDishType" },
             { name: "Dish Category", link: "RestroDishCategory" },
             { name: "Dish Sub Category", link: "RestroDishSubCategory" },
@@ -407,15 +433,17 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                           className={`flex w-full justify-between items-center pl-3  pr-3 py-4 rounded-tl-full rounded-bl-full cursor-pointer  hover:bg-[#ffffff] text-white group 
                               hover:text-[#F9832B]`}
                         >
-                          <div className="flex items-center gap-3 font-[200] text-[130%] ">
+                          <div className="flex items-center gap-3 font-[200] text-[120%] ">
                             {item.icon}
                             {item.name}
                           </div>
-                          <FaChevronDown
-                            className={`w-2 transition-transform duration-200 ${
-                              openDropdown === item.name ? "rotate-180" : ""
-                            }`}
-                          />
+                          {item.name !== "Dashboard" && (
+                            <FaChevronDown
+                              className={`w-2 transition-transform duration-200 ${
+                                openDropdown === item.name ? "rotate-180" : ""
+                              }`}
+                            />
+                          )}
                         </div>
                       ) : (
                         <Link
@@ -448,7 +476,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                               >
                                 <Link
                                   to={subItem.link}
-                                  className="block px-3 py-4"
+                                  className="block px-3 py-3"
                                 >
                                   {subItem.name}
                                 </Link>
