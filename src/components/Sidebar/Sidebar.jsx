@@ -77,7 +77,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                 name: "Dashboard",
                 icon: <DashboardIcon className="w-4 h-4" />,
                 link: "/Dashboard",
-                dropdown: true,
+                dropdown: false,
                 // subItems: [{ name: "Dashboard", link: "/Dashboard" }],
               },
             ]
@@ -88,7 +88,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                 name: "Dashboard",
                 icon: <DashboardIcon className="w-4 h-4" />,
                 link: "#",
-                dropdown: true,
+                dropdown: false,
                 subItems: [{ name: "Dashboard", link: "/Dashboard" }],
               },
             ]
@@ -461,12 +461,12 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                         <Link
                           to={item.link}
                           onClick={() => handleMainClick(item)}
-                          className={`flex w-full justify-between items-center pl-2 py-2  rounded-tl-full rounded-bl-full cursor-pointer hover:bg-[#ffffff] text-white group hover:text-[#F9832B]`}
+                          className={`flex w-full justify-between items-center pl-3  pr-3 py-4 rounded-tl-full rounded-bl-full cursor-pointer  hover:bg-[#ffffff] text-white group 
+                              hover:text-[#F9832B]`}
                         >
-                          <div className="flex items-center justify-between gap-5 font-medium">
-                            <span className="text-white  pl-3 py-3  group-hover:text-[#F9832B] transition-colors">
-                              {item.icon}
-                            </span>
+                          <div className="flex items-center gap-3 font-[200] text-[120%]">
+                            {item.icon}
+
                             {item.name}
                           </div>
                         </Link>
