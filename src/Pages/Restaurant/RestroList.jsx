@@ -5,7 +5,7 @@ import { Eye, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function RestroList() {
-  // 🔹 Sample static data (added logo + description)
+  // Sample static data (added logo + description)
   const [restaurants, setRestaurants] = useState([
     {
       id: 1,
@@ -52,7 +52,7 @@ function RestroList() {
         </button>
       </div>
 
-      {/* 🔍 Search */}
+      {/*  Search */}
       <div className="flex flex-wrap gap-3 mb-6">
         <input
           type="text"

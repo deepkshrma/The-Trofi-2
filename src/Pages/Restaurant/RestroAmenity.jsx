@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { BASE_URL } from "../../config/config";
+import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 
 function RestroAmenity() {

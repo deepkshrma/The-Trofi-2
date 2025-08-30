@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Star, Phone, MapPin, Clock, Utensils } from "lucide-react"; // extra icons
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -11,8 +11,9 @@ import profileImg from "../../assets/images/profileImg.jpg";
 import profileImg1 from "../../assets/images/profileImg1.jpg";
 import profileImg2 from "../../assets/images/profileImg2.jpg";
 import bannerLogo from "../../assets/images/bannerLogo.png";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { Link } from "react-router-dom";
 
 function RestroProfile() {
   const { isToggle } = useContext(LayoutContext);
@@ -29,7 +30,10 @@ function RestroProfile() {
       "Cafe Aroma offers a warm and inviting atmosphere with a wide variety of freshly prepared Italian and Continental dishes. Whether you're here for a casual brunch, family dinner, or romantic evening, our menu and ambiance promise a delightful experience.",
     rating: 4.3,
     totalReviews: 128,
-    address: "123 MG Road, Bangalore, Karnataka, India",
+    address:
+      "1st Floor, Shop No. 20, 21, Niwaru Rd, Rajendra Nagar, Harnathapura, Jhotwara, Jaipur, Rajasthan 302012",
+    latitude: 26.926107,
+    longitude: 75.746346,
     phone: "+91 98765 43210",
     foodType: ["Italian", "Continental", "Bakery"],
     timing: "Mon - Sun: 10:00 AM - 11:00 PM",
@@ -51,6 +55,18 @@ function RestroProfile() {
       { id: 3, image: profileImg2, name: "Chocolate Cake", price: "₹150" },
     ],
   };
+
+  function FixMapSize() {
+    const map = useMap();
+
+    useEffect(() => {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 1000); // small delay ensures DOM is ready
+    }, [map]);
+
+    return null;
+  }
 
   return (
     <div
@@ -80,7 +96,7 @@ function RestroProfile() {
         </Carousel>
 
         {/* Logo, Name & Rating */}
-        <div className="absolute bottom-4 left-6 flex items-center gap-4 z-10">
+        <div className="absolute bottom-4 left-6 flex items-center gap-4 z-[1]">
           <img
             src={restaurant.logo}
             alt="Logo"
@@ -89,13 +105,13 @@ function RestroProfile() {
           <div className="text-white">
             <h1 className="text-2xl font-bold">{restaurant.name}</h1>
             <p className="text-sm">{restaurant.shortDesc}</p>
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <Star className="text-yellow-400 w-5 h-5 fill-yellow-400" />
               <span className="font-medium">{restaurant.rating}</span>
               <span className="text-gray-200">
                 ({restaurant.totalReviews} reviews)
               </span>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -177,10 +193,15 @@ function RestroProfile() {
                   <h3 className="text-lg font-semibold text-gray-700">
                     {menu.name}
                   </h3>
-                  <p className="text-[#F9832B] font-bold">{menu.price}</p>
+                  {/* <p className="text-[#F9832B] font-bold">{menu.price}</p> */}
                 </div>
               </div>
             ))}
+          </div>
+          <div className="flex justify-end text-blue-500 mt-5">
+            <Link to="" className="link">
+              View all
+            </Link>
           </div>
         </div>
 
@@ -189,16 +210,17 @@ function RestroProfile() {
           <h2 className="text-xl font-bold text-gray-800 mb-4">Location</h2>
           <div className="w-full h-72 rounded-xl overflow-hidden shadow-md">
             <MapContainer
-              center={[12.9716, 77.5946]} // lat, lng (example: Bangalore)
+              center={[restaurant.latitude, restaurant.longitude]} // lat, lng (example: Bangalore)
               zoom={15}
               style={{ height: "100%", width: "100%" }}
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[12.9716, 77.5946]}>
+              <Marker position={[restaurant.latitude, restaurant.longitude]}>
                 <Popup>
                   {restaurant.name} - {restaurant.address}
                 </Popup>
               </Marker>
+              <FixMapSize />
             </MapContainer>
           </div>
         </div>
