@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
+import LocationPicker from "./LocationPicker";
 
-function RestroAdd() {
+function RestroAdd({ address, onChange }) {
   const [restaurantData, setRestaurantData] = useState({
     name: "",
     type: "",
@@ -55,7 +56,7 @@ function RestroAdd() {
   };
 
   return (
-    <div className="main main_page p-6 min-h-screen bg-gray-50 duration-900">
+    <div className="main main_page p-6 min-h-screen  duration-900">
       <PageTitle title={"Add New Restaurant"} />
 
       {/*  Basic Info */}
@@ -203,6 +204,16 @@ function RestroAdd() {
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
         </div>
+
+        {/* Map Picker */}
+        <LocationPicker address={restaurantData.address} />
+
+        {/* {restaurantData.latitude && restaurantData.longitude && (
+          <p className="mt-3 text-gray-700">
+            📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
+            {restaurantData.longitude.toFixed(5)}
+          </p>
+        )} */}
       </div>
 
       {/*  Menu Details */}

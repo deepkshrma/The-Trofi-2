@@ -39,6 +39,12 @@ function RoleList() {
       description: "Read-only access",
       status: "active",
     },
+    {
+      id: "3",
+      name: "Viewer",
+      description: "Read-only access",
+      status: "active",
+    },
   ]);
 
   const [search, setSearch] = useState("");
@@ -272,7 +278,7 @@ function RoleList() {
   });
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
+    <div className="main main_page w-full h-full font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/Roles" }]} />
       <div className="flex justify-between items-center">
         <PageTitle title={"All Roles"} />
@@ -284,8 +290,8 @@ function RoleList() {
         </button>
       </div>
 
-      <div className="px-4 rounded-lg shadow-md flex justify-between font-bold">
-        <ul className="flex text-[12px] gap-2">
+      <div className="px-4 rounded-lg shadow-md flex justify-between font-bold bg-white">
+        <ul className="flex text-[12px] gap-2 ">
           {["All", "Active", "Inactive"].map((status) => (
             <li
               key={status}

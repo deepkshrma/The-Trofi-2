@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { BASE_URL } from "../../config/config";
+import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 function RestroType() {
   const [type, setType] = useState("");
@@ -29,7 +29,7 @@ function RestroType() {
   };
 
   return (
-    <div className="main main_page p-6 w-full duration-900">
+    <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">
           Add New Icon

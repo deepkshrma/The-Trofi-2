@@ -28,6 +28,7 @@ import RestroDishCategory from "./Pages/Dishes/RestroDishCategory";
 import RestroDishSubCategory from "./Pages/Dishes/RestroDishSubCategory";
 import DishesList from "./Pages/Dishes/DishesList";
 import RestroProfile from "./Pages/Restaurant/RestroProfile";
+import Sidebar1 from "./components/Sidebar/Sidebar1";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -40,6 +41,7 @@ const Allroutes = () => {
           <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
           <Route element={<Layout />}>
+            {/* <Route path="/Sidebar1" element={<Sidebar1 />} /> */}
             <Route path="/Dashboard" element={<Dashboard />} />
             <Route path="/RoleList" element={<RoleList />} />
             <Route path="/RoleCreate" element={<RoleCreate />} />

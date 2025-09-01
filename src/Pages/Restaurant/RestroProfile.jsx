@@ -72,7 +72,7 @@ function RestroProfile() {
     <div
       className={`w-[100%] pt-[1.5rem] pb-[1rem] ${
         isToggle ? "pl-[19.3rem]" : ""
-      } duration-900 min-h-screen bg-gray-50`}
+      } duration-900 min-h-screen `}
     >
       {/* Banner Carousel */}
       <div className="relative w-full h-100">
@@ -208,7 +208,7 @@ function RestroProfile() {
         {/* Map Section */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Location</h2>
-          <div className="w-full h-72 rounded-xl overflow-hidden shadow-md">
+          <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
             <MapContainer
               center={[restaurant.latitude, restaurant.longitude]} // lat, lng (example: Bangalore)
               zoom={15}

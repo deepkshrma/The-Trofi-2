@@ -40,7 +40,7 @@ function AddDishes() {
   };
 
   return (
-    <div className="main main_page min-h-screen bg-gray-50 py-10 px-6 lg:px-20 duration-900">
+    <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <div className=" bg-white shadow-lg rounded-2xl p-10">
         {/* <h2 className="text-4xl font-bold text-orange-500 mb-10 text-center">
           🍴 Add New Dish

@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { CiExport } from "react-icons/ci";
 import axios from "axios";
 import guest from "../../assets/images/guest.png";
-import { USER_BASE_URL } from "../../config/config";
+import { USER_BASE_URL } from "../../config/Config";
 import { toast } from "react-toastify";
 import { FiEye } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
@@ -219,7 +219,7 @@ function UserList() {
   };
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
+    <div className="main main_page  font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[{ label: "Users List", path: "/CustomerList" }]}
       />

@@ -39,7 +39,7 @@ function DishesList() {
   );
 
   return (
-    <div className="main main_page p-6 min-h-screen bg-gray-50 duration-900">
+    <div className="main main_page p-6 min-h-screen  duration-900">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <PageTitle title={"Dishes List"} />
@@ -59,7 +59,7 @@ function DishesList() {
           placeholder="Search by dish name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+          className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
         />
       </div>
 

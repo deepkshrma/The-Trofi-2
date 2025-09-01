@@ -10,7 +10,7 @@ function RestroGoodForList() {
   ]);
 
   return (
-    <div className="main main_page p-6 w-full duration-900">
+    <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-4">
         <PageTitle title={"Restaurant - Good For"} />
 

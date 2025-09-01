@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { BASE_URL } from "../../config/config";
+import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 
 function RestroCuisine() {
@@ -33,7 +33,7 @@ function RestroCuisine() {
   };
 
   return (
-    <div className="main main_page p-6 w-full duration-900">
+    <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={"Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

@@ -433,7 +433,7 @@ const AdminList = () => {
   });
 
   return (
-    <div className="main main_page bg-[#FFFEF6] font-Montserrat space-y-4 duration-900">
+    <div className="main main_page  font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[{ label: "Admin List", path: "/admin_list" }]}
       />
@@ -447,7 +447,7 @@ const AdminList = () => {
         </button>
       </div>
 
-      <div className="px-4 rounded-lg shadow-md flex justify-between font-bold">
+      <div className="px-4 bg-white rounded-lg shadow-md flex justify-between font-bold">
         <ul className="flex text-[12px] gap-2">
           {["all", "active", "inactive", "Suspend"].map((status) => (
             <li

@@ -12,10 +12,12 @@ function Layout() {
     <>
       <LayoutContext.Provider value={{ isToggle, setIs_Toggle }}>
         <div
-          className={`flex relative w-full ${isToggle ? null : "side_menu"}`}
+          className={`flex relative w-full h-full bg-[#fcf2e6] ${
+            isToggle ? null : "side_menu"
+          }`}
         >
           <Sidebar isToggle={isToggle} setIs_Toggle={setIs_Toggle} />
-          <div className="w-full bg-[#FFFEF6] duration-900">
+          <div className="w-full h-full bg-[#fcf2e6] duration-900">
             <Header
               setIs_Toggle={setIs_Toggle}
               isToggle={isToggle}

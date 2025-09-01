@@ -279,7 +279,7 @@ export default function Dashboard() {
   }, [reviewsSort]);
 
   return (
-    <div className="p-6 bg-gray-50 main main_page min-h-screen duration-900">
+    <div className="p-6  main main_page min-h-screen duration-800 ease-in-out">
       <BreadcrumbsNav />
       <PageTitle title={"DashBoard"} />
       {/* Top KPI Cards */}
