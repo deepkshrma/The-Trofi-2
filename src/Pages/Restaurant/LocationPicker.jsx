@@ -18,6 +18,7 @@ function Recenter({ position }) {
   useEffect(() => {
     if (position) {
       map.setView(position, 14); // zoom to location
+      setTimeout(() => map.invalidateSize(), 1000);
     }
   }, [position, map]);
   return null;
