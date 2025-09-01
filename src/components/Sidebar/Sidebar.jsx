@@ -143,7 +143,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
-          name: "Restaurant Management",
+          name: "Restaurant",
           icon: <FaStore />,
           link: "#",
           dropdown: true,
@@ -165,7 +165,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
-          name: "Restaurant Setting",
+          name: "Restaurant Management",
           icon: <FaCog />,
           link: "#",
           dropdown: true,
@@ -175,7 +175,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               link: "RestroAmenity",
             },
             {
-              name: " Restaurant Amenity List",
+              name: "  Amenity List",
               link: "RestroAmenityList",
             },
             {
@@ -183,7 +183,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               link: "RestroType",
             },
             {
-              name: " Restaurant Type List",
+              name: "  Type List",
               link: "RestroTypeList",
             },
             {
@@ -191,7 +191,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               link: "RestroGoodFor",
             },
             {
-              name: " Restaurant Good For List",
+              name: "  Good For List",
               link: "RestroGoodForList",
             },
             {
@@ -199,7 +199,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               link: "RestroCuisine",
             },
             {
-              name: " Restaurant Cuisine List",
+              name: "  Cuisine List",
               link: "RestroCuisineList",
             },
           ],
@@ -211,7 +211,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
-          name: "Dish Management",
+          name: "Dish",
           icon: <RestaurantIcon />,
           link: "#",
           dropdown: true,
@@ -227,7 +227,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
-          name: "Dish Setting",
+          name: "Dish Management",
           icon: <FaConciergeBell />,
           link: "#",
           dropdown: true,
