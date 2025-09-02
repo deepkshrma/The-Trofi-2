@@ -46,7 +46,7 @@ const SidebarItem = ({
       {item.dropdown ? (
         <div
           onClick={handleClick}
-          className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
+          className={`flex w-full justify-between mb-2 items-center pl-3 pr-3 py-4 cursor-pointer 
             rounded-tl-full rounded-bl-full 
             hover:bg-white hover:text-[#F9832B] 
             ${isOpen ? "bg-white text-[#F9832B]" : "text-white"}`}
