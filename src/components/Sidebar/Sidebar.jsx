@@ -83,7 +83,7 @@ const SidebarItem = ({
 
       {/* 🔹 Recursive Sub Items */}
       {item.dropdown && isOpen && item.subItems && (
-        <ul className="ml-6 mt-2 flex flex-col gap-1 list-none pl-4 ">
+        <ul className="ml-6 mt-2 flex flex-col  list-none pl-4 ">
           {item.subItems.map((subItem, idx) => (
             <SidebarItem
               key={idx}
@@ -302,16 +302,56 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           link: "#",
           dropdown: true,
           subItems: [
-            { name: "Dish Type", link: "RestroDishType", dropdown: false },
+            {
+              name: "Dish Type",
+              link: "#",
+              dropdown: true,
+              subItems: [
+                {
+                  name: "Add Dish Type",
+                  link: "RestroDishType",
+                  dropdown: false,
+                },
+                {
+                  name: "Dish Type List",
+                  link: "RestroDishTypeList",
+                  dropdown: false,
+                },
+              ],
+            },
             {
               name: "Dish Category",
-              link: "RestroDishCategory",
-              dropdown: false,
+              link: "#",
+              dropdown: true,
+              subItems: [
+                {
+                  name: "Add Dish Category",
+                  link: "RestroDishCategory",
+                  dropdown: false,
+                },
+                {
+                  name: "Category List",
+                  link: "RestroDishCategoryList",
+                  dropdown: false,
+                },
+              ],
             },
             {
               name: "Dish Sub Category",
-              link: "RestroDishSubCategory",
-              dropdown: false,
+              link: "#",
+              dropdown: true,
+              subItems: [
+                {
+                  name: "Add Sub Category",
+                  link: "RestroDishSubCategory",
+                  dropdown: false,
+                },
+                {
+                  name: "Sub Category List",
+                  link: "RestroDishSubCategoryList",
+                  dropdown: false,
+                },
+              ],
             },
           ],
         },
@@ -336,7 +376,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
   return (
     <div className="flex bg-[#F9832B]">
       <div
-        className={`sidebar bg-[#F9832B] h-screen fixed left-0 top-0 transition-transform duration-500 z-20
+        className={`sidebar bg-[#F9832B] h-screen fixed left-0 top-0 transition-transform duration-800 z-20
           ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
       >
         {/* Logo */}
@@ -348,27 +388,29 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         </div>
 
         {/* Navigation */}
-        <nav>
-          <ul className="flex flex-col h-[90vh] overflow-y-auto scrollbar-thin-line">
-            {filteredSidebarData.map((section, sectionIndex) => (
-              <React.Fragment key={sectionIndex}>
-                {section.items.map((item, idx) => (
-                  <SidebarItem
-                    key={idx}
-                    item={item}
-                    openMain={openMain}
-                    setOpenMain={setOpenMain}
-                    openNested={openNested}
-                    setOpenNested={setOpenNested}
-                    activePath={activePath}
-                    handleSubClick={handleSubClick}
-                    isMain={true} // only top-level marked as main
-                  />
-                ))}
-              </React.Fragment>
-            ))}
-          </ul>
-        </nav>
+        <div className="flex-1 overflow-y-auto scrollbar-thin-line">
+          <nav>
+            <ul className="flex flex-col h-[90vh] gap-1 overflow-y-auto scrollbar-thin-line">
+              {filteredSidebarData.map((section, sectionIndex) => (
+                <React.Fragment key={sectionIndex}>
+                  {section.items.map((item, idx) => (
+                    <SidebarItem
+                      key={idx}
+                      item={item}
+                      openMain={openMain}
+                      setOpenMain={setOpenMain}
+                      openNested={openNested}
+                      setOpenNested={setOpenNested}
+                      activePath={activePath}
+                      handleSubClick={handleSubClick}
+                      isMain={true} // only top-level marked as main
+                    />
+                  ))}
+                </React.Fragment>
+              ))}
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
   );
