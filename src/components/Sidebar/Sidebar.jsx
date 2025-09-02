@@ -66,11 +66,11 @@ const SidebarItem = ({
           to={item.link}
           onClick={handleClick}
           className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
-            rounded-tl-full rounded-bl-full 
+            rounded-tl-full rounded-bl-full  
              
             ${
               activePath === item.link
-                ? "bg-white text-[#F9832B]"
+                ? "bg-white text-[#F9832B] mb-2"
                 : "text-white"
             }`}
         >
