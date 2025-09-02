@@ -83,7 +83,7 @@ const SidebarItem = ({
 
       {/* 🔹 Recursive Sub Items */}
       {item.dropdown && isOpen && item.subItems && (
-        <ul className="ml-6 mt-2 flex flex-col  list-none pl-4 ">
+        <ul className="ml-6 mt-2 flex flex-col gap-1 list-none pl-4 ">
           {item.subItems.map((subItem, idx) => (
             <SidebarItem
               key={idx}
@@ -376,21 +376,20 @@ function Sidebar({ setIs_Toggle, isToggle }) {
   return (
     <div className="flex bg-[#F9832B]">
       <div
-        className={`sidebar bg-[#F9832B] h-screen fixed left-0 top-0 transition-transform duration-800 z-20
+        className={`sidebar fixed left-0 top-0 transition-transform duration-800 z-20 bg-[#F9832B] 
           ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
       >
         {/* Logo */}
-        <div className="flex items-center gap-2 text-white font-bold text-2xl px-4 py-5">
+        <div className=" flex items-center gap-2 text-white font-bold text-2xl px-4 py-5">
           <div className="bg-white p-2 rounded-full">
             <img src={headerlogo} alt="" className="w-8 h-8" />
           </div>
           <span className="whitespace-nowrap">TROFI</span>
         </div>
-
-        {/* Navigation */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin-line">
+        <div className="bg-[#F9832B] h-screen overflow-y-auto scrollbar-thin-line">
+          {/* Navigation */}
           <nav>
-            <ul className="flex flex-col h-[90vh] gap-1 overflow-y-auto scrollbar-thin-line">
+            <ul className="flex flex-col h-[90vh]">
               {filteredSidebarData.map((section, sectionIndex) => (
                 <React.Fragment key={sectionIndex}>
                   {section.items.map((item, idx) => (
