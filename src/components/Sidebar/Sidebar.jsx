@@ -65,7 +65,7 @@ const SidebarItem = ({
         <Link
           to={item.link}
           onClick={handleClick}
-          className={`flex w-full justify-between items-center pl-3 pr-3 py-2 cursor-pointer 
+          className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
             rounded-tl-full rounded-bl-full hover:text-gray-300  
              
             ${
