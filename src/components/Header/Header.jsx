@@ -92,7 +92,9 @@ function Header({ setIs_Toggle, isToggle }) {
           </div>
         </span>
 
-        <div className="flex justify-end">
+        <div
+          className={`flex justify-end ${isToggle ? "hidden lg:flex" : "flex"}`}
+        >
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-3 cursor-pointer px-3 py-1 rounded-[8px]">
               <NotificationBell />
