@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { Eye, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../components/common/Pagination/Pagination";
 
 function RestroList() {
   // Sample static data (added logo + description)
@@ -31,6 +32,13 @@ function RestroList() {
   ]);
 
   const [search, setSearch] = useState("");
+  const pageSize = 10;
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalRecords: 0,
+  });
   const navigate = useNavigate();
 
   //  Apply search filter
@@ -52,22 +60,21 @@ function RestroList() {
         </button>
       </div>
 
-      {/*  Search */}
-      <div className="flex flex-wrap gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
-        />
-      </div>
-
       {/*  Table */}
-      <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto">
+      <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
+        {/*  Search */}
+        <div className="flex flex-wrap gap-3 m-3">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+          />
+        </div>
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-gray-100 text-left text-gray-700">
+            <tr className="bg-gray-200 text-left text-gray-700">
               <th className="p-3 border-b border-gray-300">S.No.</th>
               <th className="p-3 border-b border-gray-300">Logo</th>
               <th className="p-3 border-b border-gray-300">Name</th>
@@ -123,6 +130,14 @@ function RestroList() {
             )}
           </tbody>
         </table>
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalUsers}
+          itemsPerPage={10} // Same limit as API
+          onPageChange={(page) => fetchUsers(page)} // Call API on page change
+          totalPages={pagination.totalPages} // Backend total pages
+          type="backend"
+        />
       </div>
     </div>
   );

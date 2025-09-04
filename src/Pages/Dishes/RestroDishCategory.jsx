@@ -137,7 +137,7 @@ function RestroDishCategory() {
               type="submit"
               className="w-[15%] rounded-xl bg-orange-500 px-4 py-2 cursor-pointer font-medium text-white 
                shadow-md transition hover:bg-orange-600 hover:shadow-lg 
-               focus:ring-2 focus:ring-orange-300"
+               focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
               Save Category
             </button>
