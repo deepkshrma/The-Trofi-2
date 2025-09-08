@@ -137,32 +137,54 @@ function RestroAdd({ address, onChange }) {
           {/* Gallery */}
           <div>
             <label className="block mb-2 font-medium">Gallery Uploads</label>
+
+            {/* Hidden file input */}
             <input
+              id="galleryInput"
               type="file"
               accept="image/*"
               multiple
               onChange={(e) =>
-                setGallery((prev) => [...prev, ...Array.from(e.target.files)])
+                setGallery([...gallery, ...Array.from(e.target.files)])
               }
-              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-gray-50"
+              className="hidden"
             />
 
-            {/* Preview selected images */}
-            <div className="flex gap-3 flex-wrap mt-3">
-              {gallery.map((img, idx) => (
-                <div key={idx} className="relative">
+            {/* Custom button to trigger input */}
+            <button
+              type="button"
+              onClick={() => document.getElementById("galleryInput").click()}
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+            >
+              Choose Images
+            </button>
+
+            {/* Previews with file names */}
+            <div className="flex gap-4 flex-wrap mt-4">
+              {gallery.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
+                >
+                  {/* File name */}
+                  <p className="text-xs text-gray-700 truncate mb-1">
+                    {file.name}
+                  </p>
+
+                  {/* Image preview */}
                   <img
-                    src={URL.createObjectURL(img)}
+                    src={URL.createObjectURL(file)}
                     alt={`gallery-${idx}`}
-                    className="w-20 h-20 object-cover rounded-lg border"
+                    className="w-20 h-20 object-cover rounded-md border mx-auto"
                   />
+
                   {/* Remove button */}
                   <button
                     type="button"
                     onClick={() =>
                       setGallery((prev) => prev.filter((_, i) => i !== idx))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
@@ -342,8 +364,9 @@ function RestroAdd({ address, onChange }) {
         </div>
 
         {/* Map Picker */}
-        <LocationPicker address={restaurantData.address} />
-
+        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+          <LocationPicker address={restaurantData.address} />
+        </div>
         {/* {restaurantData.latitude && restaurantData.longitude && (
           <p className="mt-3 text-gray-700">
             📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
@@ -366,29 +389,37 @@ function RestroAdd({ address, onChange }) {
           Upload Menu (PDF/Images)
         </label>
         <input
+          id="menuInput"
           type="file"
           accept="image/*,.pdf"
           multiple
           onChange={(e) =>
             setMenuFiles((prev) => [...prev, ...Array.from(e.target.files)])
           }
-          className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-gray-50 mb-6"
+          className="hidden"
         />
-        <div className="flex gap-3 flex-wrap mt-3">
+        <button
+          type="button"
+          onClick={() => document.getElementById("menuInput").click()}
+          className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+        >
+          Choose Images
+        </button>
+        <div className="flex gap-4 flex-wrap mt-4">
           {menuFiles.map((file, idx) => (
-            <div key={idx} className="relative">
-              {/* Only preview images */}
-              {file.type.startsWith("image/") ? (
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`menu-${idx}`}
-                  className="w-20 h-20 object-cover rounded-lg border"
-                />
-              ) : (
-                <div className="w-20 h-20 flex items-center justify-center bg-gray-200 text-gray-600 text-xs rounded-lg border">
-                  {file.name}
-                </div>
-              )}
+            <div
+              key={idx}
+              className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
+            >
+              {/* File name */}
+              <p className="text-xs text-gray-700 truncate mb-1">{file.name}</p>
+
+              {/* Image preview */}
+              <img
+                src={URL.createObjectURL(file)}
+                alt={`menu-${idx}`}
+                className="w-20 h-20 object-cover rounded-md border mx-auto"
+              />
 
               {/* Remove button */}
               <button
@@ -396,7 +427,7 @@ function RestroAdd({ address, onChange }) {
                 onClick={() =>
                   setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
                 }
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
               >
                 ✕
               </button>

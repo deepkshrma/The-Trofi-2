@@ -86,6 +86,7 @@ const Allroutes = () => {
               path="/RestroDishSubCategoryList"
               element={<RestroDishSubCategoryList />}
             />
+            <Route path="/RestroProfile/:id" element={<RestroProfile />} />
           </Route>
         </Routes>
       </Router>

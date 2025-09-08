@@ -1,9 +1,12 @@
 // @ts-nocheck
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { Eye, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
+import axios from "axios";
+import { BASE_URL } from "../../config/Config";
+const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
 function RestroList() {
   // Sample static data (added logo + description)
@@ -30,9 +33,9 @@ function RestroList() {
       description: "Freshly baked breads, cakes & pastries.",
     },
   ]);
-
   const [search, setSearch] = useState("");
   const pageSize = 10;
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -41,9 +44,34 @@ function RestroList() {
   });
   const navigate = useNavigate();
 
+  let token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+
+  // Fetch all restaurants
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        console.log("before api call");
+
+        const response = await axios.get(`${BASE_URL}/restro/get-restaurant`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // attach token here
+          },
+        });
+        console.log("after api call");
+        setRestaurants(response.data.data);
+        console.log(response);
+      } catch (error) {
+        console.error("Error fetching restaurants:", error);
+      }
+    };
+
+    fetchRestaurants();
+  }, []);
+
   //  Apply search filter
   const filteredRestaurants = restaurants.filter((restro) =>
-    restro.name.toLowerCase().includes(search.toLowerCase())
+    restro.restro_name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -72,64 +100,80 @@ function RestroList() {
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
         </div>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-left text-gray-700">
-              <th className="p-3 border-b border-gray-300">S.No.</th>
-              <th className="p-3 border-b border-gray-300">Logo</th>
-              <th className="p-3 border-b border-gray-300">Name</th>
-              <th className="p-3 border-b border-gray-300">Type</th>
-              <th className="p-3 border-b border-gray-300">Description</th>
-              <th className="p-3 border-b border-gray-300 text-center">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRestaurants.length > 0 ? (
-              filteredRestaurants.map((restro, index) => (
-                <tr
-                  key={restro.id}
-                  className="hover:bg-gray-50 transition text-gray-700"
-                >
-                  <td className="p-3 border-b border-gray-200">{index + 1}</td>
-                  <td className="p-3 border-b border-gray-200">
-                    <img
-                      src={restro.logo}
-                      alt={restro.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  </td>
-                  <td className="p-3 border-b border-gray-200 font-medium">
-                    {restro.name}
-                  </td>
-                  <td className="p-3 border-b border-gray-200">
-                    {restro.type}
-                  </td>
-                  <td className="p-3 border-b border-gray-200">
-                    {restro.description}
-                  </td>
-                  <td className="p-3 border-b border-gray-200">
-                    <div className="flex justify-center items-center">
-                      <button className="flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100">
-                        <Eye size={16} /> View Profile
-                      </button>
-                    </div>
+        {loading ? (
+          <div className="text-center p-6 text-gray-500">Loading...</div>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-200 text-left text-gray-700">
+                <th className="p-3 border-b border-gray-300">S.No.</th>
+                <th className="p-3 border-b border-gray-300">Logo</th>
+                <th className="p-3 border-b border-gray-300">Name</th>
+                <th className="p-3 border-b border-gray-300">Type</th>
+                <th className="p-3 border-b border-gray-300">Description</th>
+                <th className="p-3 border-b border-gray-300 text-center">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRestaurants.length > 0 ? (
+                filteredRestaurants.map((restro, index) => (
+                  <tr
+                    key={restro._id}
+                    className="hover:bg-gray-50 transition text-gray-700"
+                  >
+                    <td className="p-3 border-b border-gray-200">
+                      {index + 1}
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <img
+                        src={
+                          restro.restaurant_images?.[0]
+                            ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
+                            : "https://via.placeholder.com/40"
+                        }
+                        alt={restro.restro_name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    </td>
+                    <td className="p-3 border-b border-gray-200 font-medium">
+                      {restro.restro_name}
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      {restro.food_type}
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      {restro.description}
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="flex justify-center items-center">
+                        <button
+                          className="flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 whitespace-nowrap"
+                          onClick={() =>
+                            navigate(`/RestroProfile/${restro._id}`)
+                          }
+                        >
+                          <Eye size={16} /> View Profile
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="text-center p-6 text-gray-500 italic"
+                  >
+                    No restaurants found.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="text-center p-6 text-gray-500 italic"
-                >
-                  No restaurants found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        )}
+
         <Pagination
           currentPage={pagination.currentPage}
           totalItems={pagination.totalUsers}
