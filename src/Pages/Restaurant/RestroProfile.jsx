@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Star, Phone, MapPin, Clock, Utensils } from "lucide-react"; // extra icons
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -13,16 +13,18 @@ import profileImg2 from "../../assets/images/profileImg2.jpg";
 import bannerLogo from "../../assets/images/bannerLogo.png";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import axios from "axios";
+import { BASE_URL } from "../../config/Config";
+const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
 function RestroProfile() {
   const { isToggle } = useContext(LayoutContext);
-
+  const { id } = useParams();
+  const [loading, setLoading] = useState(true);
   // Sample banner images
   const banners = [banner1, banner2, banner3];
-
-  // Restaurant Data
-  const restaurant = {
+  const [restaurant, setRestaurant] = useState({
     logo: bannerLogo,
     name: "Cafe Aroma",
     shortDesc: "Your cozy corner for Italian & Continental delights.",
@@ -54,7 +56,70 @@ function RestroProfile() {
       { id: 2, image: profileImg1, name: "Pasta Alfredo", price: "₹300" },
       { id: 3, image: profileImg2, name: "Chocolate Cake", price: "₹150" },
     ],
-  };
+  });
+  // Restaurant Data
+  // const restaurant = {
+  //   logo: bannerLogo,
+  //   name: "Cafe Aroma",
+  //   shortDesc: "Your cozy corner for Italian & Continental delights.",
+  //   longDesc:
+  //     "Cafe Aroma offers a warm and inviting atmosphere with a wide variety of freshly prepared Italian and Continental dishes. Whether you're here for a casual brunch, family dinner, or romantic evening, our menu and ambiance promise a delightful experience.",
+  //   rating: 4.3,
+  //   totalReviews: 128,
+  //   address:
+  //     "1st Floor, Shop No. 20, 21, Niwaru Rd, Rajendra Nagar, Harnathapura, Jhotwara, Jaipur, Rajasthan 302012",
+  //   latitude: 26.926107,
+  //   longitude: 75.746346,
+  //   phone: "+91 98765 43210",
+  //   foodType: ["Italian", "Continental", "Bakery"],
+  //   timing: "Mon - Sun: 10:00 AM - 11:00 PM",
+  //   amenities: [
+  //     "Free Wi-Fi",
+  //     "Outdoor Seating",
+  //     "Live Music",
+  //     "Parking Available",
+  //     "Wheelchair Accessible",
+  //   ],
+  //   topDishes: [
+  //     { id: 1, name: "Tandoori Chicken", price: "₹450" },
+  //     { id: 2, name: "Pasta Alfredo", price: "₹300" },
+  //     { id: 3, name: "Chocolate Lava Cake", price: "₹200" },
+  //   ],
+  //   menus: [
+  //     { id: 1, image: profileImg, name: "Margherita Pizza", price: "₹250" },
+  //     { id: 2, image: profileImg1, name: "Pasta Alfredo", price: "₹300" },
+  //     { id: 3, image: profileImg2, name: "Chocolate Cake", price: "₹150" },
+  //   ],
+  // };
+
+  let token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+  useEffect(() => {
+    const fetchRestaurant = async () => {
+      try {
+        // const token = localStorage.getItem("token"); // or your auth token
+        const res = await axios.get(`${BASE_URL}/restro/get-restaurant/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setRestaurant(res.data.data);
+      } catch (error) {
+        console.error("Error fetching restaurant:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRestaurant();
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-6 text-gray-600">Loading...</div>;
+  }
+
+  if (!restaurant) {
+    return <div className="p-6 text-red-500">Restaurant not found</div>;
+  }
 
   function FixMapSize() {
     const map = useMap();
@@ -83,16 +148,22 @@ function RestroProfile() {
           showStatus={false}
           interval={4000}
         >
-          {banners.map((banner, i) => (
-            <div key={i} className="relative">
-              <img
-                src={banner}
-                alt={`Banner-${i}`}
-                className="w-full h-100 object-cover"
-              />
-              <div className="absolute inset-0 bg-black/20 bg-opacity-30 z-0"></div>
+          {restaurant.restaurant_images?.length > 0 ? (
+            restaurant.restaurant_images.map((img, i) => (
+              <div key={i} className="relative">
+                <img
+                  src={`${IMAGE_URL}/${img}`}
+                  alt={`Banner-${i}`}
+                  className="w-full h-100 object-cover"
+                />
+                <div className="absolute inset-0 bg-black/20 bg-opacity-30 z-0"></div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-gray-200 h-64 flex items-center justify-center">
+              No Images
             </div>
-          ))}
+          )}
         </Carousel>
 
         {/* Logo, Name & Rating */}
@@ -103,8 +174,8 @@ function RestroProfile() {
             className="w-20 h-20 rounded-full shadow-md border-4 border-white"
           />
           <div className="text-white">
-            <h1 className="text-2xl font-bold">{restaurant.name}</h1>
-            <p className="text-sm">{restaurant.shortDesc}</p>
+            <h1 className="text-2xl font-bold">{restaurant.restro_name}</h1>
+            <p className="text-sm">{restaurant.description}</p>
             {/* <div className="flex items-center gap-1">
               <Star className="text-yellow-400 w-5 h-5 fill-yellow-400" />
               <span className="font-medium">{restaurant.rating}</span>
@@ -120,23 +191,26 @@ function RestroProfile() {
       <div className="p-6 space-y-6">
         <div className="bg-white p-5 rounded-xl shadow-md">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
-            About {restaurant.name}
+            About {restaurant.restro_name}
           </h2>
-          <p className="text-gray-600">{restaurant.longDesc}</p>
+          <p className="text-gray-600">{restaurant.long_description}</p>
 
           <div className="mt-4 grid sm:grid-cols-2 gap-4 text-gray-700">
             <p className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-[#F9832B]" /> {restaurant.address}
             </p>
             <p className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-[#F9832B]" /> {restaurant.phone}
+              <Phone className="w-5 h-5 text-[#F9832B]" />{" "}
+              {restaurant.country_code} {restaurant.phone}
             </p>
             <p className="flex items-center gap-2">
               <Utensils className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.foodType.join(", ")}
+              {Array.isArray(restaurant.food_type)
+                ? restaurant.food_type.join(", ")
+                : restaurant.food_type || "N/A"}
             </p>
             <p className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#F9832B]" /> {restaurant.timing}
+              <Clock className="w-5 h-5 text-[#F9832B]" /> {restaurant.time}
             </p>
           </div>
         </div>
@@ -158,52 +232,60 @@ function RestroProfile() {
         </div>
 
         {/* Top Dishes Section */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Top Dishes</h2>
-          <div className="bg-white rounded-xl shadow-md p-5">
-            <ul className="divide-y divide-gray-200">
-              {restaurant.topDishes.map((dish) => (
-                <li
-                  key={dish.id}
-                  className="flex justify-between items-center py-3"
-                >
-                  <span className="text-gray-700 font-medium">{dish.name}</span>
-                  <span className="text-[#F9832B] font-bold">{dish.price}</span>
-                </li>
-              ))}
-            </ul>
+        {restaurant.top_dishes?.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Top Dishes</h2>
+            <div className="bg-white rounded-xl shadow-md p-5">
+              <ul className="divide-y divide-gray-200">
+                {restaurant.top_dishes.map((dish, i) => (
+                  <li
+                    key={i}
+                    className="flex justify-between items-center py-3"
+                  >
+                    <span className="text-gray-700 font-medium">
+                      {dish.name}
+                    </span>
+                    <span className="text-[#F9832B] font-bold">
+                      {dish.price}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Menu Section */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {restaurant.menus.map((menu) => (
-              <div
-                key={menu.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
-              >
-                <img
-                  src={menu.image}
-                  alt={menu.name}
-                  className="w-full h-40 object-cover rounded-lg"
-                />
-                <div className="mt-3">
-                  <h3 className="text-lg font-semibold text-gray-700">
-                    {menu.name}
-                  </h3>
-                  {/* <p className="text-[#F9832B] font-bold">{menu.price}</p> */}
+        {restaurant.restaurant_menu_images?.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {restaurant.restaurant_menu_images.map((menu, i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
+                >
+                  <img
+                    src={`${IMAGE_URL}/${menu}`}
+                    alt={`Menu-${i}`}
+                    className="w-full h-40 object-cover rounded-lg"
+                  />
+                  <div className="mt-3">
+                    {/* <h3 className="text-lg font-semibold text-gray-700">
+                      {menu.name}
+                    </h3> */}
+                    {/* <p className="text-[#F9832B] font-bold">{menu.price}</p> */}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="flex justify-end text-blue-500 mt-5">
+              <Link to="" className="link">
+                View all
+              </Link>
+            </div>
           </div>
-          <div className="flex justify-end text-blue-500 mt-5">
-            <Link to="" className="link">
-              View all
-            </Link>
-          </div>
-        </div>
+        )}
 
         {/* Map Section */}
         <div className="p-6">
@@ -217,7 +299,7 @@ function RestroProfile() {
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <Marker position={[restaurant.latitude, restaurant.longitude]}>
                 <Popup>
-                  {restaurant.name} - {restaurant.address}
+                  {restaurant.restro_name} - {restaurant.address}
                 </Popup>
               </Marker>
               <FixMapSize />

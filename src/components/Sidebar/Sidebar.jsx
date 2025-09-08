@@ -66,7 +66,9 @@ const SidebarItem = ({
           to={item.link}
           onClick={handleClick}
           className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
-            rounded-tl-full rounded-bl-full hover:text-gray-300  
+            rounded-tl-full rounded-bl-full ${
+              item.name === "Dashboard" ? "" : "hover:text-gray-300"
+            }   
              
             ${
               activePath === item.link
@@ -376,12 +378,20 @@ function Sidebar({ setIs_Toggle, isToggle }) {
   return (
     <div className="flex bg-[#F9832B]">
       <div
-        className={`sidebar fixed left-0 top-0 transition-transform duration-800 z-20 bg-[#F9832B] 
+        className={`sidebar fixed left-0 top-0 transition-transform duration-900 z-20 bg-[#F9832B] 
           ${isToggle ? "translate-x-0" : "-translate-x-full"} shadow-lg`}
       >
         {/* Logo */}
         <div className=" flex items-center gap-2 text-white font-bold text-2xl px-4 py-5">
-          <div className="bg-white p-2 rounded-full">
+          <div
+            className="bg-white p-2 rounded-full"
+            style={{
+              boxShadow: `
+      inset 6px 6px 12px rgba(249, 115, 22, 0.35),  /* orange shadow bottom-right */
+      inset -6px -6px 12px rgba(255, 200, 150, 0.6) /* soft orange highlight top-left */
+    `,
+            }}
+          >
             <img src={headerlogo} alt="" className="w-8 h-8" />
           </div>
           <span className="whitespace-nowrap">TROFI</span>
