@@ -49,7 +49,7 @@ function AddDishes() {
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <div className=" bg-white shadow-lg rounded-2xl p-10">
         {/* <h2 className="text-4xl font-bold text-orange-500 mb-10 text-center">
-          🍴 Add New Dish
+           Add New Dish
         </h2> */}
         <PageTittle title={"Add New Dish"} />
 
@@ -193,43 +193,64 @@ function AddDishes() {
           </div>
 
           {/* Images */}
+          {/* Dish Images */}
           <div className="md:col-span-2">
             <label className="block text-gray-600 mb-2 font-medium">
               Dish Images
             </label>
             <input
+              id="dishImage"
               type="file"
               multiple
               accept="image/*"
-              onChange={handleFileChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400"
+              onChange={(e) =>
+                setImages((prev) => [...prev, ...Array.from(e.target.files)])
+              }
+              className="hidden"
             />
-          </div>
+            <button
+              type="button"
+              onClick={() => document.getElementById("dishImage").click()}
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+            >
+              Choose Images
+            </button>
 
-          {/* Preview Images */}
-          {images.length > 0 && (
-            <div className="flex flex-wrap gap-4 mt-4">
-              {images.map((img, index) => (
-                <div
-                  key={index}
-                  className="relative w-32 h-32 border rounded-lg overflow-hidden shadow"
-                >
-                  <img
-                    src={URL.createObjectURL(img)}
-                    alt={`preview-${index}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-1 right-1 w-5 h-5 flex justify-center items-center bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+            {/* Preview Images */}
+            {images.length > 0 && (
+              <div className="flex flex-wrap gap-4 mt-4">
+                {images.map((img, index) => (
+                  <div
+                    key={index}
+                    className="relative w-28 rounded-lg border shadow bg-white p-2 flex flex-col items-center"
                   >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                    {/* Filename */}
+                    <p className="text-xs text-gray-600 mb-2 text-center truncate w-full">
+                      {img.name}
+                    </p>
+
+                    {/* Preview */}
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`preview-${index}`}
+                      className="w-20 h-20 object-cover rounded-md border"
+                    />
+
+                    {/* Remove Button */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImages((prev) => prev.filter((_, i) => i !== index))
+                      }
+                      className="absolute -top-2 -right-2 w-6 h-6 flex justify-center items-center bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-md"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Availability */}
           <div className="flex items-center gap-2 md:col-span-2">

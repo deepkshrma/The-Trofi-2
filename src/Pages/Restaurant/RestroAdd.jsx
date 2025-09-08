@@ -364,8 +364,9 @@ function RestroAdd({ address, onChange }) {
         </div>
 
         {/* Map Picker */}
-        <LocationPicker address={restaurantData.address} />
-
+        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+          <LocationPicker address={restaurantData.address} />
+        </div>
         {/* {restaurantData.latitude && restaurantData.longitude && (
           <p className="mt-3 text-gray-700">
             📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
