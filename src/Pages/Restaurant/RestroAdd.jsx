@@ -13,11 +13,18 @@ function RestroAdd({ address, onChange }) {
     state: "",
     facilities: [],
     dishes: [],
+    hygieneStatus: "",
+    email: "",
+    password: "",
+    birthYear: "",
+    openingTime: "",
+    closingTime: "",
+    openDays: [],
   });
 
   const [gallery, setGallery] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
-  const [menuFile, setMenuFile] = useState(null);
+  const [menuFiles, setMenuFiles] = useState([]);
 
   const facilityOptions = ["Wi-Fi", "Parking", "AC", "Delivery"];
 
@@ -67,6 +74,25 @@ function RestroAdd({ address, onChange }) {
         >
           <Utensils size={20} /> Basic Information
         </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            value={restaurantData.email}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={restaurantData.password}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -146,27 +172,137 @@ function RestroAdd({ address, onChange }) {
           </div>
         </div>
 
-        {/* Facilities */}
-        <h3 className="font-medium mb-3">Facilities Available:</h3>
-        <div className="flex gap-3 flex-wrap">
-          {facilityOptions.map((facility) => {
-            const isActive = restaurantData.facilities.includes(facility);
-            return (
-              <button
-                key={facility}
-                type="button"
-                onClick={() => handleFacilityToggle(facility)}
-                className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* Facilities */}
+          <div>
+            <h3 className="font-medium ">Facilities Available:</h3>
+            <div className="flex gap-3 flex-wrap">
+              {facilityOptions.map((facility) => {
+                const isActive = restaurantData.facilities.includes(facility);
+                return (
+                  <button
+                    key={facility}
+                    type="button"
+                    onClick={() => handleFacilityToggle(facility)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
         ${
           isActive
             ? "bg-[#F9832B] text-white"
             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
         }`}
-              >
-                {facility}
-              </button>
-            );
-          })}
+                  >
+                    {facility}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* hygiene status */}
+          <div>
+            <label className="block mb-2 font-medium">Hygiene Status</label>
+            <div className="flex gap-4">
+              {["Excellent", "Good", "Average", "Poor"].map((status) => (
+                <label key={status} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="hygieneStatus"
+                    value={status}
+                    checked={restaurantData.hygieneStatus === status}
+                    onChange={handleChange}
+                    className="accent-[#F9832B]"
+                  />
+                  {status}
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="birthYear" className="block mb-1 font-medium">
+              Select Birth Year
+            </label>
+            <select
+              name="birthYear"
+              value={restaurantData.birthYear}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3.5 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            >
+              <option value="">Select Year</option>
+              {Array.from(
+                { length: 150 },
+                (_, i) => new Date().getFullYear() - i
+              ).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-1 font-medium">Opening Time</label>
+              <input
+                type="time"
+                name="openingTime"
+                value={restaurantData.openingTime}
+                onChange={handleChange}
+                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 font-medium">Closing Time</label>
+              <input
+                type="time"
+                name="closingTime"
+                value={restaurantData.closingTime}
+                onChange={handleChange}
+                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8">
+          <label className="block mb-2 font-medium">Open Days</label>
+          <div className="flex gap-3 flex-wrap">
+            {[
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ].map((day) => {
+              const isSelected = restaurantData.openDays.includes(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => {
+                    setRestaurantData((prev) => {
+                      const updatedDays = isSelected
+                        ? prev.openDays.filter((d) => d !== day)
+                        : [...prev.openDays, day];
+                      return { ...prev, openDays: updatedDays };
+                    });
+                  }}
+                  className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
+            ${
+              isSelected
+                ? "bg-[#F9832B] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -227,14 +363,46 @@ function RestroAdd({ address, onChange }) {
 
         {/* Menu Upload */}
         <label className="block mb-2 font-medium">
-          Upload Menu (PDF/Image)
+          Upload Menu (PDF/Images)
         </label>
         <input
           type="file"
-          accept=".pdf,image/*"
-          onChange={(e) => setMenuFile(e.target.files[0])}
+          accept="image/*,.pdf"
+          multiple
+          onChange={(e) =>
+            setMenuFiles((prev) => [...prev, ...Array.from(e.target.files)])
+          }
           className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-gray-50 mb-6"
         />
+        <div className="flex gap-3 flex-wrap mt-3">
+          {menuFiles.map((file, idx) => (
+            <div key={idx} className="relative">
+              {/* Only preview images */}
+              {file.type.startsWith("image/") ? (
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`menu-${idx}`}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                />
+              ) : (
+                <div className="w-20 h-20 flex items-center justify-center bg-gray-200 text-gray-600 text-xs rounded-lg border">
+                  {file.name}
+                </div>
+              )}
+
+              {/* Remove button */}
+              <button
+                type="button"
+                onClick={() =>
+                  setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
+                }
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
 
         {/* Dish Form */}
         <div className="flex justify-between items-center mb-4">
@@ -353,7 +521,7 @@ function RestroAdd({ address, onChange }) {
               Available
             </label>
 
-            {/* ✅ Footer with Remove Button */}
+            {/* Footer with Remove Button */}
             <div className="flex justify-end">
               <button
                 onClick={() => {

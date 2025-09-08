@@ -66,7 +66,7 @@ const SidebarItem = ({
           to={item.link}
           onClick={handleClick}
           className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
-            rounded-tl-full rounded-bl-full  
+            rounded-tl-full rounded-bl-full hover:text-gray-300  
              
             ${
               activePath === item.link
@@ -386,7 +386,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           </div>
           <span className="whitespace-nowrap">TROFI</span>
         </div>
-        <div className="bg-[#F9832B] h-screen overflow-y-auto scrollbar-thin-line">
+        <div className="bg-[#F9832B] h-[90vh] overflow-y-auto scrollbar-thin-line">
           {/* Navigation */}
           <nav>
             <ul className="flex flex-col h-[90vh]">

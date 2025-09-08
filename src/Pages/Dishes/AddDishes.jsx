@@ -30,13 +30,19 @@ function AddDishes() {
 
   // Handle file upload
   const handleFileChange = (e) => {
-    setImages([...e.target.files]);
+    const files = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...files]); // append new files
+  };
+
+  // Remove selected image
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
   };
 
   // Handle submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted ✅", { ingredients, images });
+    console.log("Form submitted", { ingredients, images });
   };
 
   return (
@@ -92,19 +98,6 @@ function AddDishes() {
             ></textarea>
           </div>
 
-          {/* Cuisine */}
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Cuisine
-            </label>
-            <select
-              name="cuisine"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition bg-white"
-            >
-              <option value="">Select Cuisine</option>
-            </select>
-          </div>
-
           {/* Category */}
           <div>
             <label className="block text-gray-600 font-medium mb-2">
@@ -139,6 +132,19 @@ function AddDishes() {
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition bg-white"
             >
               <option value="">Select Type</option>
+            </select>
+          </div>
+
+          {/* Cuisine */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Cuisine
+            </label>
+            <select
+              name="cuisine"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition bg-white"
+            >
+              <option value="">Select Cuisine</option>
             </select>
           </div>
 
@@ -199,6 +205,31 @@ function AddDishes() {
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400"
             />
           </div>
+
+          {/* Preview Images */}
+          {images.length > 0 && (
+            <div className="flex flex-wrap gap-4 mt-4">
+              {images.map((img, index) => (
+                <div
+                  key={index}
+                  className="relative w-32 h-32 border rounded-lg overflow-hidden shadow"
+                >
+                  <img
+                    src={URL.createObjectURL(img)}
+                    alt={`preview-${index}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-1 right-1 w-5 h-5 flex justify-center items-center bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Availability */}
           <div className="flex items-center gap-2 md:col-span-2">
