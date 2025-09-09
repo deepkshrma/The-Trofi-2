@@ -32,7 +32,8 @@ import Sidebar1 from "./components/Sidebar/Sidebar1";
 import RestroDishTypeList from "./Pages/Dishes/RestroDishTypeList";
 import RestroDishCategoryList from "./Pages/Dishes/RestroDishCategoryList";
 import RestroDishSubCategoryList from "./Pages/Dishes/RestroDishSubCategoryList";
-// import RestaurantReviewList from "./Pages/Reviews/Restaurant/RestaurantReviewList";
+import RestaurantReviewList from "./Pages/Reviews/Restaurant/RestaurantReviewList";
+import DishReviewList from "./Pages/Reviews/Dishes/DishReviewList";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -88,10 +89,11 @@ const Allroutes = () => {
               element={<RestroDishSubCategoryList />}
             />
             <Route path="/RestroProfile/:id" element={<RestroProfile />} />
-            {/* <Route
+            <Route
               path="/RestaurantReviewList"
               element={<RestaurantReviewList />}
-            /> */}
+            />
+            <Route path="/DishReviewList" element={<DishReviewList />} />
           </Route>
         </Routes>
       </Router>

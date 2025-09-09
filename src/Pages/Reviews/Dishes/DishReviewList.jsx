@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
-export default function RestaurantReviewList() {
+export default function DishReviewList() {
   const [reviews, setReviews] = useState([
     {
       id: 1,
       userName: "Priyanshu",
-      restroName: "Taj Palace",
+      dishName: "Paneer Butter Masala",
       rating_label: "Good",
       star_value: 4,
       status: "pending",
@@ -13,7 +13,7 @@ export default function RestaurantReviewList() {
     {
       id: 2,
       userName: "Sreya",
-      restroName: "Barbeque Nation",
+      dishName: "Chicken Biryani",
       rating_label: "Excellent",
       star_value: 5,
       status: "accepted",
@@ -21,7 +21,7 @@ export default function RestaurantReviewList() {
     {
       id: 3,
       userName: "Rohit",
-      restroName: "Dominos",
+      dishName: "Margherita Pizza",
       rating_label: "Average",
       star_value: 3,
       status: "denied",
@@ -29,7 +29,7 @@ export default function RestaurantReviewList() {
     {
       id: 4,
       userName: "Aditi",
-      restroName: "Cafe Coffee Day",
+      dishName: "Caesar Salad",
       rating_label: "Poor",
       star_value: 2,
       status: "pending",
@@ -37,7 +37,7 @@ export default function RestaurantReviewList() {
     {
       id: 5,
       userName: "Karan",
-      restroName: "McDonalds",
+      dishName: "Chocolate Lava Cake",
       rating_label: "Good",
       star_value: 4,
       status: "accepted",
@@ -50,7 +50,7 @@ export default function RestaurantReviewList() {
   const filteredReviews = reviews.filter(
     (rev) =>
       rev.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rev.restroName.toLowerCase().includes(searchTerm.toLowerCase())
+      rev.dishName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Helper to render stars
@@ -64,7 +64,7 @@ export default function RestaurantReviewList() {
 
   return (
     <div className="main main_page p-6 duration-900">
-      <h1 className="text-xl font-bold mb-4">Restaurant Reviews List</h1>
+      <h1 className="text-xl font-bold mb-4">Dish Reviews List</h1>
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
         {/* Search Field */}
@@ -83,7 +83,7 @@ export default function RestaurantReviewList() {
             <tr className="bg-gray-300  text-left">
               <th className="p-3 whitespace-nowrap">S.No</th>
               <th className="p-3 whitespace-nowrap">User Name</th>
-              <th className="p-3 whitespace-nowrap">Restro Name</th>
+              <th className="p-3 whitespace-nowrap">Dish Name</th>
               <th className="p-3 whitespace-nowrap">Rating Label</th>
               <th className="p-3 whitespace-nowrap">Rating</th>
               <th className="p-3 whitespace-nowrap">Status</th>
@@ -97,12 +97,12 @@ export default function RestaurantReviewList() {
               >
                 <td className="p-3 whitespace-nowrap">{idx + 1}</td>
                 <td className="p-3 whitespace-nowrap">{rev.userName}</td>
-                <td className="p-3 whitespace-nowrap">{rev.restroName}</td>
+                <td className="p-3 whitespace-nowrap">{rev.dishName}</td>
                 <td className="p-3 whitespace-nowrap">{rev.rating_label}</td>
                 <td className="p-3">{renderStars(rev.star_value)}</td>
                 <td className="p-3">
                   <span
-                    className={`inline-block w-24 text-center  px-2 py-1 rounded-full text-xs font-semibold ${
+                    className={`inline-block w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${
                       rev.status === "accepted"
                         ? "bg-green-100 text-green-700"
                         : rev.status === "denied"
