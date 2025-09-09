@@ -2,41 +2,59 @@ import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
-function RestroType() {
-  const [type, setType] = useState("");
+import { useLocation, useNavigate } from "react-router-dom";
 
-  // Handle form submit
+function RestroType() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const editData = location.state || null;
+  const [type, setType] = useState(editData?.name || "");
+  const isEdit = Boolean(editData?.id);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!type) {
       alert("Please enter a type");
+      return;
     }
 
     try {
-      const res = await axios.post(`${BASE_URL}/restro/create-restro-type`, {
-        name: type,
-      });
-      if (res.status === 201 || res.data?.status) {
-        alert(res.data?.message || "Restro-Type created successfully");
-        setType("");
+      if (isEdit) {
+        const res = await axios.patch(
+          `${BASE_URL}/restro/edit-restaurant-type/${editData.id}`,
+          { name: type }
+        );
+
+        if (res.status === 200 || res.data?.status) {
+          alert(res.data?.message || "Updated successfully");
+          navigate("/RestroTypeList");
+        } else {
+          alert(res.data?.message || "Something went wrong");
+        }
       } else {
-        alert(res.data?.message || "Something went wrong");
+        const res = await axios.post(`${BASE_URL}/restro/create-restaurant-type`, {
+          name: type,
+        });
+
+        if (res.status === 201 || res.data?.status) {
+          alert(res.data?.message || "Created successfully");
+          setType("");
+        } else {
+          alert(res.data?.message || "Something went wrong");
+        }
       }
     } catch (error) {
       console.error(error);
-      alert("Error while creating Restro-Type");
+      alert("Error while saving Restaurant Type");
     }
   };
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Add New Icon
-        </h2> */}
-        <PageTitle title={"Restaurant Type"} />
+        <PageTitle title={isEdit ? "Update Restaurant Type" : "Restaurant Type"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
-          {/* Type Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Restaurant Type
@@ -53,14 +71,13 @@ function RestroType() {
             />
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             className="px-6 py-2 rounded-xl bg-orange-500 cursor-pointer font-medium text-white 
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
           >
-            Save
+            {isEdit ? "Update" : "Save"}
           </button>
         </form>
       </div>

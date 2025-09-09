@@ -1,15 +1,23 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function RestroAmenity() {
-  const [iconName, setIconName] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const editData = location.state || null;
+
+  const [iconName, setIconName] = useState(editData?.name || "");
   const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(
+    editData?.icon ? `${BASE_URL.replace(/\/api\/?$/, "/")}${editData.icon}` : null
+  );
   const fileInputRef = useRef(null);
 
-  // Handle file input change
+  const isEdit = Boolean(editData?.id);
+
   const handleFileChange = (e) => {
     const f = e.target.files[0];
     if (f) {
@@ -18,51 +26,66 @@ function RestroAmenity() {
     }
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!iconName || !file) {
-      alert("Please provide both icon name and image");
+    if (!iconName) {
+      alert("Please provide amenity name");
       return;
     }
 
     const formData = new FormData();
     formData.append("amenity_name", iconName);
-    formData.append("amenity_icon", file);
+    if (file) {
+      formData.append("amenity_icon", file);
+    }
 
     try {
-      const res = await axios.post(
-        `${BASE_URL}/restro/create-amenity`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      if (isEdit) {
+        const res = await axios.patch(
+          `${BASE_URL}/restro/edit-amenity/${editData.id}`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
 
-      if (res.status === 201 || res.data?.status) {
-        alert(res.data?.message || "Amenity created successfully");
-        setIconName("");
-        setFile(null);
-        setPreview(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+        if (res.status === 200 || res.data?.status) {
+          alert(res.data?.message || "Amenity updated successfully");
+          navigate("/RestroAmenityList");
+        } else {
+          alert(res.data?.message || "Something went wrong");
         }
       } else {
-        alert(res.data?.message || "Something went wrong");
+        const res = await axios.post(
+          `${BASE_URL}/restro/create-amenity`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+
+        if (res.status === 201 || res.data?.status) {
+          alert(res.data?.message || "Amenity created successfully");
+          setIconName("");
+          setFile(null);
+          setPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        } else {
+          alert(res.data?.message || "Something went wrong");
+        }
       }
     } catch (err) {
       console.error(err);
-      alert("Error while creating amenity");
+      alert("Error while saving amenity");
     }
   };
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        <PageTitle title={"Restaurant Amenity"} />
+        <PageTitle title={isEdit ? "Update Amenity" : "Restaurant Amenity"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
-          {/* Icon Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Icon Name
@@ -79,7 +102,6 @@ function RestroAmenity() {
             />
           </div>
 
-          {/* Icon Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload Icon Image
@@ -94,11 +116,9 @@ function RestroAmenity() {
                  file:border-0 file:bg-orange-500 file:px-4 file:py-2 file:text-white 
                  file:cursor-pointer hover:file:bg-orange-600 focus:ring-2 
                  focus:ring-orange-300 transition"
-              required
             />
           </div>
 
-          {/* Preview */}
           {preview && (
             <div className="mt-4">
               <p className="text-sm text-gray-500 mb-2">Preview:</p>
@@ -110,7 +130,6 @@ function RestroAmenity() {
             </div>
           )}
 
-          {/* Submit */}
           <div className="flex justify-end">
             <button
               type="submit"
@@ -118,7 +137,7 @@ function RestroAmenity() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              Save Icon
+              {isEdit ? "Update Amenity" : "Save Icon"}
             </button>
           </div>
         </form>

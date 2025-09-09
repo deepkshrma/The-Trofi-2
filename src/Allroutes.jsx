@@ -57,9 +57,13 @@ const Allroutes = () => {
             <Route path="/RestroList" element={<RestroList />} />
             <Route path="/UserProfile" element={<UserProfile />} />
             <Route path="/RestroAmenity" element={<RestroAmenity />} />
+            <Route path="/RestroAmenity/:id" element={<RestroAmenity />} />
             <Route path="/RestroType" element={<RestroType />} />
+            <Route path="/RestroType/:id" element={<RestroType />} />
             <Route path="/RestroGoodFor" element={<RestroGoodFor />} />
+            <Route path="/RestroGoodFor/:id" element={<RestroGoodFor />} />
             <Route path="/RestroCuisine" element={<RestroCuisine />} />
+            <Route path="/RestroCuisine/:id" element={<RestroCuisine />} />
             <Route path="/RestroAmenityList" element={<RestroAmenityList />} />
             <Route path="/RestroTypeList" element={<RestroTypeList />} />
             <Route path="/RestroCuisineList" element={<RestroCuisineList />} />

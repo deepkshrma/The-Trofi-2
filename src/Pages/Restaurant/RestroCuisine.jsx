@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function RestroCuisine() {
+  const { id } = useParams(); // check if edit mode
+  const location = useLocation();
   const [cuisine, setCuisine] = useState("");
+  const navigate = useNavigate();
+
+  // Prefill if edit mode
+  useEffect(() => {
+    if (id && location.state?.name) {
+      setCuisine(location.state.name);
+    }
+  }, [id, location]);
 
   // Handle form submit
   const handleSubmit = async (e) => {
@@ -16,28 +28,38 @@ function RestroCuisine() {
     }
 
     try {
-      const res = await axios.post(`${BASE_URL}/restro/create-cusine`, {
-        name: cuisine,
-      });
+      let res;
+      if (id) {
+        // Update mode
+        res = await axios.patch(`${BASE_URL}/restro/edit-cusine/${id}`, {
+          name: cuisine,
+        });
+      } else {
+        // Create mode
+        res = await axios.post(`${BASE_URL}/restro/create-cusine`, {
+          name: cuisine,
+        });
+      }
 
-      if (res.status === 201 || res.data?.status) {
-        alert(res.data?.message || "Cuisine created successfully");
-        setCuisine("");
+      if (res.status === 200 || res.status === 201 || res.data?.status) {
+        alert(res.data?.message || (id ? "Cuisine updated" : "Cuisine created"));
+        if (!id) setCuisine(""); // clear only in create
+        navigate('/RestroCuisineList')
       } else {
         alert(res.data?.message || "Something went wrong");
       }
     } catch (err) {
       console.error(err);
-      alert("Error while creating cuisine");
+      alert("Error while saving cuisine");
     }
   };
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        <PageTitle title={"Restaurant Cuisine"} />
+        <PageTitle title={id ? "Update Cuisine" : "Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
-          {/* Icon Name */}
+          {/* Cuisine Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Restaurant Cuisine
@@ -61,7 +83,7 @@ function RestroCuisine() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
           >
-            Save
+            {id ? "Update" : "Save"}
           </button>
         </form>
       </div>
