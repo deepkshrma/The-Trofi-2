@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
-import LocationPicker from "./LocationPicker";
+import LocationPicker from "../../components/LocationPicker/LocationPicker";
 
-function RestroAdd({ address, onChange }) {
+function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
     name: "",
     type: "",
@@ -14,19 +14,22 @@ function RestroAdd({ address, onChange }) {
     facilities: [],
     dishes: [],
     hygieneStatus: "",
+    food_type:"",
     email: "",
     password: "",
     birthYear: "",
     openingTime: "",
     closingTime: "",
     openDays: [],
+    latitude: null, // ✅ added
+    longitude: null, // ✅ added
   });
 
   const [gallery, setGallery] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
   const [menuFiles, setMenuFiles] = useState([]);
 
-  const facilityOptions = ["Wi-Fi", "Parking", "AC", "Delivery"];
+  // const facilityOptions = ['veg', 'non-veg', 'both'];
 
   const handleChange = (e) => {
     setRestaurantData({
@@ -35,14 +38,14 @@ function RestroAdd({ address, onChange }) {
     });
   };
 
-  const handleFacilityToggle = (facility) => {
-    setRestaurantData((prev) => {
-      const facilities = prev.facilities.includes(facility)
-        ? prev.facilities.filter((f) => f !== facility)
-        : [...prev.facilities, facility];
-      return { ...prev, facilities };
-    });
-  };
+  // const handleFacilityToggle = (facility) => {
+  //   setRestaurantData((prev) => {
+  //     const facilities = prev.facilities.includes(facility)
+  //       ? prev.facilities.filter((f) => f !== facility)
+  //       : [...prev.facilities, facility];
+  //     return { ...prev, facilities };
+  //   });
+  // };
 
   const handleDishAdd = () => {
     setRestaurantData({
@@ -60,6 +63,45 @@ function RestroAdd({ address, onChange }) {
         },
       ],
     });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("restro_name", restaurantData.name);
+      formData.append("email", restaurantData.email);
+      formData.append("password", restaurantData.password);
+      formData.append("address", restaurantData.address);
+      formData.append("city", restaurantData.city);
+      formData.append("state", restaurantData.state);
+      formData.append("latitude", restaurantData.latitude);
+      formData.append("longitude", restaurantData.longitude);
+      formData.append("description", restaurantData.description);
+      formData.append("hygiene_status", restaurantData.hygieneStatus);
+      formData.append("food_type", restaurantData.food_type);
+
+      // ✅ restaurant images
+      gallery.forEach((file) => formData.append("restaurant_images", file));
+      if (profileImage) formData.append("restaurant_images", profileImage);
+
+      // ✅ menu images
+      menuFiles.forEach((file) =>
+        formData.append("restaurant_menu_images", file)
+      );
+
+      const response = await fetch(
+        "http://trofi-backend.apponedemo.top/api/restro/create-restaurant",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+      console.log("Restaurant Created:", result);
+    } catch (err) {
+      console.error("Error:", err);
+    }
   };
 
   return (
@@ -197,34 +239,31 @@ function RestroAdd({ address, onChange }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           {/* Facilities */}
           <div>
-            <h3 className="font-medium ">Facilities Available:</h3>
-            <div className="flex gap-3 flex-wrap">
-              {facilityOptions.map((facility) => {
-                const isActive = restaurantData.facilities.includes(facility);
-                return (
-                  <button
-                    key={facility}
-                    type="button"
-                    onClick={() => handleFacilityToggle(facility)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
-        ${
-          isActive
-            ? "bg-[#F9832B] text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-        }`}
-                  >
-                    {facility}
-                  </button>
-                );
-              })}
+            <div>
+            <label className="block mb-2 font-medium">Food Type</label>
+            <div className="flex gap-4">
+              {["veg", "non-veg" , "both"].map((status) => (
+                <label key={status} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="food_type"
+                    value={status}
+                    checked={restaurantData.food_type === status}
+                    onChange={handleChange}
+                    className="accent-[#F9832B]"
+                  />
+                  {status}
+                </label>
+              ))}
             </div>
+          </div>
           </div>
 
           {/* hygiene status */}
           <div>
             <label className="block mb-2 font-medium">Hygiene Status</label>
             <div className="flex gap-4">
-              {["Excellent", "Good", "Average", "Poor"].map((status) => (
+              {["hygiene", "general"].map((status) => (
                 <label key={status} className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -328,7 +367,7 @@ function RestroAdd({ address, onChange }) {
         </div>
       </div>
 
-      {/*  Location Info */}
+      {/* Location Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
@@ -336,6 +375,7 @@ function RestroAdd({ address, onChange }) {
         >
           <MapPin size={20} /> Location Details
         </h2>
+
         <input
           type="text"
           name="address"
@@ -344,6 +384,7 @@ function RestroAdd({ address, onChange }) {
           onChange={handleChange}
           className="w-full border border-gray-300 p-3 rounded-lg shadow-sm mb-3 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
           <input
             type="text"
@@ -363,16 +404,24 @@ function RestroAdd({ address, onChange }) {
           />
         </div>
 
-        {/* Map Picker */}
-        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
-          <LocationPicker address={restaurantData.address} />
-        </div>
-        {/* {restaurantData.latitude && restaurantData.longitude && (
+        {/* ✅ Interactive Map */}
+        <LocationPicker
+          onLocationSelect={({ lat, lng }) =>
+            setRestaurantData({
+              ...restaurantData,
+              latitude: lat,
+              longitude: lng,
+            })
+          }
+        />
+
+        {/* Show selected lat/lng */}
+        {restaurantData.latitude && restaurantData.longitude && (
           <p className="mt-3 text-gray-700">
             📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
             {restaurantData.longitude.toFixed(5)}
           </p>
-        )} */}
+        )}
       </div>
 
       {/*  Menu Details */}
