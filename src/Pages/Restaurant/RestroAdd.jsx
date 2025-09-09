@@ -1,47 +1,98 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
-import LocationPicker from "./LocationPicker";
+import LocationPicker from "../../components/LocationPicker/LocationPicker";
 
-function RestroAdd({ address, onChange }) {
+const BASE_URL = "http://trofi-backend.apponedemo.top/api";
+
+function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
     name: "",
-    type: "",
-    description: "",
-    address: "",
-    city: "",
-    state: "",
-    facilities: [],
-    dishes: [],
-    hygieneStatus: "",
     email: "",
     password: "",
+    role_id: "68aead7b9db7925a61de75bb",
+    address: "",
+    country_code: "",
+    phone: "",
     birthYear: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "India",
+    latitude: null,
+    longitude: null,
+    food_type: "both",
+    description: "",
+    longDescription: "",
+    hygieneStatus: "general",
     openingTime: "",
     closingTime: "",
     openDays: [],
+    dish_type: [],
+    restaurant_type: [],
+    good_for: [],
+    cuisines: [],
+    amenities: [],
   });
 
-  const [gallery, setGallery] = useState([]);
-  const [profileImage, setProfileImage] = useState(null);
-  const [menuFiles, setMenuFiles] = useState([]);
+  const [dishTypes, setDishTypes] = useState([]);
+  const [cuisines, setCuisines] = useState([]);
+  const [goodFors, setGoodFors] = useState([]);
+  const [restroTypes, setRestroTypes] = useState([]);
+  const [amenities, setAmenities] = useState([]);
 
-  const facilityOptions = ["Wi-Fi", "Parking", "AC", "Delivery"];
+  const [gallery, setGallery] = useState([]);
+  const [menuFiles, setMenuFiles] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+
+  // const facilityOptions = ['veg', 'non-veg', 'both'];
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const endpoints = [
+          "restro/get-dish-type",
+          "restro/get-cusine",
+          "restro/get-good-for",
+          "restro/get-restaurant-types",
+          "restro/get-amenity",
+        ];
+
+        const [dishRes, cuisineRes, goodForRes, restroTypeRes, amenityRes] =
+          await Promise.all(
+            endpoints.map((ep) =>
+              fetch(`${BASE_URL}/${ep}`).then((res) => res.json())
+            )
+          );
+
+        setDishTypes(dishRes.data || []);
+        setCuisines(cuisineRes.data || []);
+        setGoodFors(goodForRes.data || []);
+        setRestroTypes(restroTypeRes.data || []);
+        setAmenities(amenityRes.data || []);
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
 
   const handleChange = (e) => {
-    setRestaurantData({
-      ...restaurantData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setRestaurantData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFacilityToggle = (facility) => {
-    setRestaurantData((prev) => {
-      const facilities = prev.facilities.includes(facility)
-        ? prev.facilities.filter((f) => f !== facility)
-        : [...prev.facilities, facility];
-      return { ...prev, facilities };
-    });
+  const handleArrayChange = (e, field) => {
+    const values = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
+    setRestaurantData((prev) => ({ ...prev, [field]: values }));
   };
 
   const handleDishAdd = () => {
@@ -61,6 +112,83 @@ function RestroAdd({ address, onChange }) {
       ],
     });
   };
+
+  const handleSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("role_id", restaurantData.role_id);
+      formData.append("restro_name", restaurantData.name);
+      formData.append("email", restaurantData.email);
+      formData.append("password", restaurantData.password);
+      formData.append("address", restaurantData.address);
+      formData.append("postalCode", restaurantData.postalCode);
+      formData.append("country", restaurantData.country);
+      formData.append("country_code", restaurantData.country_code);
+      formData.append("phone", restaurantData.phone);
+      formData.append("birth_year", restaurantData.birthYear);
+      formData.append("city", restaurantData.city || "");
+      formData.append("state", restaurantData.state || "");
+      formData.append("latitude", restaurantData.latitude);
+      formData.append("longitude", restaurantData.longitude);
+      formData.append("food_type", restaurantData.food_type);
+      formData.append("description", restaurantData.description || "");
+      formData.append("long_description", restaurantData.longDescription || "");
+      formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
+      formData.append(
+        "restaurant_type",
+        JSON.stringify(restaurantData.restaurant_type)
+      );
+      formData.append("good_for", JSON.stringify(restaurantData.good_for));
+      formData.append("cuisines", JSON.stringify(restaurantData.cuisines));
+      formData.append("amenities", JSON.stringify(restaurantData.amenities));
+
+      formData.append(
+        "hygiene_status",
+        restaurantData.hygieneStatus || "general"
+      );
+      if (restaurantData.openingTime && restaurantData.closingTime) {
+        formData.append(
+          "time",
+          `${restaurantData.openingTime} to ${restaurantData.closingTime}`
+        );
+      }
+      if (restaurantData.openDays.length > 0) {
+        formData.append("days", restaurantData.openDays.join(", "));
+      }
+
+      // restaurantData.dish_type.forEach((id) =>
+      //   formData.append("dish_type", id)
+      // );
+      // restaurantData.restaurant_type.forEach((id) =>
+      //   formData.append("restaurant_type", id)
+      // );
+      // restaurantData.good_for.forEach((id) => formData.append("good_for", id));
+      // restaurantData.cuisines.forEach((id) => formData.append("cuisines", id));
+      // restaurantData.amenities.forEach((id) =>
+      //   formData.append("amenities", id)
+      // );
+
+      gallery.forEach((file) => formData.append("restaurant_images", file));
+      if (profileImage) {
+        formData.append("restaurant_images", profileImage);
+      }
+      menuFiles.forEach((file) =>
+        formData.append("restaurant_menu_images", file)
+      );
+
+      const response = await fetch(`${BASE_URL}/restro/create-restaurant`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log("Restaurant Created:", result);
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
+
+  if (loading) return <p>Loading options...</p>;
 
   return (
     <div className="main main_page p-6 min-h-screen  duration-900">
@@ -92,8 +220,37 @@ function RestroAdd({ address, onChange }) {
             onChange={handleChange}
             className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Role
+          </label>
+          <select
+            name="role_id"
+            value={restaurantData.role_id}
+            onChange={handleChange}
+            className="input-field"
+          >
+            <option value="68aead7b9db7925a61de75bb">Admin</option>
+            {/* You can add more static roles here if needed */}
+          </select>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            type="text"
+            name="country_code"
+            placeholder="Country Code"
+            value={restaurantData.country_code}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm"
+          />
+
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone Number"
+            value={restaurantData.phone}
+            onChange={handleChange}
+            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm"
+          />
           <input
             type="text"
             name="name"
@@ -102,14 +259,14 @@ function RestroAdd({ address, onChange }) {
             onChange={handleChange}
             className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
-          <input
+          {/* <input
             type="text"
             name="type"
             placeholder="Restaurant Type (e.g., Cafe, Bakery)"
-            value={restaurantData.type}
+            value={restaurantData.restaurant_type}
             onChange={handleChange}
             className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          />
+          /> */}
         </div>
         <textarea
           name="description"
@@ -197,26 +354,23 @@ function RestroAdd({ address, onChange }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           {/* Facilities */}
           <div>
-            <h3 className="font-medium ">Facilities Available:</h3>
-            <div className="flex gap-3 flex-wrap">
-              {facilityOptions.map((facility) => {
-                const isActive = restaurantData.facilities.includes(facility);
-                return (
-                  <button
-                    key={facility}
-                    type="button"
-                    onClick={() => handleFacilityToggle(facility)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
-        ${
-          isActive
-            ? "bg-[#F9832B] text-white"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-        }`}
-                  >
-                    {facility}
-                  </button>
-                );
-              })}
+            <div>
+              <label className="block mb-2 font-medium">Food Type</label>
+              <div className="flex gap-4">
+                {["veg", "non-veg", "both"].map((status) => (
+                  <label key={status} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="food_type"
+                      value={status}
+                      checked={restaurantData.food_type === status}
+                      onChange={handleChange}
+                      className="accent-[#F9832B]"
+                    />
+                    {status}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -224,7 +378,7 @@ function RestroAdd({ address, onChange }) {
           <div>
             <label className="block mb-2 font-medium">Hygiene Status</label>
             <div className="flex gap-4">
-              {["Excellent", "Good", "Average", "Poor"].map((status) => (
+              {["hygiene", "general"].map((status) => (
                 <label key={status} className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -327,8 +481,66 @@ function RestroAdd({ address, onChange }) {
           </div>
         </div>
       </div>
+      <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
+        <h2
+          className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
+          style={{ color: "#F9832B" }}
+        >
+          <PlusCircle size={20} /> Additional Details
+        </h2>
 
-      {/*  Location Info */}
+        {/* Helper function for rendering selection buttons */}
+        {[
+          { label: "Dish Type", field: "dish_type", options: dishTypes },
+          { label: "Cuisines", field: "cuisines", options: cuisines },
+          { label: "Good For", field: "good_for", options: goodFors },
+          {
+            label: "Restaurant Type",
+            field: "restaurant_type",
+            options: restroTypes,
+          },
+          { label: "Amenities", field: "amenities", options: amenities },
+        ].map(({ label, field, options }) => (
+          <div key={field} className="mb-6">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              {label}
+            </label>
+            <div className="flex gap-3 flex-wrap">
+              {options.map((item) => {
+                const isSelected = restaurantData[field].includes(item._id);
+                return (
+                  <button
+                    key={item._id}
+                    type="button"
+                    onClick={() =>
+                      setRestaurantData((prev) => {
+                        const updatedArray = isSelected
+                          ? prev[field].filter((id) => id !== item._id)
+                          : [...prev[field], item._id];
+                        return { ...prev, [field]: updatedArray };
+                      })
+                    }
+                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition ${
+                      isSelected
+                        ? "bg-[#F9832B] text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {item.name ||
+                      item.amenity_name ||
+                      item.cuisine_name ||
+                      item.good_for_name ||
+                      item.restaurant_type_name ||
+                      "Unnamed"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Location Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
@@ -336,6 +548,7 @@ function RestroAdd({ address, onChange }) {
         >
           <MapPin size={20} /> Location Details
         </h2>
+
         <input
           type="text"
           name="address"
@@ -344,6 +557,7 @@ function RestroAdd({ address, onChange }) {
           onChange={handleChange}
           className="w-full border border-gray-300 p-3 rounded-lg shadow-sm mb-3 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
         />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
           <input
             type="text"
@@ -362,17 +576,35 @@ function RestroAdd({ address, onChange }) {
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
         </div>
-
-        {/* Map Picker */}
-        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
-          <LocationPicker address={restaurantData.address} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+          <input
+            type="text"
+            name="postalCode"
+            placeholder="Postal Code"
+            value={restaurantData.postalCode}
+            onChange={handleChange}
+            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+          />
         </div>
-        {/* {restaurantData.latitude && restaurantData.longitude && (
+
+        {/* ✅ Interactive Map */}
+        <LocationPicker
+          onLocationSelect={({ lat, lng }) =>
+            setRestaurantData({
+              ...restaurantData,
+              latitude: lat,
+              longitude: lng,
+            })
+          }
+        />
+
+        {/* Show selected lat/lng */}
+        {restaurantData.latitude && restaurantData.longitude && (
           <p className="mt-3 text-gray-700">
             📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
             {restaurantData.longitude.toFixed(5)}
           </p>
-        )} */}
+        )}
       </div>
 
       {/*  Menu Details */}
@@ -436,7 +668,7 @@ function RestroAdd({ address, onChange }) {
         </div>
 
         {/* Dish Form */}
-        <div className="flex justify-between items-center mb-4">
+        {/* <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium text-gray-700">Dishes</h3>
           <button
             onClick={handleDishAdd}
@@ -445,14 +677,14 @@ function RestroAdd({ address, onChange }) {
           >
             <PlusCircle size={18} /> Add Dish
           </button>
-        </div>
+        </div> */}
 
-        {restaurantData.dishes.map((dish, index) => (
+        {/* {restaurantData.dishes.map((dish, index) => (
           <div
             key={index}
             className="border border-gray-300 p-4 rounded-lg mb-4 bg-gray-50 shadow-md"
           >
-            {/* Dish Fields */}
+          
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
               <input
                 type="text"
@@ -469,7 +701,7 @@ function RestroAdd({ address, onChange }) {
                 className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               />
 
-              {/* Dish Type */}
+              
               <select
                 value={dish.type}
                 onChange={(e) => {
@@ -488,7 +720,7 @@ function RestroAdd({ address, onChange }) {
               </select>
             </div>
 
-            {/* Spice + Price */}
+          
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
               <select
                 value={dish.spiceLevel}
@@ -522,7 +754,7 @@ function RestroAdd({ address, onChange }) {
               />
             </div>
 
-            {/* Image + Availability */}
+           
             <label className="block mb-1">Dish Image</label>
             <input
               type="file"
@@ -552,7 +784,7 @@ function RestroAdd({ address, onChange }) {
               Available
             </label>
 
-            {/* Footer with Remove Button */}
+           
             <div className="flex justify-end">
               <button
                 onClick={() => {
@@ -570,7 +802,7 @@ function RestroAdd({ address, onChange }) {
               </button>
             </div>
           </div>
-        ))}
+        ))} */}
       </div>
 
       {/* Submit */}
@@ -578,6 +810,7 @@ function RestroAdd({ address, onChange }) {
         <button
           className="text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
           style={{ backgroundColor: "#F9832B" }}
+          onClick={handleSubmit}
         >
           Save Restaurant
         </button>
