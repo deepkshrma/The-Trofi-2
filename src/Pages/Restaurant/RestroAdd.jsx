@@ -203,62 +203,87 @@ function RestroAdd() {
           <Utensils size={20} /> Basic Information
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            value={restaurantData.email}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          />
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={restaurantData.email}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={restaurantData.password}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          />
-          <label className="block mb-2 text-sm font-medium text-gray-700">
-            Role
-          </label>
-          <select
-            name="role_id"
-            value={restaurantData.role_id}
-            onChange={handleChange}
-            className="input-field"
-          >
-            <option value="68aead7b9db7925a61de75bb">Admin</option>
-            {/* You can add more static roles here if needed */}
-          </select>
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              value={restaurantData.password}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          {" "}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Restaurant Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={restaurantData.name}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">Role</label>
+            <select
+              name="role_id"
+              value={restaurantData.role_id}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring focus:ring-orange-400 focus:border-[#F9832B] transition bg-white"
+            >
+              <option value="68aead7b9db7925a61de75bb">Admin</option>
+              {/* You can add more static roles here if needed */}
+            </select>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="country_code"
-            placeholder="Country Code"
-            value={restaurantData.country_code}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm"
-          />
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Country Code
+            </label>
+            <input
+              type="text"
+              name="country_code"
+              value={restaurantData.country_code}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
 
-          <input
-            type="text"
-            name="phone"
-            placeholder="Phone Number"
-            value={restaurantData.phone}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm"
-          />
-          <input
-            type="text"
-            name="name"
-            placeholder="Restaurant Name"
-            value={restaurantData.name}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          />
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Phone Number
+            </label>
+            <input
+              type="text"
+              name="phone"
+              value={restaurantData.phone}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
+
           {/* <input
             type="text"
             name="type"
@@ -268,32 +293,98 @@ function RestroAdd() {
             className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           /> */}
         </div>
-        <textarea
-          name="description"
-          placeholder="About the restaurant..."
-          value={restaurantData.description}
-          onChange={handleChange}
-          className="w-full border border-gray-300 p-3 rounded-lg shadow-sm mt-4 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          rows="4"
-        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Short Description
+            </label>
+            <textarea
+              name="description"
+              placeholder="About the restaurant..."
+              value={restaurantData.description}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm  focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              rows="4"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Long Description
+            </label>
+            <textarea
+              name="description"
+              placeholder="About the restaurant..."
+              value={restaurantData.description}
+              onChange={handleChange}
+              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm  focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              rows="4"
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mb-6">
           {/* Profile Image */}
           <div>
-            <label className="block mb-2 font-medium">
-              Profile Image / Logo
+            {/* Menu Upload */}
+            <label className="block mb-2 font-medium text-gray-600">
+              Upload Menu (PDF/Images)
             </label>
             <input
+              id="menuInput"
               type="file"
-              accept="image/*"
-              onChange={(e) => setProfileImage(e.target.files[0])}
-              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-gray-50"
+              accept="image/*,.pdf"
+              multiple
+              onChange={(e) =>
+                setMenuFiles((prev) => [...prev, ...Array.from(e.target.files)])
+              }
+              className="hidden"
             />
+            <button
+              type="button"
+              onClick={() => document.getElementById("menuInput").click()}
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+            >
+              Choose Images
+            </button>
+            <div className="flex gap-4 flex-wrap mt-4">
+              {menuFiles.map((file, idx) => (
+                <div
+                  key={idx}
+                  className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
+                >
+                  {/* File name */}
+                  <p className="text-xs text-gray-700 truncate mb-1">
+                    {file.name}
+                  </p>
+
+                  {/* Image preview */}
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`menu-${idx}`}
+                    className="w-20 h-20 object-cover rounded-md border mx-auto"
+                  />
+
+                  {/* Remove button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Gallery */}
           <div>
-            <label className="block mb-2 font-medium">Gallery Uploads</label>
+            <label className="block mb-2 font-medium text-gray-600">
+              Gallery Uploads
+            </label>
 
             {/* Hidden file input */}
             <input
@@ -355,10 +446,15 @@ function RestroAdd() {
           {/* Facilities */}
           <div>
             <div>
-              <label className="block mb-2 font-medium">Food Type</label>
+              <label className="block mb-2 font-medium text-gray-600">
+                Food Type
+              </label>
               <div className="flex gap-4">
                 {["veg", "non-veg", "both"].map((status) => (
-                  <label key={status} className="flex items-center gap-2">
+                  <label
+                    key={status}
+                    className="flex items-center gap-2 text-gray-600"
+                  >
                     <input
                       type="radio"
                       name="food_type"
@@ -376,10 +472,15 @@ function RestroAdd() {
 
           {/* hygiene status */}
           <div>
-            <label className="block mb-2 font-medium">Hygiene Status</label>
+            <label className="block mb-2 font-medium text-gray-600">
+              Hygiene Status
+            </label>
             <div className="flex gap-4">
               {["hygiene", "general"].map((status) => (
-                <label key={status} className="flex items-center gap-2">
+                <label
+                  key={status}
+                  className="flex items-center gap-2 text-gray-600"
+                >
                   <input
                     type="radio"
                     name="hygieneStatus"
@@ -397,16 +498,21 @@ function RestroAdd() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="birthYear" className="block mb-1 font-medium">
+            <label
+              htmlFor="birthYear"
+              className="block mb-1 font-medium text-gray-600"
+            >
               Select Birth Year
             </label>
             <select
               name="birthYear"
               value={restaurantData.birthYear}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3.5 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              className="w-full border border-gray-300 p-3.5 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             >
-              <option value="">Select Year</option>
+              <option value="" className="text-gray-600">
+                Select Year
+              </option>
               {Array.from(
                 { length: 150 },
                 (_, i) => new Date().getFullYear() - i
@@ -420,30 +526,36 @@ function RestroAdd() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block mb-1 font-medium">Opening Time</label>
+              <label className="block mb-1 font-medium text-gray-600">
+                Opening Time
+              </label>
               <input
                 type="time"
                 name="openingTime"
                 value={restaurantData.openingTime}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               />
             </div>
             <div>
-              <label className="block mb-1 font-medium">Closing Time</label>
+              <label className="block mb-1 font-medium text-gray-600">
+                Closing Time
+              </label>
               <input
                 type="time"
                 name="closingTime"
                 value={restaurantData.closingTime}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               />
             </div>
           </div>
         </div>
 
         <div className="mt-8">
-          <label className="block mb-2 font-medium">Open Days</label>
+          <label className="block mb-2 font-medium text-gray-600">
+            Open Days
+          </label>
           <div className="flex gap-3 flex-wrap">
             {[
               "Monday",
@@ -501,8 +613,11 @@ function RestroAdd() {
           },
           { label: "Amenities", field: "amenities", options: amenities },
         ].map(({ label, field, options }) => (
-          <div key={field} className="mb-6">
-            <label className="block mb-2 text-sm font-medium text-gray-700">
+          <div
+            key={field}
+            className="mb-6 shadow-xl p-3 rounded-lg bg-gray-100"
+          >
+            <label className="block mb-2 text-lg font-bold text-gray-700">
               {label}
             </label>
             <div className="flex gap-3 flex-wrap">
@@ -558,7 +673,7 @@ function RestroAdd() {
           className="w-full border border-gray-300 p-3 rounded-lg shadow-sm mb-3 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
           <input
             type="text"
             name="city"
@@ -575,8 +690,6 @@ function RestroAdd() {
             onChange={handleChange}
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
           <input
             type="text"
             name="postalCode"
@@ -586,17 +699,20 @@ function RestroAdd() {
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>
 
         {/* ✅ Interactive Map */}
-        <LocationPicker
-          onLocationSelect={({ lat, lng }) =>
-            setRestaurantData({
-              ...restaurantData,
-              latitude: lat,
-              longitude: lng,
-            })
-          }
-        />
+        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+          <LocationPicker
+            onLocationSelect={({ lat, lng }) =>
+              setRestaurantData({
+                ...restaurantData,
+                latitude: lat,
+                longitude: lng,
+              })
+            }
+          />
+        </div>
 
         {/* Show selected lat/lng */}
         {restaurantData.latitude && restaurantData.longitude && (
@@ -605,204 +721,6 @@ function RestroAdd() {
             {restaurantData.longitude.toFixed(5)}
           </p>
         )}
-      </div>
-
-      {/*  Menu Details */}
-      <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
-        <h2
-          className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
-          style={{ color: "#F9832B" }}
-        >
-          <Upload size={20} /> Menu Details
-        </h2>
-
-        {/* Menu Upload */}
-        <label className="block mb-2 font-medium">
-          Upload Menu (PDF/Images)
-        </label>
-        <input
-          id="menuInput"
-          type="file"
-          accept="image/*,.pdf"
-          multiple
-          onChange={(e) =>
-            setMenuFiles((prev) => [...prev, ...Array.from(e.target.files)])
-          }
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => document.getElementById("menuInput").click()}
-          className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
-        >
-          Choose Images
-        </button>
-        <div className="flex gap-4 flex-wrap mt-4">
-          {menuFiles.map((file, idx) => (
-            <div
-              key={idx}
-              className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
-            >
-              {/* File name */}
-              <p className="text-xs text-gray-700 truncate mb-1">{file.name}</p>
-
-              {/* Image preview */}
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`menu-${idx}`}
-                className="w-20 h-20 object-cover rounded-md border mx-auto"
-              />
-
-              {/* Remove button */}
-              <button
-                type="button"
-                onClick={() =>
-                  setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
-                }
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Dish Form */}
-        {/* <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium text-gray-700">Dishes</h3>
-          <button
-            onClick={handleDishAdd}
-            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg"
-            style={{ backgroundColor: "#F9832B" }}
-          >
-            <PlusCircle size={18} /> Add Dish
-          </button>
-        </div> */}
-
-        {/* {restaurantData.dishes.map((dish, index) => (
-          <div
-            key={index}
-            className="border border-gray-300 p-4 rounded-lg mb-4 bg-gray-50 shadow-md"
-          >
-          
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-              <input
-                type="text"
-                placeholder="Dish Name"
-                value={dish.name}
-                onChange={(e) => {
-                  const updatedDishes = [...restaurantData.dishes];
-                  updatedDishes[index].name = e.target.value;
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              />
-
-              
-              <select
-                value={dish.type}
-                onChange={(e) => {
-                  const updatedDishes = [...restaurantData.dishes];
-                  updatedDishes[index].type = e.target.value;
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-white text-gray-700 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              >
-                <option>Veg</option>
-                <option>Non-Veg</option>
-                <option>Vegan</option>
-              </select>
-            </div>
-
-          
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-              <select
-                value={dish.spiceLevel}
-                onChange={(e) => {
-                  const updatedDishes = [...restaurantData.dishes];
-                  updatedDishes[index].spiceLevel = e.target.value;
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-white text-gray-700 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              >
-                <option>Normal</option>
-                <option>Spicy</option>
-                <option>Extra Spicy</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Price"
-                value={dish.price}
-                onChange={(e) => {
-                  const updatedDishes = [...restaurantData.dishes];
-                  updatedDishes[index].price = e.target.value;
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              />
-            </div>
-
-           
-            <label className="block mb-1">Dish Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const updatedDishes = [...restaurantData.dishes];
-                updatedDishes[index].image = e.target.files[0];
-                setRestaurantData({ ...restaurantData, dishes: updatedDishes });
-              }}
-              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm bg-gray-50 mb-2"
-            />
-
-            <label className="flex items-center gap-2 mb-3">
-              <input
-                type="checkbox"
-                checked={dish.available}
-                onChange={() => {
-                  const updatedDishes = [...restaurantData.dishes];
-                  updatedDishes[index].available =
-                    !updatedDishes[index].available;
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-              />
-              Available
-            </label>
-
-           
-            <div className="flex justify-end">
-              <button
-                onClick={() => {
-                  const updatedDishes = restaurantData.dishes.filter(
-                    (_, i) => i !== index
-                  );
-                  setRestaurantData({
-                    ...restaurantData,
-                    dishes: updatedDishes,
-                  });
-                }}
-                className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition"
-              >
-                Remove Dish
-              </button>
-            </div>
-          </div>
-        ))} */}
       </div>
 
       {/* Submit */}
