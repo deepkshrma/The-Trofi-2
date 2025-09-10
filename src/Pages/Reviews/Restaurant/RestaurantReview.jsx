@@ -1,7 +1,144 @@
-import React from "react";
+// src/pages/Reviews/ReviewDetail.jsx
+import React, { useState } from "react";
+import { Star, CheckCircle, XCircle } from "lucide-react";
+import star1 from "../../../assets/images/untitled_folder_6/star1.png";
+import star2 from "../../../assets/images/untitled_folder_6/star2.png";
+import star3 from "../../../assets/images/untitled_folder_6/star3.png";
+import star4 from "../../../assets/images/untitled_folder_6/star4.png";
+import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 
 function RestaurantReview() {
-  return <div>RestaurantReview</div>;
+  const review = {
+    restaurantImage:
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
+    restroName: "Taj Palace",
+    rating_label: "Excellent experience!",
+    star_value: 5,
+    comment:
+      "The food was delicious, ambiance was wonderful, and service was top-notch. Definitely visiting again!",
+    qa: [
+      { question: "Was the food served hot?", answer: "Yes, perfectly hot." },
+      { question: "Would you recommend us to others?", answer: "Absolutely!" },
+    ],
+    images: [
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
+    ],
+  };
+
+  const faceStars = [
+    {
+      img: star1,
+      label: "Very Bad",
+    },
+    { img: star2, label: "Bad" },
+    { img: star3, label: "Okay" },
+    {
+      img: star4,
+      label: "Good",
+    },
+    {
+      img: star5,
+      label: "Excellent",
+    },
+  ];
+
+  const [approvedImages, setApprovedImages] = useState([]);
+
+  const handleImageAction = (img, action) => {
+    if (action === "approve") {
+      setApprovedImages((prev) => [...prev, img]);
+    } else {
+      setApprovedImages((prev) => prev.filter((i) => i !== img));
+    }
+  };
+
+  return (
+    <div className="main main_page p-6 space-y-8">
+      {/*  Restaurant Info */}
+      <div className="bg-white p-6 rounded-xl shadow-lg flex gap-6">
+        <img
+          src={review.restaurantImage}
+          alt={review.restroName}
+          className="w-40 h-32 object-cover rounded-lg"
+        />
+        <div className="flex flex-col justify-center">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {review.restroName}
+          </h2>
+          <p className="text-gray-600 mb-2">
+            {faceStars[review.star_value - 1].label}
+          </p>
+          <div className="flex gap-2">
+            {faceStars.map((face, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <img
+                  src={face.img}
+                  alt={face.label}
+                  className={`w-8 h-8 ${
+                    index < review.star_value ? "" : "opacity-30"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/*  Review Comment */}
+      <div className="bg-white p-6 rounded-xl shadow-lg ">
+        <h3 className="text-lg font-semibold mb-3">Review Comment</h3>
+        <p className="text-gray-700 italic">{review.comment}</p>
+      </div>
+
+      {/*  Q&A Section */}
+      <div className="bg-white p-6 rounded-xl shadow-lg">
+        <h3 className="text-lg font-semibold mb-3">Q&A</h3>
+        <div className="space-y-3">
+          {review.qa.map((item, idx) => (
+            <div key={idx} className="border-b border-gray-300 pb-2">
+              <p className="font-medium text-gray-800">Q: {item.question}</p>
+              <p className="text-gray-600">A: {item.answer}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/*  Review Images */}
+      <div className="bg-white p-6 rounded-xl shadow-lg">
+        <h3 className="text-lg font-semibold mb-4">Review Images</h3>
+        <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+          {review.images.map((img, idx) => (
+            <div
+              key={idx}
+              className="relative  rounded-lg overflow-hidden shadow-lg p-3"
+            >
+              <img
+                src={img}
+                alt={`review-${idx}`}
+                className="w-1/4 h-40 object-cover"
+              />
+              <div className="absolute bottom-2 left-2 flex gap-2">
+                <button
+                  onClick={() => handleImageAction(img, "approve")}
+                  className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                >
+                  <CheckCircle size={14} /> Approve
+                </button>
+                <button
+                  onClick={() => handleImageAction(img, "reject")}
+                  className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                >
+                  <XCircle size={14} /> Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default RestaurantReview;
