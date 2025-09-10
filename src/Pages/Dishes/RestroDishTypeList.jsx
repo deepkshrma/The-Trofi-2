@@ -1,41 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Pagination from "../../components/common/Pagination/Pagination";
+import { BASE_URL } from "../../config/Config";
+import { useNavigate } from "react-router-dom";
 
 const RestroDishTypeList = () => {
-  const dishes = [
-    {
-      id: 1,
-      image: "https://via.placeholder.com/60",
-      type: "Italian Pasta",
-      description: "Creamy Alfredo pasta with herbs",
-    },
-    {
-      id: 2,
-      image: "https://via.placeholder.com/60",
-      type: "Indian Curry",
-      description: "Spicy chicken curry with naan bread",
-    },
-    {
-      id: 3,
-      image: "https://via.placeholder.com/60",
-      type: "Sushi",
-      description: "Fresh salmon and avocado rolls",
-    },
-  ];
-
+  const [dishes, setDishes] = useState([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const pageSize = 10;
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10,
     totalRecords: 0,
   });
 
-  //  Apply search filter
-  const filteredDishes = dishes.filter((dish) =>
-    dish.type.toLowerCase().includes(search.toLowerCase())
+  const navigate = useNavigate();
+
+  // Fetch dish types
+  useEffect(() => {
+    fetchDishes();
+  }, []);
+
+  async function fetchDishes() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${BASE_URL}/restro/get-dish-type`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      if (!json?.success) throw new Error(json.message || "API Error");
+
+      setDishes(json.data);
+      setPagination((p) => ({
+        ...p,
+        totalRecords: json.data.length,
+        totalPages: Math.ceil(json.data.length / pageSize),
+      }));
+    } catch (err) {
+      setError(err.message || "Failed to fetch dish types");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Search filter
+  const filtered = dishes.filter((dish) =>
+    dish.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Pagination slice
+  const start = (pagination.currentPage - 1) * pageSize;
+  const paginated = filtered.slice(start, start + pageSize);
 
   return (
     <div className="main main_page p-6  duration-900">
@@ -43,67 +60,105 @@ const RestroDishTypeList = () => {
         Dish Management
       </h2>
       <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
-        {/* 🔍 Search */}
+        {/* Search */}
         <div className="flex flex-wrap gap-3 m-3">
           <input
             type="text"
             placeholder="Search by dish name..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPagination((p) => ({ ...p, currentPage: 1 }));
+            }}
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
+          <button
+            onClick={fetchDishes}
+            className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
+          >
+            Refresh
+          </button>
         </div>
 
-        <table className="min-w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200 text-left text-gray-700">
-              <th className="p-3 pl-4">S.No.</th>
-              <th className="p-3">Image</th>
-              <th className="p-3">Dish Type</th>
-              <th className="p-3">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredDishes.length > 0 ? (
-              filteredDishes.map((dish, index) => (
-                <tr
-                  key={dish.id}
-                  className="border-b border-gray-300 hover:bg-orange-50 transition "
-                >
-                  <td className="p-3 pl-4 font-medium text-gray-700">
-                    {index + 1}
-                  </td>
-                  <td className="p-3">
-                    <img
-                      src={dish.image}
-                      alt={dish.type}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                  </td>
-                  <td className="p-3 text-gray-700">{dish.type}</td>
-                  <td className="p-3 text-gray-500">{dish.description}</td>
+        {/* Table */}
+        {loading ? (
+          <div className="text-center p-6">Loading dish types…</div>
+        ) : error ? (
+          <div className="text-center p-6 text-red-500">Error: {error}</div>
+        ) : (
+          <>
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-200 text-left text-gray-700">
+                  <th className="p-3 pl-4">S.No.</th>
+                  <th className="p-3">Image</th>
+                  <th className="p-3">Dish Type</th>
+                  <th className="p-3">Description</th>
+                  <th className="p-3">Action</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  colSpan="5"
-                  className="text-center p-6 text-gray-500 italic"
-                >
-                  No dishes found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalItems={pagination.totalUsers}
-          itemsPerPage={10} // Same limit as API
-          onPageChange={(page) => fetchUsers(page)} // Call API on page change
-          totalPages={pagination.totalPages} // Backend total pages
-          type="backend"
-        />
+              </thead>
+              <tbody>
+                {paginated.length > 0 ? (
+                  paginated.map((dish, index) => (
+                    <tr
+                      key={dish._id}
+                      className="border-b border-gray-300 hover:bg-orange-50 transition "
+                    >
+                      <td className="p-3 pl-4 font-medium text-gray-700">
+                        {start + index + 1}
+                      </td>
+                      <td className="p-3">
+                        {dish.icon ? (
+                          <img
+                            src={`${BASE_URL.replace("/api", "")}/${dish.icon}`}
+                            alt={dish.name}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="text-gray-400">No Image</span>
+                        )}
+                      </td>
+
+                      <td className="p-3 text-gray-700">{dish.name}</td>
+                      <td className="p-3 text-gray-500">{dish.description}</td>
+                      <td className="p-3">
+                        <button
+                          onClick={() =>
+                            navigate("/RestroDishType", { state: { dish } })
+                          }
+                          className="px-3 py-1 rounded-lg text-white bg-green-500 text-sm cursor-pointer shadow-md hover:bg-green-600"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="5"
+                      className="text-center p-6 text-gray-500 italic"
+                    >
+                      No dishes found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalItems={filtered.length}
+              itemsPerPage={pageSize}
+              onPageChange={(page) =>
+                setPagination((p) => ({ ...p, currentPage: page }))
+              }
+              totalPages={pagination.totalPages}
+              type="frontend"
+            />
+          </>
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import loginbg from "../../assets/images/loginimage.jpg";
 import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 export default function Login() {
   const navigate = useNavigate();
   return (
