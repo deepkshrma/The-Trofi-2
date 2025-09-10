@@ -1,6 +1,5 @@
 // src/pages/Reviews/ReviewDetail.jsx
-import React, { useState } from "react";
-import { Star, CheckCircle, XCircle } from "lucide-react";
+import React from "react";
 import star1 from "../../../assets/images/untitled_folder_6/star1.png";
 import star2 from "../../../assets/images/untitled_folder_6/star2.png";
 import star3 from "../../../assets/images/untitled_folder_6/star3.png";
@@ -25,39 +24,28 @@ function RestaurantReview() {
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
     ],
   };
 
   const faceStars = [
-    {
-      img: star1,
-      label: "Very Bad",
-    },
+    { img: star1, label: "Very Bad" },
     { img: star2, label: "Bad" },
     { img: star3, label: "Okay" },
-    {
-      img: star4,
-      label: "Good",
-    },
-    {
-      img: star5,
-      label: "Excellent",
-    },
+    { img: star4, label: "Good" },
+    { img: star5, label: "Excellent" },
   ];
 
   return (
-    <div className="main main_page p-6 space-y-8">
+    <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
       {/*  Restaurant Info */}
-      <div className="bg-white p-6 rounded-xl shadow-lg flex gap-6">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg flex flex-col md:flex-row gap-4 md:gap-6">
         <img
           src={review.restaurantImage}
           alt={review.restroName}
-          className="w-40 h-32 object-cover rounded-lg"
+          className="w-full md:w-40 h-40 object-cover rounded-lg"
         />
         <div className="flex flex-col justify-center">
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
             {review.restroName}
           </h2>
           <p className="text-gray-600 mb-2">
@@ -65,28 +53,27 @@ function RestaurantReview() {
           </p>
           <div className="flex gap-2">
             {faceStars.map((face, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <img
-                  src={face.img}
-                  alt={face.label}
-                  className={`w-8 h-8 ${
-                    index < review.star_value ? "" : "opacity-30"
-                  }`}
-                />
-              </div>
+              <img
+                key={index}
+                src={face.img}
+                alt={face.label}
+                className={`w-6 h-6 md:w-8 md:h-8 ${
+                  index < review.star_value ? "" : "opacity-30"
+                }`}
+              />
             ))}
           </div>
         </div>
       </div>
 
       {/*  Review Comment */}
-      <div className="bg-white p-6 rounded-xl shadow-lg ">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-3">Review Comment</h3>
         <p className="text-gray-700 italic">{review.comment}</p>
       </div>
 
       {/*  Q&A Section */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-3">Q&A</h3>
         <div className="space-y-3">
           {review.qa.map((item, idx) => (
@@ -99,19 +86,19 @@ function RestaurantReview() {
       </div>
 
       {/*  Review Images */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-4">Review Images</h3>
         <div className="flex flex-col gap-6">
           {review.images.map((img, idx) => (
             <div
               key={idx}
-              className="flex items-start gap-6 p-4 border border-gray-200 rounded-lg shadow-sm"
+              className="flex flex-col md:flex-row items-start gap-4 md:gap-6 p-4 border border-gray-200 rounded-lg shadow-sm"
             >
               {/* Left side - Image */}
               <img
                 src={img}
                 alt={`review-${idx}`}
-                className="w-60 h-40 object-cover rounded-lg shadow-md"
+                className="w-full md:w-60 h-48 object-cover rounded-lg shadow-md"
               />
 
               {/* Right side - Form */}
@@ -130,28 +117,33 @@ function RestaurantReview() {
                     reason
                   );
                 }}
-                className="flex flex-col gap-3 flex-1"
+                className="flex flex-col gap-3 flex-1 w-full"
               >
                 {/* Approve / Reject */}
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="action"
+                      name={`action-${idx}`}
                       value="approve"
                       required
                     />
                     Approve
                   </label>
                   <label className="flex items-center gap-2">
-                    <input type="radio" name="action" value="reject" required />
+                    <input
+                      type="radio"
+                      name={`action-${idx}`}
+                      value="reject"
+                      required
+                    />
                     Reject
                   </label>
                 </div>
 
                 {/* Reason */}
                 <textarea
-                  name="reason"
+                  name={`reason-${idx}`}
                   placeholder="Reason for this action..."
                   className="border border-gray-300 rounded-md p-2 h-20 w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
                 />
