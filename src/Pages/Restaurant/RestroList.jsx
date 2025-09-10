@@ -34,12 +34,12 @@ function RestroList() {
     },
   ]);
   const [search, setSearch] = useState("");
-  const pageSize = 10;
+  const pageSize = 15;
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10,
+    pageSize: 15,
     totalRecords: 0,
   });
   const navigate = useNavigate();
@@ -177,7 +177,7 @@ function RestroList() {
         <Pagination
           currentPage={pagination.currentPage}
           totalItems={pagination.totalUsers}
-          itemsPerPage={10} // Same limit as API
+          itemsPerPage={15} // Same limit as API
           onPageChange={(page) => fetchUsers(page)} // Call API on page change
           totalPages={pagination.totalPages} // Backend total pages
           type="backend"

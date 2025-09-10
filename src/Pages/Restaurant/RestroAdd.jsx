@@ -87,31 +87,8 @@ function RestroAdd() {
     setRestaurantData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleArrayChange = (e, field) => {
-    const values = Array.from(
-      e.target.selectedOptions,
-      (option) => option.value
-    );
-    setRestaurantData((prev) => ({ ...prev, [field]: values }));
-  };
 
-  const handleDishAdd = () => {
-    setRestaurantData({
-      ...restaurantData,
-      dishes: [
-        ...restaurantData.dishes,
-        {
-          name: "",
-          type: "Veg",
-          spiceLevel: "Normal",
-          price: "",
-          image: null,
-          available: true,
-          lastUpdated: new Date().toLocaleDateString(),
-        },
-      ],
-    });
-  };
+
 
   const handleSubmit = async () => {
     try {
@@ -156,18 +133,6 @@ function RestroAdd() {
         formData.append("days", restaurantData.openDays.join(", "));
       }
 
-      // restaurantData.dish_type.forEach((id) =>
-      //   formData.append("dish_type", id)
-      // );
-      // restaurantData.restaurant_type.forEach((id) =>
-      //   formData.append("restaurant_type", id)
-      // );
-      // restaurantData.good_for.forEach((id) => formData.append("good_for", id));
-      // restaurantData.cuisines.forEach((id) => formData.append("cuisines", id));
-      // restaurantData.amenities.forEach((id) =>
-      //   formData.append("amenities", id)
-      // );
-
       gallery.forEach((file) => formData.append("restaurant_images", file));
       if (profileImage) {
         formData.append("restaurant_images", profileImage);
@@ -183,6 +148,7 @@ function RestroAdd() {
 
       const result = await response.json();
       console.log("Restaurant Created:", result);
+      alert("restro created successfully!")
     } catch (err) {
       console.error("Error:", err);
     }
@@ -313,9 +279,9 @@ function RestroAdd() {
               Long Description
             </label>
             <textarea
-              name="description"
+              name="longDescription"
               placeholder="About the restaurant..."
-              value={restaurantData.description}
+              value={restaurantData.longDescription}
               onChange={handleChange}
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm  focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               rows="4"
@@ -726,7 +692,7 @@ function RestroAdd() {
       {/* Submit */}
       <div className="flex justify-end">
         <button
-          className="text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg"
+          className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md hover:shadow-lg"
           style={{ backgroundColor: "#F9832B" }}
           onClick={handleSubmit}
         >
