@@ -96,7 +96,9 @@ const RestroDishCategoryList = () => {
                   </td>
                   <td className="p-3">
                     <img
-                      src={`${BASE_URL.replace("/api", "")}/${cat.category_icon}`}
+                      src={`${BASE_URL.replace("/api", "")}/${
+                        cat.category_icon
+                      }`}
                       alt={cat.category_name}
                       className="w-12 h-12 rounded-lg object-cover"
                     />
@@ -106,7 +108,9 @@ const RestroDishCategoryList = () => {
                   <td className="p-3">
                     <button
                       onClick={() =>
-                        navigate(`/RestroDishCategory/${cat._id}`)
+                        navigate("/RestroDishCategory", {
+                          state: { category: cat },
+                        })
                       }
                       className="px-3 py-1 rounded-lg bg-green-500 text-white text-sm shadow-md hover:bg-green-600"
                     >
