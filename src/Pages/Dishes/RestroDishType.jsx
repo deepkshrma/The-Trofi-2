@@ -1,15 +1,33 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function RestroDishType() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [editId, setEditId] = useState(null);
 
   const fileInputRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Check if edit mode (id passed via state from list page)
+  useEffect(() => {
+    if (location.state?.dish) {
+      const { _id, name, description, icon } = location.state.dish;
+      setEditId(_id);
+      setName(name);
+      setDescription(description);
+      if (icon) {
+        setPreview(`${BASE_URL.replace("/api", "")}/${icon}`);
+      }
+    }
+  }, [location.state]);
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -24,47 +42,62 @@ function RestroDishType() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !description || !file) {
-      alert("Please provide name, description and icon");
+    if (!name || !description) {
+      toast.error("Please provide name and description");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
-    formData.append("icon", file);
+    if (file) formData.append("icon", file);
 
     try {
-      const res = await axios.post(
-        `${BASE_URL}/restro/create-dish-type`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      let res;
+      if (editId) {
+        res = await axios.patch(
+          `${BASE_URL}/restro/edit-dish-type/${editId}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      } else {
+        res = await axios.post(
+          `${BASE_URL}/restro/create-dish-type`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      }
 
-      if (res.status === 201 || res.data?.status) {
-        alert(res.data?.message || "Dish Type created successfully");
-        setName("");
-        setDescription("");
-        setFile(null);
-        setPreview(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+      console.log("API RESPONSE:", res); 
+
+      if ([200, 201].includes(res.status)) {
+        toast.success(res.data?.message || "Dish Type saved successfully");
+        navigate("/RestroDishTypeList");
+
+        if (!editId) {
+          setName("");
+          setDescription("");
+          setFile(null);
+          setPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
         }
       } else {
-        alert(res.data?.message || "Something went wrong");
+        toast.error(res.data?.message || "Something went wrong");
       }
     } catch (err) {
-      console.error(err);
-      alert("Error while creating dish type");
+      console.error("API ERROR:", err);
+      toast.error(
+        err.response?.data?.message || "Error while saving dish type"
+      );
     }
   };
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        <PageTitle title={"Restaurant Dish Type"} />
+        <PageTitle
+          title={editId ? "Edit Restaurant Dish Type" : "Restaurant Dish Type"}
+        />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
           {/* Name */}
           <div>
@@ -115,7 +148,6 @@ function RestroDishType() {
                  file:border-0 file:bg-orange-500 file:px-4 file:py-2 file:text-white 
                  file:cursor-pointer hover:file:bg-orange-600 focus:ring-2 
                  focus:ring-orange-300 transition"
-              required
             />
           </div>
 
@@ -139,7 +171,7 @@ function RestroDishType() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              Save
+              {editId ? "Update" : "Save"}
             </button>
           </div>
         </form>

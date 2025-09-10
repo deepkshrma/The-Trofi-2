@@ -1,29 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Pagination from "../../components/common/Pagination/Pagination";
+import { BASE_URL } from "../../config/Config";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const RestroDishCategoryList = () => {
-  const categories = [
-    {
-      id: 1,
-      image: "https://via.placeholder.com/60",
-      name: "Starters",
-      description: "Light dishes to start your meal, like soups and salads.",
-    },
-    {
-      id: 2,
-      image: "https://via.placeholder.com/60",
-      name: "Main Course",
-      description: "Hearty meals including rice, curries, and breads.",
-    },
-    {
-      id: 3,
-      image: "https://via.placeholder.com/60",
-      name: "Desserts",
-      description: "Sweet dishes such as cakes, ice creams, and puddings.",
-    },
-  ];
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
-  const pageSize = 10;
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -31,9 +16,39 @@ const RestroDishCategoryList = () => {
     totalRecords: 0,
   });
 
-  //  Apply search filter
+  const navigate = useNavigate();
+
+  // Fetch categories
+  const fetchCategories = async (page = 1) => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${BASE_URL}/restro/get-dish-category`);
+      if (res.data?.success) {
+        setCategories(res.data.data);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          pageSize: 10,
+          totalRecords: res.data.data.length,
+        });
+      } else {
+        toast.error(res.data?.message || "Failed to fetch categories");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error fetching categories");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  // Apply search
   const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(search.toLowerCase())
+    category.category_name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -46,26 +61,34 @@ const RestroDishCategoryList = () => {
         <div className="flex flex-wrap gap-3 m-3">
           <input
             type="text"
-            placeholder="Search by dish name..."
+            placeholder="Search by category name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
         </div>
+
         <table className="min-w-full border-collapse">
           <thead>
             <tr className="bg-gray-200 text-gray-700 text-left">
-              <th className="p-3 pl-4 ">S.No.</th>
+              <th className="p-3 pl-4">S.No.</th>
               <th className="p-3">Image</th>
               <th className="p-3">Category Name</th>
-              <th className="p-3 ">Description</th>
+              <th className="p-3">Description</th>
+              <th className="p-3">Action</th>
             </tr>
           </thead>
           <tbody>
-            {filteredCategories.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="5" className="text-center p-6 text-gray-500">
+                  Loading...
+                </td>
+              </tr>
+            ) : filteredCategories.length > 0 ? (
               filteredCategories.map((cat, index) => (
                 <tr
-                  key={cat.id}
+                  key={cat._id}
                   className="border-b border-gray-300 hover:bg-orange-50 transition"
                 >
                   <td className="p-3 pl-4 font-medium text-gray-700">
@@ -73,13 +96,23 @@ const RestroDishCategoryList = () => {
                   </td>
                   <td className="p-3">
                     <img
-                      src={cat.image}
-                      alt={cat.name}
+                      src={`${BASE_URL.replace("/api", "")}/${cat.category_icon}`}
+                      alt={cat.category_name}
                       className="w-12 h-12 rounded-lg object-cover"
                     />
                   </td>
-                  <td className="p-3 text-gray-700">{cat.name}</td>
+                  <td className="p-3 text-gray-700">{cat.category_name}</td>
                   <td className="p-3 text-gray-500">{cat.description}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() =>
+                        navigate(`/RestroDishCategory/${cat._id}`)
+                      }
+                      className="px-3 py-1 rounded-lg bg-green-500 text-white text-sm shadow-md hover:bg-green-600"
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -88,37 +121,19 @@ const RestroDishCategoryList = () => {
                   colSpan="5"
                   className="text-center p-6 text-gray-500 italic"
                 >
-                  No dishes found.
+                  No categories found.
                 </td>
               </tr>
             )}
-            {/* {categories.map((cat, index) => (
-              <tr
-                key={cat.id}
-                className="border-b border-gray-300 hover:bg-orange-50 transition"
-              >
-                <td className="p-3 pl-4 font-medium text-gray-700">
-                  {index + 1}
-                </td>
-                <td className="p-3">
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                </td>
-                <td className="p-3 text-gray-700">{cat.name}</td>
-                <td className="p-3 text-gray-500">{cat.description}</td>
-              </tr>
-            ))} */}
           </tbody>
         </table>
+
         <Pagination
           currentPage={pagination.currentPage}
-          totalItems={pagination.totalUsers}
-          itemsPerPage={10} // Same limit as API
-          onPageChange={(page) => fetchUsers(page)} // Call API on page change
-          totalPages={pagination.totalPages} // Backend total pages
+          totalItems={pagination.totalRecords}
+          itemsPerPage={pagination.pageSize}
+          onPageChange={(page) => fetchCategories(page)}
+          totalPages={pagination.totalPages}
           type="backend"
         />
       </div>

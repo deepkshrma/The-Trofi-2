@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function RestroDishCategory() {
   const [categoryName, setCategoryName] = useState("");
@@ -10,6 +12,25 @@ function RestroDishCategory() {
   const [preview, setPreview] = useState(null);
 
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+  const { id } = useParams(); // edit mode if id exists
+
+  // Fetch data if edit mode
+  useEffect(() => {
+    if (id) {
+      axios
+        .get(`${BASE_URL}/restro/get-dish-category`)
+        .then((res) => {
+          const category = res.data?.data.find((c) => c._id === id);
+          if (category) {
+            setCategoryName(category.category_name);
+            setDescription(category.description);
+            setPreview(`${BASE_URL.replace("/api", "")}/${category.category_icon}`);
+          }
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [id]);
 
   // Handle file input change
   const handleFileChange = (e) => {
@@ -20,44 +41,45 @@ function RestroDishCategory() {
     }
   };
 
-  // Handle form submit
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!categoryName || !description || !file) {
-      alert("Please provide category name, description and icon");
+    if (!categoryName || !description || (!file && !id)) {
+      toast.error("Please provide category name, description and icon");
       return;
     }
 
     const formData = new FormData();
     formData.append("category_name", categoryName);
     formData.append("description", description);
-    formData.append("category_icon", file);
+    if (file) formData.append("category_icon", file);
 
     try {
-      const res = await axios.post(
-        `${BASE_URL}/restro/create-dish-category`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      if (res.status === 201 || res.data?.status) {
-        alert(res.data?.message || "Dish Category created successfully");
-        setCategoryName("");
-        setDescription("");
-        setFile(null);
-        setPreview(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+      let res;
+      if (id) {
+        res = await axios.patch(
+          `${BASE_URL}/restro/edit-dish-category/${id}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
       } else {
-        alert(res.data?.message || "Something went wrong");
+        res = await axios.post(
+          `${BASE_URL}/restro/create-dish-category`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+      }
+
+      if (res.data?.status || res.data?.success) {
+        toast.success(res.data?.message || "Saved successfully");
+        navigate("/RestroDishCategoryList"); 
+      } else {
+        toast.error(res.data?.message || "Something went wrong");
       }
     } catch (err) {
       console.error(err);
-      alert("Error while creating dish category");
+      toast.error("Error while saving category");
     }
   };
 
@@ -115,7 +137,7 @@ function RestroDishCategory() {
                  file:border-0 file:bg-orange-500 file:px-4 file:py-2 file:text-white 
                  file:cursor-pointer hover:file:bg-orange-600 focus:ring-2 
                  focus:ring-orange-300 transition"
-              required
+              required={!id}
             />
           </div>
 
@@ -139,7 +161,7 @@ function RestroDishCategory() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              Save Category
+              {id ? "Update Category" : "Save Category"}
             </button>
           </div>
         </form>

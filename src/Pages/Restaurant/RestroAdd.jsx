@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
-
-const BASE_URL = "http://trofi-backend.apponedemo.top/api";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import {BASE_URL} from "../../config/Config.js"
+import axios from "axios";
 
 function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
@@ -46,6 +48,7 @@ function RestroAdd() {
   const [profileImage, setProfileImage] = useState(null);
 
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // const facilityOptions = ['veg', 'non-veg', 'both'];
 
@@ -148,9 +151,11 @@ function RestroAdd() {
 
       const result = await response.json();
       console.log("Restaurant Created:", result);
-      alert("restro created successfully!")
+      toast.success("restro created successfully!")
+      navigate("/RestroList")
     } catch (err) {
       console.error("Error:", err);
+      toast.error(err)
     }
   };
 
