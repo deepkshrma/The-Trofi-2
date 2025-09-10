@@ -34,6 +34,7 @@ import RestroDishCategoryList from "./Pages/Dishes/RestroDishCategoryList";
 import RestroDishSubCategoryList from "./Pages/Dishes/RestroDishSubCategoryList";
 import RestaurantReviewList from "./Pages/Reviews/Restaurant/RestaurantReviewList";
 import DishReviewList from "./Pages/Reviews/Dishes/DishReviewList";
+import RestaurantReview from "./Pages/Reviews/Restaurant/RestaurantReview";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -97,6 +98,7 @@ const Allroutes = () => {
               path="/RestaurantReviewList"
               element={<RestaurantReviewList />}
             />
+            <Route path="/RestaurantReview" element={<RestaurantReview />} />
             <Route path="/DishReviewList" element={<DishReviewList />} />
           </Route>
         </Routes>
