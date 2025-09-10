@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { FaRegEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function RestaurantReviewList() {
   const [reviews, setReviews] = useState([
@@ -45,6 +47,7 @@ export default function RestaurantReviewList() {
   ]);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   // Filter reviews based on search
   const filteredReviews = reviews.filter(
@@ -74,7 +77,7 @@ export default function RestaurantReviewList() {
             placeholder="Search by User or Restaurant..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-orange-400"
           />
         </div>
 
@@ -87,6 +90,7 @@ export default function RestaurantReviewList() {
               <th className="p-3 whitespace-nowrap">Rating Label</th>
               <th className="p-3 whitespace-nowrap">Rating</th>
               <th className="p-3 whitespace-nowrap">Status</th>
+              <th className="p-3 whitespace-nowrap">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -112,6 +116,14 @@ export default function RestaurantReviewList() {
                   >
                     {rev.status}
                   </span>
+                </td>
+                <td className="p-3">
+                  <div>
+                    <FaRegEye
+                      size={20}
+                      onClick={() => navigate("/RestaurantReview")}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}

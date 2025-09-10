@@ -13,7 +13,7 @@ function RestaurantReview() {
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
     restroName: "Taj Palace",
     rating_label: "Excellent experience!",
-    star_value: 5,
+    star_value: 3,
     comment:
       "The food was delicious, ambiance was wonderful, and service was top-notch. Definitely visiting again!",
     qa: [
@@ -21,6 +21,9 @@ function RestaurantReview() {
       { question: "Would you recommend us to others?", answer: "Absolutely!" },
     ],
     images: [
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
+      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
@@ -43,16 +46,6 @@ function RestaurantReview() {
       label: "Excellent",
     },
   ];
-
-  const [approvedImages, setApprovedImages] = useState([]);
-
-  const handleImageAction = (img, action) => {
-    if (action === "approve") {
-      setApprovedImages((prev) => [...prev, img]);
-    } else {
-      setApprovedImages((prev) => prev.filter((i) => i !== img));
-    }
-  };
 
   return (
     <div className="main main_page p-6 space-y-8">
@@ -108,31 +101,69 @@ function RestaurantReview() {
       {/*  Review Images */}
       <div className="bg-white p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-4">Review Images</h3>
-        <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
+        <div className="flex flex-col gap-6">
           {review.images.map((img, idx) => (
             <div
               key={idx}
-              className="relative  rounded-lg overflow-hidden shadow-lg p-3"
+              className="flex items-start gap-6 p-4 border border-gray-200 rounded-lg shadow-sm"
             >
+              {/* Left side - Image */}
               <img
                 src={img}
                 alt={`review-${idx}`}
-                className="w-1/4 h-40 object-cover"
+                className="w-60 h-40 object-cover rounded-lg shadow-md"
               />
-              <div className="absolute bottom-2 left-2 flex gap-2">
+
+              {/* Right side - Form */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target);
+                  const action = formData.get("action");
+                  const reason = formData.get("reason");
+                  console.log(
+                    "Image:",
+                    img,
+                    "Action:",
+                    action,
+                    "Reason:",
+                    reason
+                  );
+                }}
+                className="flex flex-col gap-3 flex-1"
+              >
+                {/* Approve / Reject */}
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="action"
+                      value="approve"
+                      required
+                    />
+                    Approve
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="radio" name="action" value="reject" required />
+                    Reject
+                  </label>
+                </div>
+
+                {/* Reason */}
+                <textarea
+                  name="reason"
+                  placeholder="Reason for this action..."
+                  className="border border-gray-300 rounded-md p-2 h-20 w-full focus:outline-none focus:ring-2 focus:ring-orange-400"
+                />
+
+                {/* Submit */}
                 <button
-                  onClick={() => handleImageAction(img, "approve")}
-                  className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200"
+                  type="submit"
+                  className="self-start px-4 py-2 bg-orange-400 text-white rounded-md shadow hover:bg-orange-500 cursor-pointer"
                 >
-                  <CheckCircle size={14} /> Approve
+                  Done
                 </button>
-                <button
-                  onClick={() => handleImageAction(img, "reject")}
-                  className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
-                >
-                  <XCircle size={14} /> Reject
-                </button>
-              </div>
+              </form>
             </div>
           ))}
         </div>

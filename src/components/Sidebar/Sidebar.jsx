@@ -360,6 +360,30 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       ],
       border: true,
     },
+    {
+      section: "",
+      items: [
+        {
+          name: "Users Review",
+          icon: <FaStore />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            {
+              name: "Restaurants Review",
+              link: "RestaurantReviewList",
+              dropdown: false,
+            },
+            {
+              name: "Dishes Review",
+              link: "DishReviewList",
+              dropdown: false,
+            },
+          ],
+        },
+      ],
+      border: true,
+    },
   ];
 
   const handleSubClick = (link) => {
