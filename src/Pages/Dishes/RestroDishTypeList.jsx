@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Pagination from "../../components/common/Pagination/Pagination";
 import { BASE_URL } from "../../config/Config";
 import { useNavigate } from "react-router-dom";
+import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 
 const RestroDishTypeList = () => {
   const [dishes, setDishes] = useState([]);
@@ -15,6 +16,14 @@ const RestroDishTypeList = () => {
     totalPages: 1,
     totalRecords: 0,
   });
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    // setSelectedAdmin(null);
+  };
+
+  const confirmDelete = async () => {};
 
   const navigate = useNavigate();
 
@@ -55,112 +64,133 @@ const RestroDishTypeList = () => {
   const paginated = filtered.slice(start, start + pageSize);
 
   return (
-    <div className="main main_page p-6  duration-900">
-      <h2 className="text-xl font-semibold mb-4 text-gray-700">
-        Dish Management
-      </h2>
-      <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
-        {/* Search */}
-        <div className="flex flex-wrap gap-3 m-3">
-          <input
-            type="text"
-            placeholder="Search by dish name..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPagination((p) => ({ ...p, currentPage: 1 }));
-            }}
-            className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
-          />
-          <button
-            onClick={fetchDishes}
-            className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
-          >
-            Refresh
-          </button>
-        </div>
+    <>
+      <div className="main main_page p-6 duration-900">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">
+          Dish Management
+        </h2>
+        <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
+          {/* Search */}
+          <div className="flex flex-wrap gap-3 m-3">
+            <input
+              type="text"
+              placeholder="Search by dish name..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPagination((p) => ({ ...p, currentPage: 1 }));
+              }}
+              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+            <button
+              onClick={fetchDishes}
+              className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
+            >
+              Refresh
+            </button>
+          </div>
 
-        {/* Table */}
-        {loading ? (
-          <div className="text-center p-6">Loading dish types…</div>
-        ) : error ? (
-          <div className="text-center p-6 text-red-500">Error: {error}</div>
-        ) : (
-          <>
-            <table className="min-w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-200 text-left text-gray-700">
-                  <th className="p-3 pl-4">S.No.</th>
-                  <th className="p-3">Image</th>
-                  <th className="p-3">Dish Type</th>
-                  <th className="p-3">Description</th>
-                  <th className="p-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginated.length > 0 ? (
-                  paginated.map((dish, index) => (
-                    <tr
-                      key={dish._id}
-                      className="border-b border-gray-300 hover:bg-orange-50 transition "
-                    >
-                      <td className="p-3 pl-4 font-medium text-gray-700">
-                        {start + index + 1}
-                      </td>
-                      <td className="p-3">
-                        {dish.icon ? (
-                          <img
-                            src={`${BASE_URL.replace("/api", "")}/${dish.icon}`}
-                            alt={dish.name}
-                            className="w-12 h-12 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <span className="text-gray-400">No Image</span>
-                        )}
-                      </td>
+          {/* Table */}
+          {loading ? (
+            <div className="text-center p-6">Loading dish types…</div>
+          ) : error ? (
+            <div className="text-center p-6 text-red-500">Error: {error}</div>
+          ) : (
+            <>
+              <table className="min-w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-200 text-left text-gray-700">
+                    <th className="p-3 pl-4">S.No.</th>
+                    <th className="p-3">Image</th>
+                    <th className="p-3">Dish Type</th>
+                    <th className="p-3">Description</th>
+                    <th className="p-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.length > 0 ? (
+                    paginated.map((dish, index) => (
+                      <tr
+                        key={dish._id}
+                        className="border-b border-gray-300 hover:bg-orange-50 transition "
+                      >
+                        <td className="p-3 pl-4 font-medium text-gray-700">
+                          {start + index + 1}
+                        </td>
+                        <td className="p-3">
+                          {dish.icon ? (
+                            <img
+                              src={`${BASE_URL.replace("/api", "")}/${
+                                dish.icon
+                              }`}
+                              alt={dish.name}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <span className="text-gray-400">No Image</span>
+                          )}
+                        </td>
 
-                      <td className="p-3 text-gray-700">{dish.name}</td>
-                      <td className="p-3 text-gray-500">{dish.description}</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() =>
-                            navigate("/RestroDishType", { state: { dish } })
-                          }
-                          className="px-3 py-1 rounded-lg text-white bg-green-500 text-sm cursor-pointer shadow-md hover:bg-green-600"
-                        >
-                          Edit
-                        </button>
+                        <td className="p-3 text-gray-700">{dish.name}</td>
+                        <td className="p-3 text-gray-500">
+                          {dish.description}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() =>
+                                navigate("/RestroDishType", { state: { dish } })
+                              }
+                              className="px-3 py-1 rounded-lg text-white bg-green-500 text-sm cursor-pointer shadow-md hover:bg-green-600"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => setShowDeleteModal(true)}
+                              className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="text-center p-6 text-gray-500 italic"
+                      >
+                        No dishes found.
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="text-center p-6 text-gray-500 italic"
-                    >
-                      No dishes found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
 
-            {/* Pagination */}
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalItems={filtered.length}
-              itemsPerPage={pageSize}
-              onPageChange={(page) =>
-                setPagination((p) => ({ ...p, currentPage: page }))
-              }
-              totalPages={pagination.totalPages}
-              type="frontend"
-            />
-          </>
-        )}
+              {/* Pagination */}
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalItems={filtered.length}
+                itemsPerPage={pageSize}
+                onPageChange={(page) =>
+                  setPagination((p) => ({ ...p, currentPage: page }))
+                }
+                totalPages={pagination.totalPages}
+                type="frontend"
+              />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      <DeleteModel
+        isOpen={showDeleteModal}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        redbutton="Confirm"
+        para="Do you really want to delete? This action cannot be undone."
+      />
+    </>
   );
 };
 

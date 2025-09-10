@@ -3,6 +3,7 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import pizza from "../../assets/images/pending.png"; // placeholder
 import Pagination from "../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
+import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 
 function RestroAmenityList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -21,6 +22,13 @@ function RestroAmenityList() {
     totalPages: 1,
     totalRecords: 0,
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    // setSelectedAdmin(null);
+  };
+
+  const confirmDelete = async () => {};
 
   useEffect(() => {
     fetchAmenities();
@@ -80,122 +88,141 @@ function RestroAmenityList() {
   };
 
   return (
-    <div className="main main_page p-6 w-full min-h-screen duration-900">
-      <PageTitle title={"Restaurant Amenities List"} />
+    <>
+      <div className="main main_page p-6 w-full min-h-screen duration-900">
+        <PageTitle title={"Restaurant Amenities List"} />
 
-      <div className="bg-white rounded-2xl shadow-md mt-3">
-        <div className="overflow-x-auto pb-3">
-          {/* Search + Refresh */}
-          <div className="flex flex-wrap gap-3 m-3 items-center">
-            <input
-              type="text"
-              placeholder="Search by name..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPagination((p) => ({ ...p, currentPage: 1 }));
-              }}
-              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
-            />
+        <div className="bg-white rounded-2xl shadow-md mt-3">
+          <div className="overflow-x-auto pb-3">
+            {/* Search + Refresh */}
+            <div className="flex flex-wrap gap-3 m-3 items-center">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPagination((p) => ({ ...p, currentPage: 1 }));
+                }}
+                className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+              />
 
-            <button
-              onClick={fetchAmenities}
-              className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
-            >
-              Refresh
-            </button>
-          </div>
+              <button
+                onClick={fetchAmenities}
+                className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
+              >
+                Refresh
+              </button>
+            </div>
 
-          {/* Loading / Error */}
-          {loading ? (
-            <div className="text-center py-6">Loading amenities…</div>
-          ) : error ? (
-            <div className="text-center py-6 text-red-500">Error: {error}</div>
-          ) : (
-            <>
-              <table className="w-full border border-gray-200 overflow-hidden">
-                <thead className="bg-gray-200 text-gray-700">
-                  <tr>
-                    <th className="px-4 py-2 text-left">S.No</th>
-                    <th className="px-4 py-2 text-left">Icon</th>
-                    <th className="px-4 py-2 text-left">Amenity Name</th>
-
-                    <th className="px-4 py-2 text-left">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedAmenities.length > 0 ? (
-                    paginatedAmenities.map((amenity, index) => {
-                      const serial =
-                        (pagination.currentPage - 1) * PAGE_SIZE + index + 1;
-                      return (
-                        <tr
-                          key={amenity.id}
-                          className="border-b border-gray-300 hover:bg-gray-50 transition"
-                        >
-                          <td className="px-4 py-2">{serial}</td>
-                          <td className="px-4 py-2">
-                            <img
-                              src={getImageUrl(amenity.icon)}
-                              alt={amenity.name}
-                              className="h-12 w-12 object-cover rounded-full "
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = pizza;
-                              }}
-                            />
-                          </td>
-                          <td className="px-4 py-2">{amenity.name}</td>
-
-                          <td className="px-4 py-2">
-                            <button
-                              onClick={() =>
-                                navigate(`/RestroAmenity/:id`, {
-                                  state: {
-                                    id: amenity.id,
-                                    name: amenity.name,
-                                    icon: amenity.icon,
-                                  },
-                                })
-                              }
-                              className="bg-green-100 text-green-700  cursor-pointer px-3 py-1 rounded-full text-sm"
-                            >
-                              Edit
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="text-center py-4 text-gray-500 italic"
-                      >
-                        No results found
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
-              <div className="mt-3 px-3">
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalItems={pagination.totalRecords}
-                  itemsPerPage={PAGE_SIZE}
-                  onPageChange={(page) =>
-                    setPagination((p) => ({ ...p, currentPage: page }))
-                  }
-                  totalPages={pagination.totalPages}
-                  type="frontend"
-                />
+            {/* Loading / Error */}
+            {loading ? (
+              <div className="text-center py-6">Loading amenities…</div>
+            ) : error ? (
+              <div className="text-center py-6 text-red-500">
+                Error: {error}
               </div>
-            </>
-          )}
+            ) : (
+              <>
+                <table className="w-full border border-gray-200 overflow-hidden">
+                  <thead className="bg-gray-200 text-gray-700">
+                    <tr>
+                      <th className="px-4 py-2 text-left">S.No</th>
+                      <th className="px-4 py-2 text-left">Icon</th>
+                      <th className="px-4 py-2 text-left">Amenity Name</th>
+
+                      <th className="px-4 py-2 text-left">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedAmenities.length > 0 ? (
+                      paginatedAmenities.map((amenity, index) => {
+                        const serial =
+                          (pagination.currentPage - 1) * PAGE_SIZE + index + 1;
+                        return (
+                          <tr
+                            key={amenity.id}
+                            className="border-b border-gray-300 hover:bg-gray-50 transition"
+                          >
+                            <td className="px-4 py-2">{serial}</td>
+                            <td className="px-4 py-2">
+                              <img
+                                src={getImageUrl(amenity.icon)}
+                                alt={amenity.name}
+                                className="h-12 w-12 object-cover rounded-full "
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = pizza;
+                                }}
+                              />
+                            </td>
+                            <td className="px-4 py-2">{amenity.name}</td>
+
+                            <td className="px-4 py-2">
+                              <div className="flex gap-3">
+                                <button
+                                  onClick={() =>
+                                    navigate(`/RestroAmenity/:id`, {
+                                      state: {
+                                        id: amenity.id,
+                                        name: amenity.name,
+                                        icon: amenity.icon,
+                                      },
+                                    })
+                                  }
+                                  className="bg-green-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => setShowDeleteModal(true)}
+                                  className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="4"
+                          className="text-center py-4 text-gray-500 italic"
+                        >
+                          No results found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                <div className="mt-3 px-3">
+                  <Pagination
+                    currentPage={pagination.currentPage}
+                    totalItems={pagination.totalRecords}
+                    itemsPerPage={PAGE_SIZE}
+                    onPageChange={(page) =>
+                      setPagination((p) => ({ ...p, currentPage: page }))
+                    }
+                    totalPages={pagination.totalPages}
+                    type="frontend"
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <DeleteModel
+        isOpen={showDeleteModal}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        redbutton="Confirm"
+        para="Do you really want to delete? This action cannot be undone."
+      />
+    </>
   );
 }
 
