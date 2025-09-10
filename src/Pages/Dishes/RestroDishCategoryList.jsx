@@ -25,6 +25,13 @@ const RestroDishCategoryList = () => {
 
   const confirmDelete = async () => {};
 
+  const getTextPreview = (html, limit = 100) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
+
   const navigate = useNavigate();
 
   // Fetch categories
@@ -114,7 +121,10 @@ const RestroDishCategoryList = () => {
                       />
                     </td>
                     <td className="p-3 text-gray-700">{cat.category_name}</td>
-                    <td className="p-3 text-gray-500">{cat.description}</td>
+                    <td className="p-3 text-gray-500">
+                      {getTextPreview(cat.description, 50)}
+                      {cat.description && cat.description.length > 100}
+                    </td>
                     <td className="p-3">
                       <div className="flex gap-3">
                         <button

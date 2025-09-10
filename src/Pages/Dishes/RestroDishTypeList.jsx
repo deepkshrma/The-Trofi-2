@@ -25,6 +25,13 @@ const RestroDishTypeList = () => {
 
   const confirmDelete = async () => {};
 
+  const getTextPreview = (html, limit = 100) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
+
   const navigate = useNavigate();
 
   // Fetch dish types
@@ -133,7 +140,8 @@ const RestroDishTypeList = () => {
 
                         <td className="p-3 text-gray-700">{dish.name}</td>
                         <td className="p-3 text-gray-500">
-                          {dish.description}
+                          {getTextPreview(dish.description, 50)}
+                          {dish.description && dish.description.length > 100}
                         </td>
                         <td className="p-3">
                           <div className="flex gap-3">

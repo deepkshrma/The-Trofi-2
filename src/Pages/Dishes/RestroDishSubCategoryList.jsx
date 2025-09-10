@@ -24,6 +24,13 @@ function RestroDishSubCategoryList() {
 
   const confirmDelete = async () => {};
 
+  const getTextPreview = (html, limit = 100) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
+
   const navigate = useNavigate();
 
   // Fetch Sub Categories
@@ -105,7 +112,10 @@ function RestroDishSubCategoryList() {
                       />
                     </td>
                     <td className="p-3 text-gray-700">{sub.sub_categ_name}</td>
-                    <td className="p-3 text-gray-500">{sub.description}</td>
+                    <td className="p-3 text-gray-500">
+                      {getTextPreview(sub.description, 50)}
+                      {sub.description && sub.description.length > 100}
+                    </td>
                     <td className="p-3">
                       <div className="flex gap-3">
                         <button
