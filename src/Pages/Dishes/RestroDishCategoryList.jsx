@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import PageTitle from "../../components/PageTitle/PageTitle";
 
 const RestroDishCategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -70,10 +71,8 @@ const RestroDishCategoryList = () => {
   return (
     <>
       <div className="p-6 main main_page duration-900">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">
-          Dish Categories
-        </h2>
-        <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
+        <PageTitle title={"Dish Categories"} />
+        <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}
           <div className="flex flex-wrap gap-3 m-3">
             <input

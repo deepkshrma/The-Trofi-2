@@ -6,20 +6,20 @@ import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 
-function RestaurantReview() {
+function DishReview() {
   const [editMode, setEditMode] = useState(false);
 
   const [review, setReview] = useState({
-    restaurantImage:
+    dishImage:
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
-    restroName: "Taj Palace",
-    rating_label: "Excellent experience!",
-    star_value: 3,
+    dishName: "Paneer Butter Masala",
+    rating_label: "Excellent taste!",
+    star_value: 4,
     comment:
-      "The food was delicious, ambiance was wonderful, and service was top-notch. Definitely visiting again!",
+      "The paneer was soft and fresh, gravy was rich and flavorful. Perfectly balanced spices!",
     qa: [
-      { question: "Was the food served hot?", answer: "Yes, perfectly hot." },
-      { question: "Would you recommend us to others?", answer: "Absolutely!" },
+      { question: "Was the dish served hot?", answer: "Yes, piping hot." },
+      { question: "Would you order this dish again?", answer: "Definitely!" },
     ],
     images: [
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
@@ -49,9 +49,9 @@ function RestaurantReview() {
 
   return (
     <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
-      {/* Header with Edit/Save button */}
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <PageTitle title={"Review Details"} />
+        <PageTitle title={"Dish Review Details"} />
         <button
           onClick={() => setEditMode(!editMode)}
           className="px-4 py-2 bg-orange-500 text-white rounded shadow hover:bg-orange-600 transition"
@@ -60,16 +60,16 @@ function RestaurantReview() {
         </button>
       </div>
 
-      {/* Restaurant Info */}
+      {/* Dish Info */}
       <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg flex flex-col md:flex-row gap-4 md:gap-6">
         <img
-          src={review.restaurantImage}
-          alt={review.restroName}
+          src={review.dishImage}
+          alt={review.dishName}
           className="w-full md:w-40 h-40 object-cover rounded-lg"
         />
         <div className="flex flex-col justify-center gap-3">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-            {review.restroName}
+            {review.dishName}
           </h2>
 
           <p className="text-gray-600 mb-1">
@@ -171,7 +171,7 @@ function RestaurantReview() {
         </div>
       </div>
 
-      {/* Review Images (Approve/Reject stays same) */}
+      {/* Review Images */}
       <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-4">Review Images</h3>
         <div className="flex flex-col gap-6">
@@ -233,4 +233,4 @@ function RestaurantReview() {
   );
 }
 
-export default RestaurantReview;
+export default DishReview;
