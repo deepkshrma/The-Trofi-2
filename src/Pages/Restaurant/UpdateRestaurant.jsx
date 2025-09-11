@@ -43,7 +43,6 @@ function UpdateRestaurant() {
   const [goodFors, setGoodFors] = useState([]);
   const [restroTypes, setRestroTypes] = useState([]);
   const [amenities, setAmenities] = useState([]);
-
   const [gallery, setGallery] = useState([]);
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
@@ -77,7 +76,7 @@ function UpdateRestaurant() {
     const fetchRestaurant = async () => {
       try {
         let token =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE3Zjk1MzQwNWQ2ODNiYjNmMzQ0YyIsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNTI4MjEsImV4cCI6MTc1NzY1NzYyMX0.-9ih6joJxRHpZ3qk4jHCdXk-cDxV977m3DlA_TrfqEQ";
 
         const res = await axios.get(`${BASE_URL}/restro/get-restaurant/${id}`, {
           headers: {
@@ -349,7 +348,7 @@ function UpdateRestaurant() {
             <button
               type="button"
               onClick={() => document.getElementById("menuInput").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg cursor-pointer shadow hover:shadow-md"
             >
               Choose Images
             </button>
@@ -377,7 +376,7 @@ function UpdateRestaurant() {
                     onClick={() =>
                       setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 cursor-pointer flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
@@ -408,7 +407,7 @@ function UpdateRestaurant() {
             <button
               type="button"
               onClick={() => document.getElementById("galleryInput").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow cursor-pointer  hover:shadow-md"
             >
               Choose Images
             </button>
@@ -438,7 +437,7 @@ function UpdateRestaurant() {
                     onClick={() =>
                       setGallery((prev) => prev.filter((_, i) => i !== idx))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full cursor-pointer w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
@@ -585,7 +584,7 @@ function UpdateRestaurant() {
                       return { ...prev, openDays: updatedDays };
                     });
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
+                  className={`px-4 py-2 rounded-full text-sm cursor-pointer font-medium shadow-sm transition 
                   ${
                     isSelected
                       ? "bg-[#F9832B] text-white"
@@ -641,7 +640,7 @@ function UpdateRestaurant() {
                         return { ...prev, [field]: updatedArray };
                       })
                     }
-                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition ${
+                    className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer shadow-sm transition ${
                       isSelected
                         ? "bg-[#F9832B] text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -730,7 +729,7 @@ function UpdateRestaurant() {
           )}
       </div>
       <button
-        className="text-white font-semibold px-6 py-3 rounded-lg shadow-md"
+        className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
         style={{ backgroundColor: "#F9832B" }}
         onClick={handleSubmit}
       >
