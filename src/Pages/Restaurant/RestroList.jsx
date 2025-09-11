@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -17,13 +20,20 @@ function RestroList() {
     pageSize: 10, // default page size
     totalRecords: 0,
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    // setSelectedAdmin(null);
+  };
+
+  const confirmDelete = async () => {};
 
   const navigate = useNavigate();
 
   const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
   let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE3Zjk1MzQwNWQ2ODNiYjNmMzQ0YyIsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNTI4MjEsImV4cCI6MTc1NzY1NzYyMX0.-9ih6joJxRHpZ3qk4jHCdXk-cDxV977m3DlA_TrfqEQ";
 
   // ✅ Fetch restaurants with pagination
   const fetchRestaurants = async (page = 1) => {
@@ -65,118 +75,143 @@ function RestroList() {
   );
 
   return (
-    <div className="main main_page p-6 min-h-screen duration-900">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <PageTitle title={"Restaurant List"} />
-        <button
-          className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg"
-          style={{ backgroundColor: "#F9832B" }}
-          onClick={() => navigate("/RestroAdd")}
-        >
-          <PlusCircle size={18} /> Add Restaurant
-        </button>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
-        {/* Search */}
-        <div className="flex flex-wrap gap-3 m-3">
-          <input
-            type="text"
-            placeholder="Search by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
-          />
+    <>
+      <div className="main main_page p-6 min-h-screen duration-900">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <PageTitle title={"Restaurant List"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroAdd")}
+          >
+            <PlusCircle size={18} /> Add Restaurant
+          </button>
         </div>
 
-        {loading ? (
-          <div className="text-center p-6 text-gray-500">Loading...</div>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-200 text-left text-gray-700">
-                <th className="p-3 border-b border-gray-300">S.No.</th>
-                <th className="p-3 border-b border-gray-300">Logo</th>
-                <th className="p-3 border-b border-gray-300">Name</th>
-                <th className="p-3 border-b border-gray-300">Type</th>
-                <th className="p-3 border-b border-gray-300">Description</th>
-                <th className="p-3 border-b border-gray-300 text-center">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRestaurants.length > 0 ? (
-                filteredRestaurants.map((restro, index) => (
-                  <tr
-                    key={restro._id}
-                    className="hover:bg-gray-50 transition text-gray-700"
-                  >
-                    <td className="p-3 border-b border-gray-200">
-                      {(pagination.currentPage - 1) * pagination.pageSize +
-                        (index + 1)}
-                    </td>
-                    <td className="p-3 border-b border-gray-200">
-                      <img
-                        src={
-                          restro.restaurant_images?.[0]
-                            ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
-                            : "https://via.placeholder.com/40"
-                        }
-                        alt={restro.restro_name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    </td>
-                    <td className="p-3 border-b border-gray-200 font-medium">
-                      {restro.restro_name}
-                    </td>
-                    <td className="p-3 border-b border-gray-200">
-                      {restro.food_type}
-                    </td>
-                    <td className="p-3 border-b border-gray-200">
-                      {restro.description}
-                    </td>
-                    <td className="p-3 border-b border-gray-200">
-                      <div className="flex justify-center items-center">
-                        <button
-                          className="flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 cursor-pointer hover:bg-blue-100 whitespace-nowrap"
-                          onClick={() =>
-                            navigate(`/RestroProfile/${restro._id}`)
+        {/* Table */}
+        <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
+          {/* Search */}
+          <div className="flex flex-wrap gap-3 m-3">
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+          </div>
+
+          {loading ? (
+            <div className="text-center p-6 text-gray-500">Loading...</div>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-200 text-left text-gray-700">
+                  <th className="p-3 border-b border-gray-300">S.No.</th>
+                  <th className="p-3 border-b border-gray-300">Logo</th>
+                  <th className="p-3 border-b border-gray-300">Name</th>
+                  <th className="p-3 border-b border-gray-300">Type</th>
+                  <th className="p-3 border-b border-gray-300">Description</th>
+                  <th className="p-3 border-b border-gray-300 text-center">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRestaurants.length > 0 ? (
+                  filteredRestaurants.map((restro, index) => (
+                    <tr
+                      key={restro._id}
+                      className="hover:bg-gray-50 transition text-gray-700"
+                    >
+                      <td className="p-3 border-b border-gray-200">
+                        {(pagination.currentPage - 1) * pagination.pageSize +
+                          (index + 1)}
+                      </td>
+                      <td className="p-3 border-b border-gray-200">
+                        <img
+                          src={
+                            restro.restaurant_images?.[0]
+                              ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
+                              : "https://via.placeholder.com/40"
                           }
-                        >
-                          <Eye size={16} /> View Profile
-                        </button>
-                      </div>
+                          alt={restro.restro_name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      </td>
+                      <td className="p-3 border-b border-gray-200 font-medium">
+                        {restro.restro_name}
+                      </td>
+                      <td className="p-3 border-b border-gray-200">
+                        {restro.food_type}
+                      </td>
+                      <td className="p-3 border-b border-gray-200">
+                        {restro.description}
+                      </td>
+                      <td className="p-3 border-b border-gray-200">
+                        <div className="flex justify-center items-center">
+                          <div className="flex gap-3">
+                            <button
+                              className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                              onClick={() =>
+                                navigate(`/RestroProfile/${restro._id}`)
+                              }
+                            >
+                              <Eye size={16} />
+                            </button>
+                            <button
+                              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                              onClick={() =>
+                                navigate(`/UpdateRestaurant/${restro._id}`)
+                              }
+                            >
+                              <MdEdit size={16} />
+                            </button>
+                            <button
+                              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                              onClick={() => setShowDeleteModal(true)}
+                            >
+                              <MdDelete size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="text-center p-6 text-gray-500 italic"
+                    >
+                      No restaurants found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="text-center p-6 text-gray-500 italic"
-                  >
-                    No restaurants found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+                )}
+              </tbody>
+            </table>
+          )}
 
-        {/* ✅ Fixed Pagination */}
-        <Pagination
-          currentPage={pagination.currentPage}
-          totalItems={pagination.totalRecords}
-          itemsPerPage={pagination.pageSize}
-          onPageChange={(page) => fetchRestaurants(page)}
-          totalPages={pagination.totalPages}
-          type="backend"
-        />
+          {/* ✅ Fixed Pagination */}
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalItems={pagination.totalRecords}
+            itemsPerPage={pagination.pageSize}
+            onPageChange={(page) => fetchRestaurants(page)}
+            totalPages={pagination.totalPages}
+            type="backend"
+          />
+        </div>
       </div>
-    </div>
+      <DeleteModel
+        isOpen={showDeleteModal}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        redbutton="Confirm"
+        para="Do you really want to delete? This action cannot be undone."
+      />
+    </>
   );
 }
 
