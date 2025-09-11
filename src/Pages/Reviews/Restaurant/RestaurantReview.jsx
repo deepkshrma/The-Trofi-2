@@ -12,7 +12,7 @@ function RestaurantReview() {
       "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
     restroName: "Taj Palace",
     rating_label: "Excellent experience!",
-    star_value: 3,
+    star_value: 5,
     comment:
       "The food was delicious, ambiance was wonderful, and service was top-notch. Definitely visiting again!",
     qa: [
@@ -52,16 +52,13 @@ function RestaurantReview() {
             {faceStars[review.star_value - 1].label}
           </p>
           <div className="flex gap-2">
-            {faceStars.map((face, index) => (
-              <img
-                key={index}
-                src={face.img}
-                alt={face.label}
-                className={`w-6 h-6 md:w-8 md:h-8 ${
-                  index < review.star_value ? "" : "opacity-30"
-                }`}
-              />
-            ))}
+            <img
+              src={faceStars[review.star_value - 1].img}
+              alt={faceStars[review.star_value - 1].label}
+              className={`w-10 h-10 md:w-12 md:h-12 `}
+            />
+
+            {}
           </div>
         </div>
       </div>
