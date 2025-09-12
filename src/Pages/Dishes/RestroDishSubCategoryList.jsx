@@ -74,7 +74,6 @@ function RestroDishSubCategoryList() {
           Dish Sub Categories
         </h2>
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
-          {/* 🔍 Search */}
           <div className="flex flex-wrap gap-3 m-3">
             <input
               type="text"
@@ -156,7 +155,7 @@ function RestroDishSubCategoryList() {
             itemsPerPage={pagination.pageSize}
             onPageChange={(page) => fetchSubCategories(page)}
             totalPages={pagination.totalPages}
-            type="backend"
+            type="frontend"
           />
         </div>
       </div>
