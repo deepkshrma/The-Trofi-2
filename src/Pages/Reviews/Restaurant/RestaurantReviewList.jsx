@@ -136,7 +136,7 @@ export default function RestaurantReviewList() {
                   <div>
                     <FaRegEye
                       size={20}
-                      onClick={() => navigate(`/RestaurantReview/${rev.id}`)}
+                      onClick={() => navigate(`/RestaurantReview`)}
                     />
                   </div>
                 </td>

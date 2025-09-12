@@ -50,7 +50,6 @@ function DishReview() {
 
   return (
     <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
-      <DynamicBreadcrumbs />
       {/* Header */}
       <div className="flex justify-between items-center">
         <PageTitle title={"Dish Review Details"} />

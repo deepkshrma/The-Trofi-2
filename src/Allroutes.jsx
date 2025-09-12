@@ -103,6 +103,7 @@ const Allroutes = () => {
               element={<RestaurantReviewList />}
             />
             <Route path="/RestaurantReview" element={<RestaurantReview />} />
+
             <Route path="/DishReviewList" element={<DishReviewList />} />
             <Route path="/DishReview" element={<DishReview />} />
           </Route>
