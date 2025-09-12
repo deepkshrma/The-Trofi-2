@@ -5,6 +5,7 @@ import { PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function DishesList() {
   // 🔹 Sample static data
@@ -49,7 +50,9 @@ function DishesList() {
 
   return (
     <div className="main main_page p-6 min-h-screen  duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[{ label: "Dishes List", path: "/DishesList" }]}
+      />
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <PageTitle title={"Dishes List"} />

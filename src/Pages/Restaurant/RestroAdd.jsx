@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../config/Config.js";
 import axios from "axios";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
 
 function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
@@ -161,7 +162,12 @@ function RestroAdd() {
 
   return (
     <div className="main main_page p-6 min-h-screen  duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant List", path: "/RestroList" },
+          { label: "Add New Restaurant", path: "RestroAdd" },
+        ]}
+      />
       <PageTitle title={"Add New Restaurant"} />
 
       {/*  Basic Info */}

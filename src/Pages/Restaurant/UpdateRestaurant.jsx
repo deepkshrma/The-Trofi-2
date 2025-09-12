@@ -7,6 +7,7 @@ import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { BASE_URL } from "../../config/Config.js";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -297,7 +298,14 @@ function UpdateRestaurant() {
 
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
-      <DynamicBreadcrumbs />
+      {/* <Breadcrumbs
+        customTrail={[
+          {
+            label: "Update Restaurant",
+            path: `/UpdateRestaurant/:${restaurantData.role_id}`,
+          },
+        ]}
+      /> */}
       <PageTitle title={"Update Restaurant"} />
       {/*  Basic Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200 mt-5">

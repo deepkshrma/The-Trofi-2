@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroDishSubCategoryList() {
   const [subCategories, setSubCategories] = useState([]);
@@ -72,7 +73,14 @@ function RestroDishSubCategoryList() {
   return (
     <>
       <div className="p-6 main main_page duration-900">
-        <DynamicBreadcrumbs />
+        <BreadcrumbsNav
+          customTrail={[
+            {
+              label: "Dish Sub Categories",
+              path: "/RestroDishSubCategoryList",
+            },
+          ]}
+        />
         <PageTitle title={"Dish Sub Categories"} />
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}

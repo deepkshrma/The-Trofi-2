@@ -5,6 +5,7 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroDishCategory() {
   const [categoryName, setCategoryName] = useState("");
@@ -93,7 +94,15 @@ function RestroDishCategory() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Dish Categories", path: "/RestroDishCategoryList" },
+          {
+            label: editCategory ? "Edit Dish Category" : "Create Dish Category",
+            path: "/RestroDishCategory",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle
           title={editCategory ? "Edit Dish Category" : "Create Dish Category"}

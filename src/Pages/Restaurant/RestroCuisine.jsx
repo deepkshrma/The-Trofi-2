@@ -5,6 +5,7 @@ import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroCuisine() {
   const { id } = useParams(); // check if edit mode
@@ -59,7 +60,15 @@ function RestroCuisine() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant - Cuisines", path: "/RestroCuisineList" },
+          {
+            label: id ? "Update Cuisine" : "Restaurant Cuisine",
+            path: "/RestroCuisine",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={id ? "Update Cuisine" : "Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

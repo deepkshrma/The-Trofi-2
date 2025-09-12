@@ -7,7 +7,6 @@ import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import PageTitle from "../../../components/PageTitle/PageTitle";
-import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 export default function DishReviewList() {
   const [reviews, setReviews] = useState([
@@ -83,7 +82,6 @@ export default function DishReviewList() {
 
   return (
     <div className="main main_page p-6 duration-900">
-      <DynamicBreadcrumbs />
       <PageTitle title={"Dish Reviews List"} />
 
       <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-5">

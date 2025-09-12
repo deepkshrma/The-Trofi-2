@@ -4,6 +4,7 @@ import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroAmenity() {
   const location = useLocation();
@@ -86,7 +87,18 @@ function RestroAmenity() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[
+          {
+            label: "Restaurant Amenities List",
+            path: "/RestroAmenityList",
+          },
+          {
+            label: isEdit ? "Update Amenity" : "Restaurant Amenity",
+            path: "/RestroAmenity",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={isEdit ? "Update Amenity" : "Restaurant Amenity"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

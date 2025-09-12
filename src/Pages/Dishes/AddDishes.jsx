@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function AddDishes() {
   const [ingredient, setIngredient] = useState("");
@@ -104,7 +105,9 @@ function AddDishes() {
 
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
-      <DynamicBreadcrumbs />
+      <BreadcrumbsNav
+        customTrail={[{ label: "Add New Dish", path: "/AddDishes" }]}
+      />
       <div className=" bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Add New Dish"} />
 

@@ -26,7 +26,6 @@ import RestroDishCategory from "./Pages/Dishes/RestroDishCategory";
 import RestroDishSubCategory from "./Pages/Dishes/RestroDishSubCategory";
 import DishesList from "./Pages/Dishes/DishesList";
 import RestroProfile from "./Pages/Restaurant/RestroProfile";
-import Sidebar1 from "./components/Sidebar/Sidebar1";
 import RestroDishTypeList from "./Pages/Dishes/RestroDishTypeList";
 import RestroDishCategoryList from "./Pages/Dishes/RestroDishCategoryList";
 import RestroDishSubCategoryList from "./Pages/Dishes/RestroDishSubCategoryList";
@@ -73,6 +72,7 @@ const Allroutes = () => {
               path="/UpdateRestaurant/:id"
               element={<UpdateRestaurant />}
             />
+            <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
             <Route path="/AddDishes" element={<AddDishes />} />
             <Route path="/RestroDishType" element={<RestroDishType />} />
             <Route

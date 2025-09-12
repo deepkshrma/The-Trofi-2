@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 const RestroDishTypeList = () => {
   const [dishes, setDishes] = useState([]);
@@ -75,7 +76,14 @@ const RestroDishTypeList = () => {
   return (
     <>
       <div className="main main_page p-6 duration-900">
-        <DynamicBreadcrumbs />
+        <BreadcrumbsNav
+          customTrail={[
+            {
+              label: "Dish Management",
+              path: "/RestroDishTypeList",
+            },
+          ]}
+        />
         <PageTitle title={"Dish Management"} />
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* Search */}

@@ -2,7 +2,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-// Define your custom map for pathnames -> readable labels
 const breadcrumbNameMap = {
   "/Dashboard": "DashBoard",
   "/AdminList": "Admin List",
@@ -42,6 +41,43 @@ const breadcrumbNameMap = {
   "/RestroProfile/:id": "Restaurant Profile",
 };
 
+// Utility: resolve labels including dynamic routes
+const getLabel = (route) => {
+  if (breadcrumbNameMap[route]) return breadcrumbNameMap[route];
+
+  const dynamicMatch = Object.keys(breadcrumbNameMap).find((path) => {
+    if (path.includes(":")) {
+      const base = path.split("/:")[0];
+      return route.startsWith(base + "/");
+    }
+    return false;
+  });
+
+  if (dynamicMatch) return breadcrumbNameMap[dynamicMatch];
+
+  return route.split("/").pop();
+};
+
+// Utility: if route matches a ":id", find its list page
+const getListParent = (route) => {
+  const dynamicMatch = Object.keys(breadcrumbNameMap).find((path) => {
+    if (path.includes(":")) {
+      const base = path.split("/:")[0];
+      return route.startsWith(base + "/");
+    }
+    return false;
+  });
+
+  if (dynamicMatch) {
+    const base = dynamicMatch.split("/:")[0]; // e.g. "/RestroAmenity"
+    const listRoute = `${base}List`; // e.g. "/RestroAmenityList"
+    if (breadcrumbNameMap[listRoute]) {
+      return listRoute;
+    }
+  }
+  return null;
+};
+
 function DynamicBreadcrumbs() {
   const location = useLocation();
   const pathnames = location.pathname.split("/").filter((x) => x);
@@ -57,15 +93,17 @@ function DynamicBreadcrumbs() {
           {pathnames.length > 0 && <span className="mx-2">/</span>}
         </li>
 
-        {/* Loop through rest of the path */}
         {pathnames.map((name, idx) => {
-          const routeTo = `/${pathnames.slice(0, idx + 1).join("/")}`;
+          let routeTo = `/${pathnames.slice(0, idx + 1).join("/")}`;
           const isLast = idx === pathnames.length - 1;
 
-          // Pick label from map, fallback to capitalized path
-          const label =
-            breadcrumbNameMap[routeTo] ||
-            name.charAt(0).toUpperCase() + name.slice(1);
+          // If this is a dynamic detail page, insert its List parent instead
+          const listParent = getListParent(routeTo);
+          if (listParent && !isLast) {
+            routeTo = listParent;
+          }
+
+          const label = getLabel(routeTo);
 
           return (
             <li key={idx} className="flex items-center">
