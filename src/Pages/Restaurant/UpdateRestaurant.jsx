@@ -14,6 +14,8 @@ function UpdateRestaurant() {
   const [restaurantData, setRestaurantData] = useState({
     name: "",
     email: "",
+    password: "",      // added default to avoid uncontrolled warnings
+    role_id: "",       // default role id
     address: "",
     country_code: "",
     phone: "",
@@ -28,64 +30,143 @@ function UpdateRestaurant() {
     description: "",
     longDescription: "",
     hygieneStatus: "general",
-    openingTime: "",
+    openingTime: "",   // will be in "HH:MM" format for <input type="time" />
     closingTime: "",
-    openDays: [],
-    dish_type: [],
+    openDays: [],      // ["Monday","Tuesday"...]
+    dish_type: [],     // array of IDs
     restaurant_type: [],
     good_for: [],
     cuisines: [],
     amenities: [],
   });
 
+  // dropdown options
   const [dishTypes, setDishTypes] = useState([]);
   const [cuisines, setCuisines] = useState([]);
   const [goodFors, setGoodFors] = useState([]);
   const [restroTypes, setRestroTypes] = useState([]);
   const [amenities, setAmenities] = useState([]);
+
   const [gallery, setGallery] = useState([]);
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
 
   const [loading, setLoading] = useState(true);
 
+  // Helpers
+  const normalizeIdArray = (arr) => {
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map((it) => {
+        if (!it) return null;
+        if (typeof it === "string") return it;
+        if (typeof it === "object") return it._id || it.id || null;
+        return null;
+      })
+      .filter(Boolean);
+  };
+
+  const parseTimeToInput = (timeStr) => {
+    if (!timeStr) return "";
+    const s = String(timeStr).trim();
+
+    // If already HH:MM, return padded
+    const hhmm = s.match(/^(\d{1,2}):(\d{2})/);
+    if (hhmm) {
+      const hh = String(hhmm[1]).padStart(2, "0");
+      const mm = String(hhmm[2]).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    // Match patterns like "7AM", "7 AM", "7:30PM", "11 PM"
+    const m = s.match(/(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])?/);
+    if (!m) return "";
+
+    let hour = parseInt(m[1], 10);
+    const minute = m[2] ? parseInt(m[2], 10) : 0;
+    const ampm = m[3];
+
+    if (ampm) {
+      if (ampm.toLowerCase() === "pm" && hour !== 12) hour += 12;
+      if (ampm.toLowerCase() === "am" && hour === 12) hour = 0;
+    }
+    const hh = String(hour).padStart(2, "0");
+    const mm = String(minute).padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  const parseDaysToFullNames = (daysStr) => {
+    if (!daysStr) return [];
+    const abbMap = {
+      Mon: "Monday",
+      Tue: "Tuesday",
+      Wed: "Wednesday",
+      Thu: "Thursday",
+      Fri: "Friday",
+      Sat: "Saturday",
+      Sun: "Sunday",
+    };
+    return String(daysStr)
+      .split(",")
+      .map((t) => t.trim())
+      .map((token) => {
+        if (!token) return null;
+        // normalize token like "Mon" or "Monday"
+        if (token.length <= 3) {
+          const key = token.charAt(0).toUpperCase() + token.slice(1, 3);
+          return abbMap[key] || token;
+        }
+        // Already full name: ensure capitalization
+        return token.charAt(0).toUpperCase() + token.slice(1);
+      })
+      .filter(Boolean);
+  };
+
+  // Fetch dropdowns and restaurant details (axios)
   useEffect(() => {
     const fetchDropdownData = async () => {
-      const endpoints = [
-        "restro/get-dish-type",
-        "restro/get-cusine",
-        "restro/get-good-for",
-        "restro/get-restaurant-types",
-        "restro/get-amenity",
-      ];
-
-      const [dishRes, cuisineRes, goodForRes, restroTypeRes, amenityRes] =
-        await Promise.all(
-          endpoints.map((ep) =>
-            fetch(`${BASE_URL}/${ep}`).then((res) => res.json())
+      try {
+        const urls = [
+          `${BASE_URL}/restro/get-dish-type`,
+          `${BASE_URL}/restro/get-cusine`,
+          `${BASE_URL}/restro/get-good-for`,
+          `${BASE_URL}/restro/get-restaurant-types`,
+          `${BASE_URL}/restro/get-amenity`,
+        ];
+        const responses = await Promise.all(
+          urls.map((u) =>
+            axios
+              .get(u)
+              .then((r) => r.data)
+              .catch(() => ({ data: [] }))
           )
         );
 
-      setDishTypes(dishRes.data || []);
-      setCuisines(cuisineRes.data || []);
-      setGoodFors(goodForRes.data || []);
-      setRestroTypes(restroTypeRes.data || []);
-      setAmenities(amenityRes.data || []);
+        setDishTypes(responses[0].data || []);
+        setCuisines(responses[1].data || []);
+        setGoodFors(responses[2].data || []);
+        setRestroTypes(responses[3].data || []);
+        setAmenities(responses[4].data || []);
+      } catch (err) {
+        console.error("Error fetching dropdown data:", err);
+      }
     };
 
     const fetchRestaurant = async () => {
       try {
-        let token =
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE3Zjk1MzQwNWQ2ODNiYjNmMzQ0YyIsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNTI4MjEsImV4cCI6MTc1NzY1NzYyMX0.-9ih6joJxRHpZ3qk4jHCdXk-cDxV977m3DlA_TrfqEQ";
-
+        // If you keep a token in localStorage, use it. Otherwise call without header.
+        const token = localStorage.getItem("token"); // optional
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await axios.get(`${BASE_URL}/restro/get-restaurant/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers,
         });
-        const data = res.data.data;
+        const data = res.data?.data || {};
 
-        setRestaurantData({
+        // parse time parts
+        const [rawOpen, rawClose] = (data.time || "").split(/\s*to\s*/i);
+
+        setRestaurantData((prev) => ({
+          ...prev,
           name: data.restro_name || "",
           email: data.email || "",
           address: data.address || "",
@@ -96,21 +177,31 @@ function UpdateRestaurant() {
           state: data.state || "",
           postalCode: data.postalCode || "",
           country: data.country || "India",
-          latitude: data.latitude || null,
-          longitude: data.longitude || null,
+          latitude:
+            data.latitude !== undefined && data.latitude !== null
+              ? String(data.latitude)
+              : null,
+          longitude:
+            data.longitude !== undefined && data.longitude !== null
+              ? String(data.longitude)
+              : null,
           food_type: data.food_type || "both",
           description: data.description || "",
           longDescription: data.long_description || "",
           hygieneStatus: data.hygiene_status || "general",
-          openingTime: data.time ? data.time.split(" to ")[0] : "",
-          closingTime: data.time ? data.time.split(" to ")[1] : "",
-          openDays: data.days ? data.days.split(", ").map((d) => d.trim()) : [],
-          dish_type: data.dish_type || [],
-          restaurant_type: data.restaurant_type || [],
-          good_for: data.good_for || [],
-          cuisines: data.cuisines || [],
-          amenities: data.amenities || [],
-        });
+          openingTime: parseTimeToInput(rawOpen),
+          closingTime: parseTimeToInput(rawClose),
+          openDays: parseDaysToFullNames(data.days),
+          dish_type: normalizeIdArray(data.dish_type),
+          restaurant_type: normalizeIdArray(data.restaurant_type),
+          good_for: normalizeIdArray(data.good_for),
+          cuisines: normalizeIdArray(data.cuisines),
+          amenities: normalizeIdArray(data.amenities),
+          role_id: data.role_id || prev.role_id || "",
+        }));
+
+        // If you want to preview existing images (not required), you can store their URLs in a separate state:
+        // setExistingImageUrls(data.restaurant_images || []);
       } catch (err) {
         console.error("Error fetching restaurant:", err);
         toast.error("Failed to fetch restaurant data");
@@ -124,8 +215,12 @@ function UpdateRestaurant() {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setRestaurantData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox") {
+      setRestaurantData((prev) => ({ ...prev, [name]: checked }));
+    } else {
+      setRestaurantData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -133,17 +228,17 @@ function UpdateRestaurant() {
       const formData = new FormData();
       formData.append("restro_name", restaurantData.name);
       formData.append("email", restaurantData.email);
-      formData.append("address", restaurantData.address);
-      formData.append("postalCode", restaurantData.postalCode);
-      formData.append("country", restaurantData.country);
-      formData.append("country_code", restaurantData.country_code);
-      formData.append("phone", restaurantData.phone);
-      formData.append("birth_year", restaurantData.birthYear);
+      formData.append("address", restaurantData.address || "");
+      formData.append("postalCode", restaurantData.postalCode || "");
+      formData.append("country", restaurantData.country || "");
+      formData.append("country_code", restaurantData.country_code || "");
+      formData.append("phone", restaurantData.phone || "");
+      formData.append("birth_year", restaurantData.birthYear || "");
       formData.append("city", restaurantData.city || "");
       formData.append("state", restaurantData.state || "");
-      formData.append("latitude", restaurantData.latitude);
-      formData.append("longitude", restaurantData.longitude);
-      formData.append("food_type", restaurantData.food_type);
+      formData.append("latitude", restaurantData.latitude || "");
+      formData.append("longitude", restaurantData.longitude || "");
+      formData.append("food_type", restaurantData.food_type || "both");
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
@@ -165,31 +260,36 @@ function UpdateRestaurant() {
         );
       }
       if (restaurantData.openDays.length > 0) {
+        // backend may expect abbreviations — transform back if needed
         formData.append("days", restaurantData.openDays.join(", "));
       }
 
       gallery.forEach((file) => formData.append("restaurant_images", file));
-      if (profileImage) {
-        formData.append("restaurant_images", profileImage);
-      }
+      if (profileImage) formData.append("restaurant_images", profileImage);
       menuFiles.forEach((file) =>
         formData.append("restaurant_menu_images", file)
       );
 
-      const response = await fetch(
+      const token = localStorage.getItem("token");
+      const headers = token
+        ? { Authorization: `Bearer ${token}` }
+        : undefined;
+
+      const response = await axios.patch(
         `${BASE_URL}/restro/update-restaurant/${id}`,
+        formData,
         {
-          method: "PATCH",
-          body: formData,
+          headers: {
+            ...(headers || {}),
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
-      const result = await response.json();
-      console.log("Restaurant Updated:", result);
       toast.success("Restaurant updated successfully!");
       navigate("/RestroList");
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Error updating:", err);
       toast.error("Update failed");
     }
   };
@@ -215,7 +315,7 @@ function UpdateRestaurant() {
             <input
               type="email"
               name="email"
-              value={restaurantData.email}
+              value={restaurantData.email || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
@@ -228,7 +328,7 @@ function UpdateRestaurant() {
             <input
               type="password"
               name="password"
-              value={restaurantData.password}
+              value={restaurantData.password || ""}
               onChange={handleChange}
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
@@ -729,13 +829,14 @@ function UpdateRestaurant() {
           )}
       </div>
       <button
-        className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
-        style={{ backgroundColor: "#F9832B" }}
-        onClick={handleSubmit}
-      >
-        Update Restaurant
-      </button>
-    </div>
+          className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
+          style={{ backgroundColor: "#F9832B" }}
+          onClick={handleSubmit}
+        >
+          Update Restaurant
+        </button>
+      </div>
+    
   );
 }
 
