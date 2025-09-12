@@ -23,6 +23,7 @@ function Layout() {
               isToggle={isToggle}
               className="fixed top-0"
             />
+
             <Outlet />
           </div>
         </div>
