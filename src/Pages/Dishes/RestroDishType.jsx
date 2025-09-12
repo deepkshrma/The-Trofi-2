@@ -4,6 +4,7 @@ import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function RestroDishType() {
   const [name, setName] = useState("");
@@ -68,7 +69,7 @@ function RestroDishType() {
         );
       }
 
-      console.log("API RESPONSE:", res); 
+      console.log("API RESPONSE:", res);
 
       if ([200, 201].includes(res.status)) {
         toast.success(res.data?.message || "Dish Type saved successfully");
@@ -94,6 +95,7 @@ function RestroDishType() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
+      <DynamicBreadcrumbs />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle
           title={editId ? "Edit Restaurant Dish Type" : "Restaurant Dish Type"}

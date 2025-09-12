@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import Pagination from "../../components/common/Pagination/Pagination";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function RestroCuisineList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -83,6 +84,7 @@ function RestroCuisineList() {
   return (
     <>
       <div className="main main_page p-6 w-full h-screen duration-900">
+        <DynamicBreadcrumbs />
         <PageTitle title={"Restaurant - Cuisines"} />
 
         <div className="bg-white rounded-2xl shadow-md mt-3">

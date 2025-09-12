@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ContextApi from "./ContextApi";
 import Login from "./Pages/Login/Login";
-import Header from "./components/Header/Header";
-import Sidebar from "./components/Sidebar/Sidebar";
 import Layout from "./Layout/Layout";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import RoleList from "./Pages/Role/RoleLIst";

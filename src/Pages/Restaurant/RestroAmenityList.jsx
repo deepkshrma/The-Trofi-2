@@ -4,6 +4,7 @@ import pizza from "../../assets/images/pending.png"; // placeholder
 import Pagination from "../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function RestroAmenityList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -90,6 +91,7 @@ function RestroAmenityList() {
   return (
     <>
       <div className="main main_page p-6 w-full min-h-screen duration-900">
+        <DynamicBreadcrumbs />
         <PageTitle title={"Restaurant Amenities List"} />
 
         <div className="bg-white rounded-2xl shadow-md mt-3">

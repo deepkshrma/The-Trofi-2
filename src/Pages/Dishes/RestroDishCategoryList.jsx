@@ -6,6 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import PageTitle from "../../components/PageTitle/PageTitle";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 const RestroDishCategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -71,6 +72,7 @@ const RestroDishCategoryList = () => {
   return (
     <>
       <div className="p-6 main main_page duration-900">
+        <DynamicBreadcrumbs />
         <PageTitle title={"Dish Categories"} />
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}

@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
-
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function AddDishes() {
   const [ingredient, setIngredient] = useState("");
@@ -94,7 +94,7 @@ function AddDishes() {
       .post(`${BASE_URL}/dishes/create-dish`, formData)
       .then((res) => {
         toast.success("Dish created successfully!");
-        navigate("/DishesList"); 
+        navigate("/DishesList");
       })
       .catch((err) => {
         console.error(err);
@@ -104,6 +104,7 @@ function AddDishes() {
 
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
+      <DynamicBreadcrumbs />
       <div className=" bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Add New Dish"} />
 

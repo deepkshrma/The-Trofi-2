@@ -9,6 +9,7 @@ import { BASE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -77,6 +78,7 @@ function RestroList() {
   return (
     <>
       <div className="main main_page p-6 min-h-screen duration-900">
+        <DynamicBreadcrumbs />
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <PageTitle title={"Restaurant List"} />

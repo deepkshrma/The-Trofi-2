@@ -4,8 +4,9 @@ import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import {BASE_URL} from "../../config/Config.js"
+import { BASE_URL } from "../../config/Config.js";
 import axios from "axios";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
 
 function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
@@ -90,9 +91,6 @@ function RestroAdd() {
     setRestaurantData((prev) => ({ ...prev, [name]: value }));
   };
 
-
-
-
   const handleSubmit = async () => {
     try {
       const formData = new FormData();
@@ -151,11 +149,11 @@ function RestroAdd() {
 
       const result = await response.json();
       console.log("Restaurant Created:", result);
-      toast.success("restro created successfully!")
-      navigate("/RestroList")
+      toast.success("restro created successfully!");
+      navigate("/RestroList");
     } catch (err) {
       console.error("Error:", err);
-      toast.error(err)
+      toast.error(err);
     }
   };
 
@@ -163,6 +161,7 @@ function RestroAdd() {
 
   return (
     <div className="main main_page p-6 min-h-screen  duration-900">
+      <DynamicBreadcrumbs />
       <PageTitle title={"Add New Restaurant"} />
 
       {/*  Basic Info */}

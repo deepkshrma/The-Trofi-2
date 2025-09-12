@@ -5,6 +5,7 @@ import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import PageTitle from "../../../components/PageTitle/PageTitle";
+import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 function RestaurantReview() {
   const [editMode, setEditMode] = useState(false);
@@ -49,6 +50,7 @@ function RestaurantReview() {
 
   return (
     <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
+      <DynamicBreadcrumbs />
       {/* Header with Edit/Save button */}
       <div className="flex justify-between items-center">
         <PageTitle title={"Review Details"} />

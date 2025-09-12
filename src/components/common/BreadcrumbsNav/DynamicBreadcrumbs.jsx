@@ -51,7 +51,7 @@ function DynamicBreadcrumbs() {
       <ol className="flex flex-wrap items-center">
         {/* Always show Home */}
         <li>
-          <Link to="/" className="text-orange-500 hover:underline">
+          <Link to="/Dashboard" className="text-orange-500 hover:underline">
             Home
           </Link>
           {pathnames.length > 0 && <span className="mx-2">/</span>}
@@ -70,7 +70,7 @@ function DynamicBreadcrumbs() {
           return (
             <li key={idx} className="flex items-center">
               {isLast ? (
-                <span className="text-gray-800 font-semibold">{label}</span>
+                <span className="text-gray-500 font-semibold">{label}</span>
               ) : (
                 <>
                   <Link
