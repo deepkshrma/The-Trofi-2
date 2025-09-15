@@ -113,13 +113,13 @@ function RestroType() {
 
             {/* Preview */}
             {image && (
-              <div className="mt-3 flex items-center gap-4 p-2 border rounded-lg w-fit">
+              <div className="mt-3 flex flex-col items-center gap-4 p-2 border rounded-lg w-fit">
+                <span className="text-sm text-gray-700">{imageFile?.name}</span>
                 <img
                   src={image}
                   alt="Preview"
                   className="w-16 h-16 object-cover rounded-md border"
                 />
-                <span className="text-sm text-gray-700">{imageFile?.name}</span>
               </div>
             )}
           </div>
