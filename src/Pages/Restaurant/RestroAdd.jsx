@@ -238,32 +238,6 @@ function RestroAdd() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-600 font-medium mb-2">
-              Country Code
-            </label>
-            <input
-              type="text"
-              name="country_code"
-              value={restaurantData.country_code}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              name="phone"
-              value={restaurantData.phone}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
               Phone Number
             </label>
             <PhoneInput
@@ -272,7 +246,7 @@ function RestroAdd() {
               onChange={(phone) =>
                 setRestaurantData((prev) => ({ ...prev, phone }))
               }
-              inputClass="!w-full !p-3 !pl-14 !rounded-lg !border-gray-300"
+              inputClass="!w-full !h-12 !p-3 !pl-14 !rounded-lg !border-gray-300"
             />
           </div>
 
@@ -335,7 +309,7 @@ function RestroAdd() {
             <button
               type="button"
               onClick={() => document.getElementById("menuInput").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md cursor-pointer"
             >
               Choose Images
             </button>
@@ -394,7 +368,7 @@ function RestroAdd() {
             <button
               type="button"
               onClick={() => document.getElementById("galleryInput").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow hover:shadow-md cursor-pointer"
             >
               Choose Images
             </button>

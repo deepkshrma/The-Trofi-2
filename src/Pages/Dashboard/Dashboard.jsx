@@ -183,7 +183,7 @@ const FilterPills = ({
       <button
         key={label}
         onClick={() => onChange(label)}
-        className={`px-3 py-1 text-sm rounded-full transition ${
+        className={`px-3 py-1 text-sm rounded-full transition  cursor-pointer ${
           active === label
             ? "bg-gray-800 text-white"
             : "text-gray-600 hover:text-gray-900"
