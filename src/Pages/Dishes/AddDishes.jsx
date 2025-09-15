@@ -32,7 +32,7 @@ function AddDishes() {
 
   useEffect(() => {
     const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YzI3MWIwMWJkNWUxMGU5YTEyMmJiNSIsImVtYWlsIjoicGFyYXNtZS5ncm91cEBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc1NzU4NTQ0MSwiZXhwIjoxNzU4MTkwMjQxfQ.0L5awNihLtdHII6oFIopJHKwkOJEUkQYFgZ9DUOCFe4";
 
     const config = {
       headers: {

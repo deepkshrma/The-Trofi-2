@@ -408,18 +408,22 @@ function RestroProfile() {
           </div>
         </div>
         <div className="bg-white p-5 rounded-xl shadow-md mt-6">
-  <h2 className="text-lg font-bold text-gray-800 mb-3">Additional Info</h2>
-  <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
-    <p className="flex items-center gap-2">
-      <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
-      {restaurant.lastMenuUpdated ? new Date(restaurant.lastMenuUpdated).toLocaleDateString() : "N/A"}
-    </p>
-    <p className="flex items-center gap-2">
-      <Star className="w-5 h-5 text-[#F9832B]" /> Avg Rating: {restaurant.avgRating || "N/A"} / 5
-    </p>
-  </div>
-</div>
-
+          <h2 className="text-lg font-bold text-gray-800 mb-3">
+            Additional Info
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
+            <p className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
+              {restaurant.lastMenuUpdated
+                ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
+                : "N/A"}
+            </p>
+            <p className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Avg Rating:{" "}
+              {restaurant.avgRating || "N/A"} / 5
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
