@@ -9,10 +9,20 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 function RestroType() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [image, setImage] = useState(null); // for preview
+  const [imageFile, setImageFile] = useState(null); // actual file
 
   const editData = location.state || null;
   const [type, setType] = useState(editData?.name || "");
   const isEdit = Boolean(editData?.id);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImage(URL.createObjectURL(file)); // preview URL
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,6 +95,33 @@ function RestroType() {
                  outline-none transition duration-200"
               required
             />
+          </div>
+
+          {/* Image upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Upload Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
+               file:rounded-lg file:border-0 file:text-sm file:font-semibold 
+               file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+            />
+
+            {/* Preview */}
+            {image && (
+              <div className="mt-3 flex flex-col items-center gap-4 p-2 border rounded-lg w-fit">
+                <span className="text-sm text-gray-700">{imageFile?.name}</span>
+                <img
+                  src={image}
+                  alt="Preview"
+                  className="w-16 h-16 object-cover rounded-md border"
+                />
+              </div>
+            )}
           </div>
 
           <button

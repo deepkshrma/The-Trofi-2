@@ -246,8 +246,8 @@ function RoleCreate() {
               key={section.key}
               className="border border-gray-200 rounded p-5 my-5 bg-white shadow-sm"
             >
-              <div className="w-full flex justify-between items-center mb-3">
-                <h2 className="text-[20px] font-semibold text-gray-700">
+              <div className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
+                <h2 className="text-[18px] sm:text-[20px] font-semibold text-gray-700">
                   {section.label}
                 </h2>
                 <label className="text-md flex items-center gap-2 cursor-pointer">
@@ -259,12 +259,13 @@ function RoleCreate() {
                   Access
                 </label>
               </div>
+
               <hr className="border-gray-200 mb-4" />
 
               {enabled && (
                 <>
                   {section.extraFields && (
-                    <div className="flex gap-6 mb-6">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6">
                       {section.extraFields.map((field) => (
                         <label
                           key={field.key}
@@ -288,7 +289,7 @@ function RoleCreate() {
                       <h4 className="text-md font-medium mb-4 text-gray-700">
                         Manage Permissions
                       </h4>
-                      <div className="grid grid-cols-6 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                         {section.manageFields.map((field) => (
                           <div
                             key={field}
