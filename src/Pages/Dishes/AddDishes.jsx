@@ -135,6 +135,7 @@ function AddDishes() {
             <input
               type="number"
               name="price"
+              min={0}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
               placeholder="Enter price"
               required
@@ -241,6 +242,12 @@ function AddDishes() {
                 type="text"
                 value={ingredient}
                 onChange={(e) => setIngredient(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault(); // prevent form submission if inside a form
+                    addIngredient(); // call your existing addIngredient function
+                  }
+                }}
                 className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
                 placeholder="Enter ingredient"
               />
