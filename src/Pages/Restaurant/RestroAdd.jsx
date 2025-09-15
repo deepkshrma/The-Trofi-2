@@ -8,6 +8,8 @@ import { BASE_URL } from "../../config/Config.js";
 import axios from "axios";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
@@ -257,6 +259,20 @@ function RestroAdd() {
               value={restaurantData.phone}
               onChange={handleChange}
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Phone Number
+            </label>
+            <PhoneInput
+              country="us" // default country
+              value={restaurantData.phone}
+              onChange={(phone) =>
+                setRestaurantData((prev) => ({ ...prev, phone }))
+              }
+              inputClass="!w-full !p-3 !pl-14 !rounded-lg !border-gray-300"
             />
           </div>
 

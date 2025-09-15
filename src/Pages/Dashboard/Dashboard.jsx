@@ -197,11 +197,11 @@ const FilterPills = ({
 );
 
 const DropdownPill = ({ label, onChange }) => (
-  <div className="relative">
+  <div className="relative ">
     <select
       value={label}
       onChange={(e) => onChange(e.target.value)}
-      className="appearance-none bg-white border rounded-full px-4 py-2 text-sm pr-8"
+      className="appearance-none bg-white border rounded-full px-4 py-2 text-sm pr-8 cursor-pointer"
     >
       <option>Monthly</option>
       <option>Weekly</option>
