@@ -34,6 +34,7 @@ import DishReviewList from "./Pages/Reviews/Dishes/DishReviewList";
 import RestaurantReview from "./Pages/Reviews/Restaurant/RestaurantReview";
 import UpdateRestaurant from "./Pages/Restaurant/UpdateRestaurant";
 import DishReview from "./Pages/Reviews/Dishes/DishReview";
+import RestroOwnerDashboard from "./Pages/Dashboard/RestroOwnerDashboard";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -106,6 +107,10 @@ const Allroutes = () => {
 
             <Route path="/DishReviewList" element={<DishReviewList />} />
             <Route path="/DishReview" element={<DishReview />} />
+            <Route
+              path="/RestroOwnerDashboard"
+              element={<RestroOwnerDashboard />}
+            />
           </Route>
         </Routes>
       </Router>

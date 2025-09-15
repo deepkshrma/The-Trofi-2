@@ -35,7 +35,7 @@ function RestroList() {
   const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
   let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE3Zjk1MzQwNWQ2ODNiYjNmMzQ0YyIsImVtYWlsIjoidGVzdDFAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNTI4MjEsImV4cCI6MTc1NzY1NzYyMX0.-9ih6joJxRHpZ3qk4jHCdXk-cDxV977m3DlA_TrfqEQ";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YzQwMDg3NmE3NzY2YzYyM2YyMDE3ZiIsImVtYWlsIjoienZoc0B5b3BtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU3Njc1NjU1LCJleHAiOjE3NTgyODA0NTV9.DDR3JF84Mwo-byCoW79TYJsQHVPmkRZfqdMHeOfTjSA";
 
   // ✅ Fetch restaurants with pagination
   const fetchRestaurants = async (page = 1) => {
