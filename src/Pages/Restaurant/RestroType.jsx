@@ -3,6 +3,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroType() {
   const location = useLocation();
@@ -33,9 +35,12 @@ function RestroType() {
           alert(res.data?.message || "Something went wrong");
         }
       } else {
-        const res = await axios.post(`${BASE_URL}/restro/create-restaurant-type`, {
-          name: type,
-        });
+        const res = await axios.post(
+          `${BASE_URL}/restro/create-restaurant-type`,
+          {
+            name: type,
+          }
+        );
 
         if (res.status === 201 || res.data?.status) {
           alert(res.data?.message || "Created successfully");
@@ -52,8 +57,19 @@ function RestroType() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant Type List", path: "/RestroTypeList" },
+          {
+            label: isEdit ? "Update Restaurant Type" : "Restaurant Type",
+            path: "/RestroType",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
-        <PageTitle title={isEdit ? "Update Restaurant Type" : "Restaurant Type"} />
+        <PageTitle
+          title={isEdit ? "Update Restaurant Type" : "Restaurant Type"}
+        />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

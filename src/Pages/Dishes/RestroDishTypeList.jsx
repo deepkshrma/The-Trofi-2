@@ -3,6 +3,9 @@ import Pagination from "../../components/common/Pagination/Pagination";
 import { BASE_URL } from "../../config/Config";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import PageTitle from "../../components/PageTitle/PageTitle";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 const RestroDishTypeList = () => {
   const [dishes, setDishes] = useState([]);
@@ -73,10 +76,16 @@ const RestroDishTypeList = () => {
   return (
     <>
       <div className="main main_page p-6 duration-900">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">
-          Dish Management
-        </h2>
-        <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3">
+        <BreadcrumbsNav
+          customTrail={[
+            {
+              label: "Dish Management",
+              path: "/RestroDishTypeList",
+            },
+          ]}
+        />
+        <PageTitle title={"Dish Management"} />
+        <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* Search */}
           <div className="flex flex-wrap gap-3 m-3">
             <input

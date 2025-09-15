@@ -3,6 +3,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroGoodFor() {
   const location = useLocation();
@@ -77,6 +79,15 @@ function RestroGoodFor() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant - Good For", path: "/RestroGoodForList" },
+          {
+            label: isEdit ? "Update Good For" : "Restaurant Good For",
+            path: "/RestroGoodFor",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={isEdit ? "Update Good For" : "Restaurant Good For"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

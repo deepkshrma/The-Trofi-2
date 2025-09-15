@@ -9,6 +9,8 @@ import { BASE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -77,6 +79,9 @@ function RestroList() {
   return (
     <>
       <div className="main main_page p-6 min-h-screen duration-900">
+        <BreadcrumbsNav
+          customTrail={[{ label: "Restaurant List", path: "RestroList" }]}
+        />
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <PageTitle title={"Restaurant List"} />

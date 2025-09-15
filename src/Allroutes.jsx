@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ContextApi from "./ContextApi";
 import Login from "./Pages/Login/Login";
-import Header from "./components/Header/Header";
-import Sidebar from "./components/Sidebar/Sidebar";
 import Layout from "./Layout/Layout";
 import Dashboard from "./Pages/Dashboard/Dashboard";
 import RoleList from "./Pages/Role/RoleLIst";
@@ -28,7 +26,6 @@ import RestroDishCategory from "./Pages/Dishes/RestroDishCategory";
 import RestroDishSubCategory from "./Pages/Dishes/RestroDishSubCategory";
 import DishesList from "./Pages/Dishes/DishesList";
 import RestroProfile from "./Pages/Restaurant/RestroProfile";
-import Sidebar1 from "./components/Sidebar/Sidebar1";
 import RestroDishTypeList from "./Pages/Dishes/RestroDishTypeList";
 import RestroDishCategoryList from "./Pages/Dishes/RestroDishCategoryList";
 import RestroDishSubCategoryList from "./Pages/Dishes/RestroDishSubCategoryList";
@@ -36,6 +33,7 @@ import RestaurantReviewList from "./Pages/Reviews/Restaurant/RestaurantReviewLis
 import DishReviewList from "./Pages/Reviews/Dishes/DishReviewList";
 import RestaurantReview from "./Pages/Reviews/Restaurant/RestaurantReview";
 import UpdateRestaurant from "./Pages/Restaurant/UpdateRestaurant";
+import DishReview from "./Pages/Reviews/Dishes/DishReview";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -70,7 +68,11 @@ const Allroutes = () => {
             <Route path="/RestroTypeList" element={<RestroTypeList />} />
             <Route path="/RestroCuisineList" element={<RestroCuisineList />} />
             <Route path="/RestroGoodForList" element={<RestroGoodForList />} />
-            <Route path="/UpdateRestaurant/:id" element={<UpdateRestaurant />} />
+            <Route
+              path="/UpdateRestaurant/:id"
+              element={<UpdateRestaurant />}
+            />
+            <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
             <Route path="/AddDishes" element={<AddDishes />} />
             <Route path="/RestroDishType" element={<RestroDishType />} />
             <Route
@@ -101,7 +103,9 @@ const Allroutes = () => {
               element={<RestaurantReviewList />}
             />
             <Route path="/RestaurantReview" element={<RestaurantReview />} />
+
             <Route path="/DishReviewList" element={<DishReviewList />} />
+            <Route path="/DishReview" element={<DishReview />} />
           </Route>
         </Routes>
       </Router>

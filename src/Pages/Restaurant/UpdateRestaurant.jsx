@@ -6,6 +6,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { BASE_URL } from "../../config/Config.js";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -14,8 +16,8 @@ function UpdateRestaurant() {
   const [restaurantData, setRestaurantData] = useState({
     name: "",
     email: "",
-    password: "",      // added default to avoid uncontrolled warnings
-    role_id: "",       // default role id
+    password: "", // added default to avoid uncontrolled warnings
+    role_id: "", // default role id
     address: "",
     country_code: "",
     phone: "",
@@ -30,10 +32,10 @@ function UpdateRestaurant() {
     description: "",
     longDescription: "",
     hygieneStatus: "general",
-    openingTime: "",   // will be in "HH:MM" format for <input type="time" />
+    openingTime: "", // will be in "HH:MM" format for <input type="time" />
     closingTime: "",
-    openDays: [],      // ["Monday","Tuesday"...]
-    dish_type: [],     // array of IDs
+    openDays: [], // ["Monday","Tuesday"...]
+    dish_type: [], // array of IDs
     restaurant_type: [],
     good_for: [],
     cuisines: [],
@@ -271,9 +273,7 @@ function UpdateRestaurant() {
       );
 
       const token = localStorage.getItem("token");
-      const headers = token
-        ? { Authorization: `Bearer ${token}` }
-        : undefined;
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
       const response = await axios.patch(
         `${BASE_URL}/restro/update-restaurant/${id}`,
@@ -298,6 +298,14 @@ function UpdateRestaurant() {
 
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
+      {/* <Breadcrumbs
+        customTrail={[
+          {
+            label: "Update Restaurant",
+            path: `/UpdateRestaurant/:${restaurantData.role_id}`,
+          },
+        ]}
+      /> */}
       <PageTitle title={"Update Restaurant"} />
       {/*  Basic Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200 mt-5">
@@ -829,14 +837,13 @@ function UpdateRestaurant() {
           )}
       </div>
       <button
-          className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
-          style={{ backgroundColor: "#F9832B" }}
-          onClick={handleSubmit}
-        >
-          Update Restaurant
-        </button>
-      </div>
-    
+        className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
+        style={{ backgroundColor: "#F9832B" }}
+        onClick={handleSubmit}
+      >
+        Update Restaurant
+      </button>
+    </div>
   );
 }
 

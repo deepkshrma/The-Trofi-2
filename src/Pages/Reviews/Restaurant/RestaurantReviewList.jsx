@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { FaRegEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import star1 from "../../../assets/images/untitled_folder_6/star1.png";
+import star2 from "../../../assets/images/untitled_folder_6/star2.png";
+import star3 from "../../../assets/images/untitled_folder_6/star3.png";
+import star4 from "../../../assets/images/untitled_folder_6/star4.png";
+import star5 from "../../../assets/images/untitled_folder_6/star5.png";
+import PageTitle from "../../../components/PageTitle/PageTitle";
+import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 
 export default function RestaurantReviewList() {
   const [reviews, setReviews] = useState([
@@ -46,6 +53,14 @@ export default function RestaurantReviewList() {
     },
   ]);
 
+  const faceStars = [
+    { img: star1, label: "Very Bad" },
+    { img: star2, label: "Bad" },
+    { img: star3, label: "Okay" },
+    { img: star4, label: "Good" },
+    { img: star5, label: "Excellent" },
+  ];
+
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
@@ -56,20 +71,12 @@ export default function RestaurantReviewList() {
       rev.restroName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Helper to render stars
-  const renderStars = (count) => {
-    return Array.from({ length: 5 }).map((_, i) => (
-      <span key={i} className={i < count ? "text-yellow-400" : "text-gray-300"}>
-        ★
-      </span>
-    ));
-  };
-
   return (
     <div className="main main_page p-6 duration-900">
-      <h1 className="text-xl font-bold mb-4">Restaurant Reviews List</h1>
+      <DynamicBreadcrumbs />
+      <PageTitle title={"Restaurant Reviews List"} />
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-5">
         {/* Search Field */}
         <div className="mb-4 w-80">
           <input
@@ -102,8 +109,16 @@ export default function RestaurantReviewList() {
                 <td className="p-3 whitespace-nowrap">{idx + 1}</td>
                 <td className="p-3 whitespace-nowrap">{rev.userName}</td>
                 <td className="p-3 whitespace-nowrap">{rev.restroName}</td>
-                <td className="p-3 whitespace-nowrap">{rev.rating_label}</td>
-                <td className="p-3">{renderStars(rev.star_value)}</td>
+                <td className="p-3 whitespace-nowrap">
+                  {faceStars[rev.star_value - 1].label}
+                </td>
+                <td className="p-3">
+                  <img
+                    src={faceStars[rev.star_value - 1].img}
+                    alt={faceStars[rev.star_value - 1].label}
+                    className="w-10 h-10 md:w-12 md:h-12"
+                  />
+                </td>
                 <td className="p-3">
                   <span
                     className={`inline-block w-24 text-center  px-2 py-1 rounded-full text-xs font-semibold ${
@@ -121,7 +136,7 @@ export default function RestaurantReviewList() {
                   <div>
                     <FaRegEye
                       size={20}
-                      onClick={() => navigate("/RestaurantReview")}
+                      onClick={() => navigate(`/RestaurantReview`)}
                     />
                   </div>
                 </td>

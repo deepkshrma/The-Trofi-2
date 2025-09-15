@@ -4,6 +4,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroCuisine() {
   const { id } = useParams(); // check if edit mode
@@ -42,9 +44,11 @@ function RestroCuisine() {
       }
 
       if (res.status === 200 || res.status === 201 || res.data?.status) {
-        alert(res.data?.message || (id ? "Cuisine updated" : "Cuisine created"));
+        alert(
+          res.data?.message || (id ? "Cuisine updated" : "Cuisine created")
+        );
         if (!id) setCuisine(""); // clear only in create
-        navigate('/RestroCuisineList')
+        navigate("/RestroCuisineList");
       } else {
         alert(res.data?.message || "Something went wrong");
       }
@@ -56,6 +60,15 @@ function RestroCuisine() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant - Cuisines", path: "/RestroCuisineList" },
+          {
+            label: id ? "Update Cuisine" : "Restaurant Cuisine",
+            path: "/RestroCuisine",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={id ? "Update Cuisine" : "Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">

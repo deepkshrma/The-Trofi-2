@@ -3,6 +3,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroAmenity() {
   const location = useLocation();
@@ -12,7 +14,9 @@ function RestroAmenity() {
   const [iconName, setIconName] = useState(editData?.name || "");
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(
-    editData?.icon ? `${BASE_URL.replace(/\/api\/?$/, "/")}${editData.icon}` : null
+    editData?.icon
+      ? `${BASE_URL.replace(/\/api\/?$/, "/")}${editData.icon}`
+      : null
   );
   const fileInputRef = useRef(null);
 
@@ -83,6 +87,18 @@ function RestroAmenity() {
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">
+      <BreadcrumbsNav
+        customTrail={[
+          {
+            label: "Restaurant Amenities List",
+            path: "/RestroAmenityList",
+          },
+          {
+            label: isEdit ? "Update Amenity" : "Restaurant Amenity",
+            path: "/RestroAmenity",
+          },
+        ]}
+      />
       <div className="bg-white rounded-2xl shadow-md p-6 ">
         <PageTitle title={isEdit ? "Update Amenity" : "Restaurant Amenity"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
