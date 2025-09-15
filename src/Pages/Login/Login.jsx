@@ -1,13 +1,45 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import trofilogo from "../../assets/images/trofititle.png";
 import loginbg from "../../assets/images/loginimage.jpg";
 import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const navigate = useNavigate();
+
+
+  const VALID_EMAIL = "test@example.com";
+  const VALID_PASSWORD = "12345678";
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    
+    if (
+      email.trim().toLowerCase() === VALID_EMAIL &&
+      password === VALID_PASSWORD
+    ) {
+      toast.success("Login successful");
+
+      // store a tiny auth flag (optional). In production use proper auth.
+      const userData = { email: VALID_EMAIL };
+      if (remember) {
+        localStorage.setItem("trofi_user", JSON.stringify(userData));
+      } else {
+        sessionStorage.setItem("trofi_user", JSON.stringify(userData));
+      }
+
+      
+      navigate("/Dashboard");
+    } else {
+      toast.error("Invalid credentials — try test@example.com / 12345678");
+    }
+  };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center relative px-4"
@@ -95,7 +127,7 @@ export default function Login() {
               Sign in by entering information below
             </p>
 
-            <form className="space-y-4 translate-y-1/6">
+            <form onSubmit={handleSubmit} className="space-y-4 translate-y-1/6">
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Email *
@@ -103,6 +135,8 @@ export default function Login() {
                 <input
                   type="email"
                   placeholder="test@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                 />
               </div>
@@ -113,6 +147,8 @@ export default function Login() {
                 <input
                   type="password"
                   placeholder="12345678"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                 />
               </div>
@@ -120,16 +156,18 @@ export default function Login() {
                 <input
                   type="checkbox"
                   id="remember"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
                   className="accent-[#F9832B] w-4 h-4"
                 />
-                <label htmlFor="remember" className="text-sm">
+                <label htmlFor="remember" className="text-sm text-white">
                   Remember my preference
                 </label>
               </div>
               <button
                 type="submit"
-                onClick={() => navigate("/Dashboard")}
-                className="w-full bg-white/90 cursor-pointer  text-[#F9832B] font-semibold py-2 rounded-lg hover:bg-gray-100 transition"
+                className="w-full bg-white/90 cursor-pointer text-[#F9832B] font-semibold py-2 rounded-lg hover:bg-gray-100 transition disabled:opacity-50"
+                disabled={!email || !password}
               >
                 Sign In
               </button>

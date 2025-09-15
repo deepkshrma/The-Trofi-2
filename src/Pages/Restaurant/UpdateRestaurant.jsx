@@ -396,15 +396,6 @@ function UpdateRestaurant() {
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
-
-          {/* <input
-                  type="text"
-                  name="type"
-                  placeholder="Restaurant Type (e.g., Cafe, Bakery)"
-                  value={restaurantData.restaurant_type}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-                /> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
