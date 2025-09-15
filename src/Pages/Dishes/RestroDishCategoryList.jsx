@@ -139,13 +139,13 @@ const RestroDishCategoryList = () => {
                               state: { category: cat },
                             })
                           }
-                          className="px-3 py-1 rounded-lg bg-green-500 text-white text-sm shadow-md hover:bg-green-600"
+                          className="px-3 py-1 rounded-lg bg-green-500 text-white text-sm shadow-md hover:bg-green-600 cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => setShowDeleteModal(true)}
-                          className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
+                          className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm "
                         >
                           Delete
                         </button>

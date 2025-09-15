@@ -57,7 +57,7 @@ function DishesList() {
       <div className="flex justify-between items-center mb-6">
         <PageTitle title={"Dishes List"} />
         <button
-          className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg"
+          className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
           style={{ backgroundColor: "#F9832B" }}
           onClick={() => navigate("/AddDishes")}
         >

@@ -91,7 +91,7 @@ function RestroCuisineList() {
             { label: "Restaurant - Cuisines", path: "/RestroCuisineList" },
           ]}
         />
-        <PageTitle title={"Restaurant - Cuisines"} />
+        <PageTitle title={"Restaurant Cuisines"} />
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
@@ -107,13 +107,6 @@ function RestroCuisineList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
-
-              <button
-                onClick={fetchCuisines}
-                className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
-              >
-                Refresh
-              </button>
             </div>
 
             {/* Loading / Error */}

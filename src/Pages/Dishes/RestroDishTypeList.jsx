@@ -98,12 +98,12 @@ const RestroDishTypeList = () => {
               }}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
             />
-            <button
+            {/* <button
               onClick={fetchDishes}
               className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
             >
               Refresh
-            </button>
+            </button> */}
           </div>
 
           {/* Table */}

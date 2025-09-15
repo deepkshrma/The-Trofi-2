@@ -42,8 +42,7 @@ function RestroType() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!type) {
-      
-      toast.success("Please enter your type")
+      toast.success("Please enter your type");
       return;
     }
 
@@ -60,12 +59,10 @@ function RestroType() {
         );
 
         if (res.status === 200 || res.data?.status) {
-          
           toast.success(res.data?.message || "Updated successfully");
           navigate("/RestroTypeList");
         } else {
-          
-          toast.error(res.data?.message || "Something went wrong")
+          toast.error(res.data?.message || "Something went wrong");
         }
       } else {
         const res = await axios.post(
@@ -80,9 +77,7 @@ function RestroType() {
           setIconFile(null);
           setIconPreview("");
         } else {
-          
-
-          toast.error(res.data?.message || "Something went wrong")
+          toast.error(res.data?.message || "Something went wrong");
         }
       }
     } catch (error) {
@@ -134,9 +129,26 @@ function RestroType() {
               type="file"
               accept="image/*"
               onChange={handleIconChange}
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 
-               file:rounded-lg file:border-0 file:text-sm file:font-semibold 
-               file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+              className="
+      w-full 
+      cursor-pointer 
+      rounded-xl 
+      border border-gray-300 
+      bg-gray-50 
+      px-3 py-2 text-sm text-gray-700 
+      shadow-sm
+      file:mr-4 
+      file:rounded-lg 
+      file:border-0 
+      file:bg-orange-500 
+      file:px-4 
+      file:py-2 
+      file:text-white 
+      file:cursor-pointer 
+      hover:file:bg-orange-600 
+      focus:ring-2 focus:ring-orange-300
+      transition
+    "
             />
 
             {/* Preview of existing or newly selected icon */}
@@ -148,7 +160,7 @@ function RestroType() {
                 <img
                   src={iconPreview}
                   alt="Icon Preview"
-                  className="w-16 h-16 object-cover rounded-md border"
+                  className="w-16 h-16 object-cover rounded-md "
                 />
               </div>
             )}
