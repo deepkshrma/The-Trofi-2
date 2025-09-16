@@ -61,7 +61,7 @@ function UserProfile() {
   const initials = user.name ? user.name.charAt(0).toUpperCase() : "U";
 
   return (
-    <div className="main main_page min-h-screen p-6 duration-900 bg-gray-100">
+    <div className="main main_page min-h-screen p-6 duration-900 ">
       <PageTitle title="User Profile" />
 
       {/* Profile Header */}

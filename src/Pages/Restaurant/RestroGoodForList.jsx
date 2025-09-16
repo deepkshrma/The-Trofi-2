@@ -5,6 +5,11 @@ import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function RestroGoodForList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -80,6 +85,27 @@ function RestroGoodForList() {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, pagination.currentPage]);
 
+  const handleExport = () => {
+    const exportData = filtered.map((item, index) => ({
+      "S.No.": index + 1,
+      Name: item.name,
+      Icon: item.icon ? item.icon : "No Icon",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "GoodFor");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "GoodFor.xlsx");
+  };
+
   return (
     <>
       <div className="main main_page p-6 w-full h-screen duration-900">
@@ -93,7 +119,7 @@ function RestroGoodForList() {
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
             {/* Search */}
-            <div className="flex flex-wrap gap-3 m-3 items-center">
+            <div className="flex justify-between items-center m-3">
               <input
                 type="text"
                 placeholder="Search by name..."
@@ -104,6 +130,14 @@ function RestroGoodForList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
+              {/* Export button (right) */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+                // style={{ backgroundColor: "#F9832B" }}
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
             </div>
 
             {/* Loading / Error */}
@@ -165,15 +199,15 @@ function RestroGoodForList() {
                                       },
                                     })
                                   }
-                                  className="bg-green-500 text-white px-3 py-1 cursor-pointer rounded text-sm"
+                                  className="flex justify-center items-center bg-green-500 hover:bg-green-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
                                 >
-                                  Edit
+                                  <MdEdit size={18} />
                                 </button>
                                 <button
                                   onClick={() => setShowDeleteModal(true)}
-                                  className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
+                                  className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
                                 >
-                                  Delete
+                                  <MdDelete size={18} />
                                 </button>
                               </div>
                             </td>

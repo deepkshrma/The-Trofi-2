@@ -342,8 +342,8 @@ const AdminList = () => {
               <div className="relative " ref={dropdownRef}>
                 <div
                   onClick={() => setIsDropdownOpen((prev) => !prev)}
-                  className={`flex justify-center items-center w-[40px] h-[25px] border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white rounded cursor-pointer ${
-                    isDropdownOpen ? "bg-blue-400 text-white" : ""
+                  className={`flex justify-center items-center w-[40px] h-[25px] border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white rounded cursor-pointer ${
+                    isDropdownOpen ? "bg-orange-400 text-white" : ""
                   } `}
                 >
                   <TfiLayoutMenuSeparated className="text-[15px]" />
@@ -543,6 +543,13 @@ const AdminList = () => {
             </tbody>
           </table>
         )}
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredAdmins.length}
+          itemsPerPage={pageSize}
+          onPageChange={setCurrentPage}
+        />
       </div>
       {showRoleModal && selectedAdminForRoleChange && (
         <AdminRoleChangeModel
@@ -592,13 +599,6 @@ const AdminList = () => {
         onConfirm={confirmDelete}
         redbutton="Yes, Delete"
         para="Do you really want to delete this admin? This action cannot be undone."
-      />
-
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filteredAdmins.length}
-        itemsPerPage={pageSize}
-        onPageChange={setCurrentPage}
       />
     </div>
   );

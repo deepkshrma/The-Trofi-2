@@ -8,6 +8,9 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import { Eye, PlusCircle } from "lucide-react";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function RestroTypeList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -82,6 +85,26 @@ function RestroTypeList() {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, pagination.currentPage]);
 
+  const handleExport = () => {
+    const exportData = filtered.map((type, index) => ({
+      "S.No.": index + 1,
+      "Restaurant Type": type.name,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RestaurantTypes");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "RestaurantTypes.xlsx");
+  };
+
   return (
     <>
       <div className="main main_page p-6 w-full h-full duration-900">
@@ -95,7 +118,7 @@ function RestroTypeList() {
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="pb-3 overflow-x-auto">
             {/* Search */}
-            <div className="flex flex-wrap gap-3 m-3 items-center">
+            <div className="flex justify-between items-center m-3">
               <input
                 type="text"
                 placeholder="Search by type..."
@@ -106,6 +129,14 @@ function RestroTypeList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
+              {/* Export button (right) */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+                // style={{ backgroundColor: "#F9832B" }}
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
             </div>
 
             {/* Loading / Error */}

@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function DishesList() {
   // 🔹 Sample static data
@@ -48,6 +51,29 @@ function DishesList() {
     dish.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleExport = () => {
+    const exportData = filteredDishes.map((dish, index) => ({
+      "S.No.": (pagination.currentPage - 1) * pagination.pageSize + (index + 1),
+      Name: dish.name,
+      Description: dish.description || "N/A",
+      Price: dish.price,
+      Image: dish.image || "N/A",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Dishes");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "Dishes.xlsx");
+  };
+
   return (
     <div className="main main_page p-6 min-h-screen  duration-900">
       <BreadcrumbsNav
@@ -68,7 +94,7 @@ function DishesList() {
       {/*  Table */}
       <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
         {/* 🔍 Search */}
-        <div className="flex flex-wrap gap-3 m-3">
+        <div className="flex justify-between flex-wrap gap-3 m-3">
           <input
             type="text"
             placeholder="Search by dish name..."
@@ -76,6 +102,14 @@ function DishesList() {
             onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
+          {/* Export button (right) */}
+          <button
+            className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+            // style={{ backgroundColor: "#F9832B" }}
+            onClick={handleExport}
+          >
+            <CiExport size={20} /> Export
+          </button>
         </div>
 
         <table className="w-full border-collapse">

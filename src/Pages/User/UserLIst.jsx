@@ -19,6 +19,7 @@ import { FaUsers } from "react-icons/fa";
 import { FaUserAlt } from "react-icons/fa";
 import { FaUserXmark } from "react-icons/fa6";
 import { FaUserShield } from "react-icons/fa6";
+import { IoFilterSharp } from "react-icons/io5";
 
 function UserList() {
   const [users, setUsers] = useState([
@@ -223,12 +224,12 @@ function UserList() {
       <BreadcrumbsNav
         customTrail={[{ label: "Users List", path: "/CustomerList" }]}
       />
-      <PageTitle title={"Customer"} />
+      <PageTitle title={"Users"} />
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
           <div>
-            <h4 className="text-[14px]">Total Customers</h4>
+            <h4 className="text-[14px]">Total Users</h4>
             <p className="text-[22px] font-semibold">{users.length}</p>
           </div>
           <div className="">
@@ -239,7 +240,7 @@ function UserList() {
         </div>
         <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
           <div>
-            <h4 className="text-[14px]">Active Customers</h4>
+            <h4 className="text-[14px]">Active Users</h4>
             <p className="text-[22px] font-semibold">
               {users.filter((u) => u.status === "active").length}
             </p>
@@ -252,7 +253,7 @@ function UserList() {
         </div>
         <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
           <div>
-            <h4 className="text-[14px]">Inactive Customers</h4>
+            <h4 className="text-[14px]">Inactive Users</h4>
             <p className="text-[22px] font-semibold">
               {users.filter((u) => u.status === "inactive").length}
             </p>
@@ -294,11 +295,15 @@ function UserList() {
           </form>
 
           <div className="flex gap-2">
-            <div className="relative">
+            <div className="relative w-28 mr-2">
+              <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-gray-500">
+                <IoFilterSharp />
+              </span>
+
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="block appearance-none bg-white border border-gray-300 px-4 py-2 pr-8 rounded-md shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block appearance-none bg-white border border-gray-300 pl-8 pr-2 py-2 rounded-md shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -321,7 +326,7 @@ function UserList() {
           <table className="mt-2 w-full border-collapse">
             <thead className="bg-gray-100">
               <tr className="text-gray-700">
-                {["SL", "Customer", "Contact Info", "Status", "Action"].map(
+                {["SL", "User", "Contact Info", "Status", "Action"].map(
                   (head, i) => (
                     <th
                       key={head}
@@ -399,22 +404,20 @@ function UserList() {
                     </td>
 
                     <td className="text-[14px] px-8 py-3 text-center">
-                      <div className="w-full flex border-1 border-gray-300 rounded-md">
-                        <div
-                          className="w-1/2 flex justify-center items-center py-2 hover:bg-gray-100 cursor-pointer"
-                          title="View"
-                          onClick={() =>
-                            navigate(`/CustomerProfile/${item._id}`)
-                          }
-                        >
-                          <FiEye size={18} />
-                        </div>
-                        <div
-                          className="w-1/2 flex justify-center items-center border-l border-gray-300 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => openDeleteModal(item._id)}
-                          title="Delete"
-                        >
-                          <RiDeleteBinLine className="text-red-500" size={18} />
+                      <div className="flex justify-center items-center">
+                        <div className="flex gap-3">
+                          <button
+                            className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                            onClick={() => navigate(`/UserProfile`)}
+                          >
+                            <FiEye size={16} />
+                          </button>
+                          <button
+                            className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                            onClick={() => openDeleteModal(item._id)}
+                          >
+                            <RiDeleteBinLine size={16} />
+                          </button>
                         </div>
                       </div>
                     </td>

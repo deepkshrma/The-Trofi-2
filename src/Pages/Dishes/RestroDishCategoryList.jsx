@@ -8,6 +8,8 @@ import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 
 const RestroDishCategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -139,15 +141,15 @@ const RestroDishCategoryList = () => {
                               state: { category: cat },
                             })
                           }
-                          className="px-3 py-1 rounded-lg bg-green-500 text-white text-sm shadow-md hover:bg-green-600 cursor-pointer"
+                          className="flex justify-center items-center bg-green-500 hover:bg-green-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
                         >
-                          Edit
+                          <MdEdit size={18} />
                         </button>
                         <button
                           onClick={() => setShowDeleteModal(true)}
-                          className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm "
+                          className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm "
                         >
-                          Delete
+                          <MdDelete size={18} />
                         </button>
                       </div>
                     </td>

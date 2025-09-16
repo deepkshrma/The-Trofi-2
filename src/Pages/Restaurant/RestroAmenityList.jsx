@@ -8,6 +8,9 @@ import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import { Eye, PlusCircle } from "lucide-react";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function RestroAmenityList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -29,7 +32,6 @@ function RestroAmenityList() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
-    
   };
 
   const confirmDelete = async () => {};
@@ -92,6 +94,27 @@ function RestroAmenityList() {
     return `${FILE_BASE}${icon}`;
   };
 
+  const handleExport = () => {
+    const exportData = filteredAmenities.map((amenity, index) => ({
+      "S.No.": index + 1,
+      "Amenity Name": amenity.name,
+      Icon: getImageUrl(amenity.icon), // export icon URL
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Amenities");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "Amenities.xlsx");
+  };
+
   return (
     <>
       <div className="main main_page p-6 w-full min-h-screen duration-900">
@@ -108,7 +131,7 @@ function RestroAmenityList() {
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
             {/* Search + Refresh */}
-            <div className="flex flex-wrap gap-3 m-3 items-center">
+            <div className="flex justify-between items-center m-3">
               <input
                 type="text"
                 placeholder="Search by name..."
@@ -119,6 +142,13 @@ function RestroAmenityList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+                // style={{ backgroundColor: "#F9832B" }}
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
             </div>
 
             {/* Loading / Error */}

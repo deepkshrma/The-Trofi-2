@@ -12,6 +12,9 @@ import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import staticimg from "../../assets/images/logo.jpg";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -38,7 +41,7 @@ function RestroList() {
   let token =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YzQwMDk0NmE3NzY2YzYyM2YyMDE5YyIsImVtYWlsIjoidGRzQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU3Njc1NjY4LCJleHAiOjE3NTgyODA0Njh9.Yx_0GEsvT0x-73pIkf-BOz20agZwKd9f6otdTOTr-MI";
 
-  // ✅ Fetch restaurants with pagination
+  // Fetch restaurants with pagination
   const fetchRestaurants = async (page = 1) => {
     try {
       setLoading(true);
@@ -69,13 +72,38 @@ function RestroList() {
   };
 
   useEffect(() => {
-    fetchRestaurants(1); 
+    fetchRestaurants(1);
   }, []);
 
   // Search filter (frontend only)
   const filteredRestaurants = restaurants.filter((restro) =>
     restro.restro_name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleExport = () => {
+    const exportData = filteredRestaurants.map((restro, index) => ({
+      "S.No.": (pagination.currentPage - 1) * pagination.pageSize + (index + 1),
+      Name: restro.restro_name,
+      Type: restro.food_type,
+      Description: restro.description || "N/A",
+      Logo: restro.restaurant_images?.[0]
+        ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
+        : "N/A",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Restaurants");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "Restaurants.xlsx");
+  };
 
   return (
     <>
@@ -98,7 +126,7 @@ function RestroList() {
         {/* Table */}
         <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
           {/* Search */}
-          <div className="flex flex-wrap gap-3 m-3">
+          <div className="flex justify-between items-center m-3">
             <input
               type="text"
               placeholder="Search by name..."
@@ -106,6 +134,14 @@ function RestroList() {
               onChange={(e) => setSearch(e.target.value)}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
             />
+            {/* Export button (right) */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+              // style={{ backgroundColor: "#F9832B" }}
+              onClick={handleExport}
+            >
+              <CiExport size={20} /> Export
+            </button>
           </div>
 
           {loading ? (
