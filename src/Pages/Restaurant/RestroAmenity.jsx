@@ -153,7 +153,7 @@ function RestroAmenity() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              {isEdit ? "Update Amenity" : "Save Icon"}
+              {isEdit ? "Update Amenity" : "Create Amenity"}
             </button>
           </div>
         </form>

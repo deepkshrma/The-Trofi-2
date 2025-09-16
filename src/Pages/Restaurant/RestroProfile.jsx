@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useContext, useEffect, useState } from "react";
 import { Star, Phone, MapPin, Clock, Utensils } from "lucide-react";
 import { Carousel } from "react-responsive-carousel";
@@ -31,7 +30,7 @@ function RestroProfile() {
   const [restaurant, setRestaurant] = useState([]);
 
   let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmE4MGYwMzQwNWQ2ODNiYjNmMzQ2ZiIsImVtYWlsIjoidGVzdDJAZ21haWwuY29tIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTcwNjIzNjksImV4cCI6MTc1NzY2NzE2OX0.VE-WDp9i0fmGQbKF7TSsPWnx_EXLN60ccHq2_LYwnjM";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YzgwNDA2ODllOTM1NWZmYWVjMmE4MyIsImVtYWlsIjoid2VsQGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU3OTM4Njk0LCJleHAiOjE3NTg1NDM0OTR9.pof-vPOVslMGk7Fbz5x5QGBVibvvSBjiKFR5g74wUVM";
 
   useEffect(() => {
     const fetchRestaurant = async () => {

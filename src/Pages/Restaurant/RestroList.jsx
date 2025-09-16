@@ -68,7 +68,7 @@ function RestroList() {
   };
 
   useEffect(() => {
-    fetchRestaurants(1); // initial load
+    fetchRestaurants(1); 
   }, []);
 
   // Search filter (frontend only)
