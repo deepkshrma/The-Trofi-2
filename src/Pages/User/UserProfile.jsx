@@ -3,7 +3,7 @@ import React from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 
 function UserProfile() {
-  // ✅ Dummy API response (with extra fields)
+  // Dummy API response (with extra fields)
   const user = {
     _id: "68c2bda448dad81c525ccb0b",
     name: "John",

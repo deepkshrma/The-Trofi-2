@@ -109,22 +109,46 @@ function RestroGoodFor() {
           </div>
 
           {/* Icon Upload */}
+          {/* Icon Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Icon
+              Upload Icon Image
             </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="w-full"
+              className="
+      w-full 
+      cursor-pointer 
+      rounded-xl 
+      border border-gray-300 
+      bg-gray-50 
+      px-3 py-2 text-sm text-gray-700 
+      shadow-sm
+      file:mr-4 
+      file:rounded-lg 
+      file:border-0 
+      file:bg-orange-500 
+      file:px-4 
+      file:py-2 
+      file:text-white 
+      file:cursor-pointer 
+      hover:file:bg-orange-600 
+      focus:ring-2 focus:ring-orange-300
+      transition
+    "
             />
+
             {preview && (
-              <img
-                src={preview}
-                alt="Preview"
-                className="mt-3 w-20 h-20 object-cover rounded-full shadow-md"
-              />
+              <div className="mt-4">
+                <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="h-24 w-24 object-cover rounded-xl border border-gray-300 shadow-md"
+                />
+              </div>
             )}
           </div>
 

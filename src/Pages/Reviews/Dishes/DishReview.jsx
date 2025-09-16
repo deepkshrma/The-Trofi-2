@@ -55,7 +55,7 @@ function DishReview() {
         <PageTitle title={"Dish Review Details"} />
         <button
           onClick={() => setEditMode(!editMode)}
-          className="px-4 py-2 bg-orange-500 text-white rounded shadow hover:bg-orange-600 transition"
+          className="px-4 py-2 bg-orange-500 text-white rounded shadow hover:bg-orange-600 transition cursor-pointer"
         >
           {editMode ? "Save" : "Edit"}
         </button>
@@ -221,7 +221,7 @@ function DishReview() {
                 </div>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition"
+                  className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition cursor-pointer"
                 >
                   Done
                 </button>

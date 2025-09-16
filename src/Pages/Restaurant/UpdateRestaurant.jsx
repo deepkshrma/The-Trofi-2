@@ -8,6 +8,8 @@ import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { BASE_URL } from "../../config/Config.js";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -373,27 +375,15 @@ function UpdateRestaurant() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-600 font-medium mb-2">
-              Country Code
-            </label>
-            <input
-              type="text"
-              name="country_code"
-              value={restaurantData.country_code}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
               Phone Number
             </label>
-            <input
-              type="text"
-              name="phone"
+            <PhoneInput
+              country="us" // default country
               value={restaurantData.phone}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              onChange={(phone) =>
+                setRestaurantData((prev) => ({ ...prev, phone }))
+              }
+              inputClass="!w-full !h-12 !p-3 !pl-14 !rounded-lg !border-gray-300"
             />
           </div>
         </div>

@@ -133,7 +133,7 @@ export default function RestaurantReviewList() {
                   </span>
                 </td>
                 <td className="p-3">
-                  <div>
+                  <div className="cursor-pointer">
                     <FaRegEye
                       size={20}
                       onClick={() => navigate(`/RestaurantReview`)}
