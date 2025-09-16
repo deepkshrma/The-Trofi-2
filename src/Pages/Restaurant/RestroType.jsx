@@ -39,25 +39,25 @@ function RestroType() {
     }
   };
 
-//   useEffect(() => {
-//   if (isEdit) {
-//     // editing mode → prefill
-//     setType(editData.name || "");
-//     setIconPreview(
-//       editData.icon
-//         ? (editData.icon.startsWith("http")
-//             ? editData.icon
-//             : `${BASE_URL}/${editData.icon}`)
-//         : ""
-//     );
-//     setIconFile(null);
-//   } else {
-//     // create mode → clear everything
-//     setType("");
-//     setIconPreview("");
-//     setIconFile(null);
-//   }
-// }, [editData]);  // runs whenever location.state changes
+  //   useEffect(() => {
+  //   if (isEdit) {
+  //     // editing mode → prefill
+  //     setType(editData.name || "");
+  //     setIconPreview(
+  //       editData.icon
+  //         ? (editData.icon.startsWith("http")
+  //             ? editData.icon
+  //             : `${BASE_URL}/${editData.icon}`)
+  //         : ""
+  //     );
+  //     setIconFile(null);
+  //   } else {
+  //     // create mode → clear everything
+  //     setType("");
+  //     setIconPreview("");
+  //     setIconFile(null);
+  //   }
+  // }, [editData]);  // runs whenever location.state changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -67,7 +67,21 @@ function AddDishes() {
       .get(`${BASE_URL}/restro/get-cusine`, config)
       .then((res) => setCuisines(res.data?.data || []))
       .catch((err) => console.error(err));
+
+    axios
+      .get(`${BASE_URL}/dishes/get-dishes-categories`, config)
+      .then((res) => {
+        if (res.data.success) {
+          setDishCategories(res.data.data.categories || []);
+          setDishSubCategories(res.data.data.subCategories || []);
+        }
+      })
+      .catch((err) => console.error(err));
   }, []);
+
+  const filteredSubCategories = dishSubCategories.filter(
+    (sc) => sc.parentCategoryId === selectedDishCategory?.value
+  );
 
   const addIngredient = () => {
     if (ingredient.trim() !== "") {
@@ -180,9 +194,11 @@ function AddDishes() {
                 label: c.category_name,
               }))}
               value={selectedDishCategory}
-              onChange={setSelectedDishCategory}
+              onChange={(cat) => {
+                setSelectedDishCategory(cat);
+                setSelectedDishSubCategory(null); // reset subcategory when category changes
+              }}
               placeholder="Select Category"
-              className="w-full"
             />
           </div>
 
@@ -191,14 +207,14 @@ function AddDishes() {
               Sub Category
             </label>
             <Select
-              options={dishSubCategories.map((sc) => ({
+              options={filteredSubCategories.map((sc) => ({
                 value: sc._id,
                 label: sc.sub_categ_name,
               }))}
               value={selectedDishSubCategory}
               onChange={setSelectedDishSubCategory}
               placeholder="Select Sub Category"
-              className="w-full"
+              isDisabled={!selectedDishCategory} // disable until category selected
             />
           </div>
 
