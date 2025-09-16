@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import pizza from "../../assets/images/pending.png"; // placeholder
+import pizza from "../../assets/images/pending.png";
 import Pagination from "../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
+import { Eye, PlusCircle } from "lucide-react";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroAmenityList() {
@@ -27,7 +29,7 @@ function RestroAmenityList() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
-    // setSelectedAdmin(null);
+    
   };
 
   const confirmDelete = async () => {};
@@ -56,6 +58,7 @@ function RestroAmenityList() {
       setAmenities(normalized);
     } catch (err) {
       setError(err.message || "Failed to fetch amenities");
+      toast.error(err.message || "Failed to fetch amenities");
     } finally {
       setLoading(false);
     }
@@ -162,7 +165,7 @@ function RestroAmenityList() {
                             <td className="px-4 py-2">{amenity.name}</td>
 
                             <td className="px-4 py-2">
-                              <div className="flex gap-3">
+                              {/* <div className="flex gap-3">
                                 <button
                                   onClick={() =>
                                     navigate(`/RestroAmenity/:id`, {
@@ -182,6 +185,36 @@ function RestroAmenityList() {
                                   className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
                                 >
                                   Delete
+                                </button>
+                              </div> */}
+                              <div className="flex gap-3">
+                                {/* <button
+                                  className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                                  onClick={() =>
+                                    navigate(`/RestroProfile/${restro._id}`)
+                                  }
+                                >
+                                  <Eye size={16} />
+                                </button> */}
+                                <button
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                                  onClick={() =>
+                                    navigate(`/RestroAmenity/:id`, {
+                                      state: {
+                                        id: amenity.id,
+                                        name: amenity.name,
+                                        icon: amenity.icon,
+                                      },
+                                    })
+                                  }
+                                >
+                                  <MdEdit size={16} />
+                                </button>
+                                <button
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                                  onClick={() => setShowDeleteModal(true)}
+                                >
+                                  <MdDelete size={16} />
                                 </button>
                               </div>
                             </td>

@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { Eye, PlusCircle } from "lucide-react";
+import { MdEdit } from "react-icons/md";
+import { MdDelete } from "react-icons/md";
 
 function RestroTypeList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -139,7 +142,7 @@ function RestroTypeList() {
                               </span>
                             </td>
                             <td className="px-4 py-2">
-                              <div className="flex gap-3">
+                              {/* <div className="flex gap-3">
                                 <button
                                   onClick={() =>
                                     navigate(`/RestroType/:id`, {
@@ -155,6 +158,32 @@ function RestroTypeList() {
                                   className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
                                 >
                                   Delete
+                                </button>
+                              </div> */}
+                              <div className="flex gap-3">
+                                {/* <button
+                                  className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                                  onClick={() =>
+                                    navigate(`/RestroProfile/${restro._id}`)
+                                  }
+                                >
+                                  <Eye size={16} />
+                                </button> */}
+                                <button
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                                  onClick={() =>
+                                    navigate(`/RestroType/:id`, {
+                                      state: { id: type.id, name: type.name },
+                                    })
+                                  }
+                                >
+                                  <MdEdit size={16} />
+                                </button>
+                                <button
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                                  onClick={() => setShowDeleteModal(true)}
+                                >
+                                  <MdDelete size={16} />
                                 </button>
                               </div>
                             </td>

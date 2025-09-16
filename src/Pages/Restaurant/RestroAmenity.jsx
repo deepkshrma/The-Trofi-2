@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
@@ -30,11 +31,29 @@ function RestroAmenity() {
     }
   };
 
+  useEffect(() => {
+    if (isEdit) {
+      setIconName(editData.name || "");
+      setPreview(
+        editData.icon
+          ? `${BASE_URL.replace(/\/api\/?$/, "/")}${editData.icon}`
+          : null
+      );
+      setFile(null);
+    } else {
+      // Clear everything when switching to create mode
+      setIconName("");
+      setFile(null);
+      setPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [editData]); // runs whenever you navigate and state changes
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!iconName) {
-      alert("Please provide amenity name");
+      toast.error("Please provide amenity name");
       return;
     }
 
@@ -55,10 +74,10 @@ function RestroAmenity() {
         );
 
         if (res.status === 200 || res.data?.status) {
-          alert(res.data?.message || "Amenity updated successfully");
+          toast.success(res.data?.message || "Amenity updated successfully");
           navigate("/RestroAmenityList");
         } else {
-          alert(res.data?.message || "Something went wrong");
+          toast.error(res.data?.message || "Something went wrong");
         }
       } else {
         const res = await axios.post(
@@ -70,18 +89,19 @@ function RestroAmenity() {
         );
 
         if (res.status === 201 || res.data?.status) {
-          alert(res.data?.message || "Amenity created successfully");
+          toast.success(res.data?.message || "Amenity created successfully");
           setIconName("");
           setFile(null);
           setPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
         } else {
-          alert(res.data?.message || "Something went wrong");
+          toast.error(res.data?.message || "Something went wrong");
         }
       }
     } catch (err) {
       console.error(err);
-      alert("Error while saving amenity");
+
+      toast.error(err || "Error while saving amenity");
     }
   };
 
