@@ -11,6 +11,7 @@ import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import staticimg from "../../assets/images/logo.jpg";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -139,7 +140,7 @@ function RestroList() {
                           src={
                             restro.restaurant_images?.[0]
                               ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
-                              : "https://via.placeholder.com/40"
+                              : staticimg
                           }
                           alt={restro.restro_name}
                           className="w-10 h-10 rounded-full object-cover"
