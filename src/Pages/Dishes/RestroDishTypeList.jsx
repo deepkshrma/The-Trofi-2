@@ -4,10 +4,13 @@ import { BASE_URL } from "../../config/Config";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
+import { FiFilter } from "react-icons/fi";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const RestroDishTypeList = () => {
   const [dishes, setDishes] = useState([]);
@@ -75,6 +78,29 @@ const RestroDishTypeList = () => {
   const start = (pagination.currentPage - 1) * pageSize;
   const paginated = filtered.slice(start, start + pageSize);
 
+  const handleExport = () => {
+      // Prepare data for Excel
+      const exportData = reviews.map((rev, index) => ({
+        "S.No.": index + 1,
+        "User Name": rev.userName,
+        "Restaurant Name": rev.restroName,
+        "Rating Label": faceStars[rev.star_value - 1]?.label || rev.rating_label,
+        Stars: rev.star_value,
+        Status: rev.status,
+      }));
+  
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "RestaurantReviews");
+  
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+      saveAs(blob, "RestaurantReviews.xlsx");
+    };
+
   return (
     <>
       <div className="main main_page p-6 duration-900">
@@ -88,7 +114,7 @@ const RestroDishTypeList = () => {
         />
         <PageTitle title={"Dish Management"} />
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
-          {/* Search */}
+          {/* Search
           <div className="flex flex-wrap gap-3 m-3">
             <input
               type="text"
@@ -100,12 +126,41 @@ const RestroDishTypeList = () => {
               }}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
             />
-            {/* <button
-              onClick={fetchDishes}
-              className="px-3 py-2 rounded-lg bg-[#F9832B] text-white text-sm"
-            >
-              Refresh
-            </button> */}
+          </div> */}
+
+          <div className="flex justify-between items-center m-3">
+            {/* 🔍 Search input */}
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+
+            {/* 📂 Right-side controls */}
+            <div className="flex items-center gap-3">
+              {/* 🧮 Filter button */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+                onClick={() => {
+                  // TODO: open a filter modal / drawer
+                  console.log(
+                    "Open filter options: cuisine, hygiene, favorites"
+                  );
+                }}
+              >
+                <FiFilter size={20} /> Filter
+              </button>
+
+              {/* ⬇ Export button */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
+            </div>
           </div>
 
           {/* Table */}

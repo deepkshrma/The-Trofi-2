@@ -122,7 +122,7 @@ const REVIEWS = [
     orderId: "#0010299",
     reviewer: "Kinda Alexa",
     rating: 5,
-    sentiment: "POSITIVE",
+    sentiment: "accpected",
     img: pizza3,
     // ISO strings make sorting reliable
     date: "2025-08-22T14:20:00+05:30",
@@ -133,7 +133,7 @@ const REVIEWS = [
     orderId: "#0010235",
     reviewer: "Peter Parkur",
     rating: 2,
-    sentiment: "NEGATIVE",
+    sentiment: "pending",
     img: pizza2,
     date: "2025-08-20T19:05:00+05:30",
   },
@@ -143,7 +143,7 @@ const REVIEWS = [
     orderId: "#0010237",
     reviewer: "Jimmy Kueai",
     rating: 4,
-    sentiment: "POSITIVE",
+    sentiment: "denied",
     img: tuna2,
     date: "2025-08-21T09:45:00+05:30",
   },
@@ -154,7 +154,7 @@ const REVIEWS = [
     orderId: "#0010308",
     reviewer: "Ria Sen",
     rating: 5,
-    sentiment: "POSITIVE",
+    sentiment: "pending",
     img: pizza4,
     date: "2025-08-24T16:10:00+05:30",
   },
@@ -164,7 +164,7 @@ const REVIEWS = [
     orderId: "#0010311",
     reviewer: "Aman Verma",
     rating: 4,
-    sentiment: "POSITIVE",
+    sentiment: "accpected",
     img: pizza1,
     date: "2025-08-23T11:30:00+05:30",
   },
@@ -471,8 +471,10 @@ export default function Dashboard() {
                 </div>
                 <span
                   className={`px-3 py-1 rounded-md text-xs ${
-                    r.sentiment === "POSITIVE"
+                    r.sentiment === "accpected"
                       ? "bg-green-100 text-green-700"
+                      : r.sentiment === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
                       : "bg-red-100 text-red-600"
                   }`}
                 >
@@ -508,7 +510,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400">⭐ 4.8 avg</p>
                 </div>
               </div>
-              <span className="text-gray-500 text-sm">70 Reviews</span>
+              {/* <span className="text-gray-500 text-sm">70 Reviews</span> */}
             </li>
             <li className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
@@ -522,7 +524,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400">⭐ 4.6 avg</p>
                 </div>
               </div>
-              <span className="text-gray-500 text-sm">60 Reviews</span>
+              {/* <span className="text-gray-500 text-sm">60 Reviews</span> */}
             </li>
             <li className="flex items-center justify-between py-4">
               <div className="flex items-center gap-3">
@@ -538,7 +540,7 @@ export default function Dashboard() {
                   <p className="text-xs text-gray-400">⭐ 4.2 avg</p>
                 </div>
               </div>
-              <span className="text-gray-500 text-sm">50 Reviews</span>
+              {/* <span className="text-gray-500 text-sm">50 Reviews</span> */}
             </li>
           </ul>
         </div>

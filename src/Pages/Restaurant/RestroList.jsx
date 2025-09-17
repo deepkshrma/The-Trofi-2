@@ -15,6 +15,15 @@ import staticimg from "../../assets/images/logo.jpg";
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { FiFilter } from "react-icons/fi";
+import { FaTriangleExclamation } from "react-icons/fa6";
+import {
+  FaUtensils,
+  FaStoreAlt,
+  FaConciergeBell,
+  FaStoreSlash,
+  FaBan,
+} from "react-icons/fa";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -122,11 +131,62 @@ function RestroList() {
             <PlusCircle size={18} /> Add Restaurant
           </button>
         </div>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Total restaurants</h4>
+              <p className="text-[22px] font-semibold">{restaurants.length}</p>
+            </div>
+            <div className="">
+              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+                <FaUtensils size={35} className="text-blue-900" />
+              </div>
+            </div>
+          </div>
+          <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Active restaurants</h4>
+              <p className="text-[22px] font-semibold">
+                {restaurants.filter((u) => u.status === "active").length}
+              </p>
+            </div>
+            <div className="">
+              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+                <FaStoreAlt size={35} className="text-green-500" />
+              </div>
+            </div>
+          </div>
+          <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Inactive restaurants</h4>
+              <p className="text-[22px] font-semibold">
+                {restaurants.filter((u) => u.status === "inactive").length}
+              </p>
+            </div>
+            <div className="">
+              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+                <FaStoreSlash size={35} className="text-yellow-500" />
+              </div>
+            </div>
+          </div>
+          <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Suspended restaurants</h4>
+              <p className="text-[22px] font-semibold">
+                {restaurants.filter((u) => u.status === "suspended").length}
+              </p>
+            </div>
+            <div className="">
+              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+                <FaBan size={35} className="text-red-500" />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Table */}
-        <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
-          {/* Search */}
-          <div className="flex justify-between items-center m-3">
+        <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
+          {/* <div className="flex justify-between items-center m-3">
             <input
               type="text"
               placeholder="Search by name..."
@@ -134,14 +194,49 @@ function RestroList() {
               onChange={(e) => setSearch(e.target.value)}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
             />
-            {/* Export button (right) */}
+            
             <button
               className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
-              // style={{ backgroundColor: "#F9832B" }}
+              
               onClick={handleExport}
             >
               <CiExport size={20} /> Export
             </button>
+          </div> */}
+
+          <div className="flex justify-between items-center m-3">
+            {/* 🔍 Search input */}
+            <input
+              type="text"
+              placeholder="Search by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+
+            {/* 📂 Right-side controls */}
+            <div className="flex items-center gap-3">
+              {/* 🧮 Filter button */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+                onClick={() => {
+                  // TODO: open a filter modal / drawer
+                  console.log(
+                    "Open filter options: cuisine, hygiene, favorites"
+                  );
+                }}
+              >
+                <FiFilter size={20} /> Filter
+              </button>
+
+              {/* ⬇ Export button */}
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
+            </div>
           </div>
 
           {loading ? (

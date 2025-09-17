@@ -7,8 +7,20 @@ import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import PageTitle from "../../../components/PageTitle/PageTitle";
+import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { FiFilter } from "react-icons/fi";
+import { CiExport } from "react-icons/ci";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import {
+  FaStar,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHourglassHalf,
+} from "react-icons/fa";
 
 export default function DishReviewList() {
+  const [search, setSearch] = useState("");
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -80,20 +92,137 @@ export default function DishReviewList() {
     ));
   };
 
+  const handleExport = () => {
+    // Prepare data for Excel
+    const exportData = reviews.map((rev, index) => ({
+      "S.No.": index + 1,
+      "User Name": rev.userName,
+      "Restaurant Name": rev.restroName,
+      "Rating Label": faceStars[rev.star_value - 1]?.label || rev.rating_label,
+      Stars: rev.star_value,
+      Status: rev.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RestaurantReviews");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "RestaurantReviews.xlsx");
+  };
+
   return (
     <div className="main main_page p-6 duration-900">
+      <BreadcrumbsNav
+        customTrail={[
+          {
+            label: "Dish Reviews List",
+            path: "/DishReviewList",
+          },
+        ]}
+      />
       <PageTitle title={"Dish Reviews List"} />
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-5">
-        {/* Search Field */}
-        <div className="mb-4 w-80">
+      {/* top kpi in review  */}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+          <div>
+            <h4 className="text-[14px]">Total Reviews</h4>
+            <p className="text-[22px] font-semibold">{reviews.length}</p>
+          </div>
+          <div className="">
+            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+              <FaStar size={35} className="text-blue-900" />
+            </div>
+          </div>
+        </div>
+        <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
+          <div>
+            <h4 className="text-[14px]">Accepted Reviews</h4>
+            <p className="text-[22px] font-semibold">
+              {reviews.filter((u) => u.status === "active").length}
+            </p>
+          </div>
+          <div className="">
+            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+              <FaCheckCircle size={35} className="text-green-500" />
+            </div>
+          </div>
+        </div>
+        <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
+          <div>
+            <h4 className="text-[14px]">Pending Reviews</h4>
+            <p className="text-[22px] font-semibold">
+              {reviews.filter((u) => u.status === "inactive").length}
+            </p>
+          </div>
+          <div className="">
+            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+              <FaHourglassHalf size={35} className="text-yellow-500" />
+            </div>
+          </div>
+        </div>
+        <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
+          <div>
+            <h4 className="text-[14px]">Denied Reviews</h4>
+            <p className="text-[22px] font-semibold">
+              {reviews.filter((u) => u.status === "suspended").length}
+            </p>
+          </div>
+          <div className="">
+            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+              <FaTimesCircle size={35} className="text-red-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-3">
+        {/* 
+        <div className="mb-2  w-80">
           <input
             type="text"
             placeholder="Search by User or Restaurant..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
+        </div> */}
+
+        <div className="flex justify-between items-center m-3">
+          {/* 🔍 Search input */}
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+          />
+
+          {/* 📂 Right-side controls */}
+          <div className="flex items-center gap-3">
+            {/* 🧮 Filter button */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+              onClick={() => {
+                // TODO: open a filter modal / drawer
+                console.log("Open filter options: cuisine, hygiene, favorites");
+              }}
+            >
+              <FiFilter size={20} /> Filter
+            </button>
+
+            {/* ⬇ Export button */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+              onClick={handleExport}
+            >
+              <CiExport size={20} /> Export
+            </button>
+          </div>
         </div>
 
         <table className="w-full border-collapse">

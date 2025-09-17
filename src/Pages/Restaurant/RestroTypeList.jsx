@@ -3,11 +3,8 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import Pagination from "../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
-import { Eye, PlusCircle } from "lucide-react";
-import { MdEdit } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
+import { MdEdit, MdDelete } from "react-icons/md";
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -30,12 +27,11 @@ function RestroTypeList() {
   });
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
-    // setSelectedAdmin(null);
-  };
+  const closeDeleteModal = () => setShowDeleteModal(false);
 
-  const confirmDelete = async () => {};
+  const confirmDelete = async () => {
+    // implement delete logic here
+  };
 
   useEffect(() => {
     fetchTypes();
@@ -53,6 +49,7 @@ function RestroTypeList() {
       const normalized = json.data.map((t) => ({
         id: t._id,
         name: t.name,
+        icon: t.icon,
       }));
 
       setTypes(normalized);
@@ -109,15 +106,13 @@ function RestroTypeList() {
     <>
       <div className="main main_page p-6 w-full h-full duration-900">
         <BreadcrumbsNav
-          customTrail={[
-            { label: "Restaurant Type List", path: "/RestroTypeList" },
-          ]}
+          customTrail={[{ label: "Restaurant Type List", path: "/RestroTypeList" }]}
         />
-        <PageTitle title={"Restaurant Type List"} />
+        <PageTitle title="Restaurant Type List" />
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="pb-3 overflow-x-auto">
-            {/* Search */}
+            {/* Search + Export */}
             <div className="flex justify-between items-center m-3">
               <input
                 type="text"
@@ -129,29 +124,25 @@ function RestroTypeList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
-              {/* Export button (right) */}
               <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
-                // style={{ backgroundColor: "#F9832B" }}
                 onClick={handleExport}
               >
                 <CiExport size={20} /> Export
               </button>
             </div>
 
-            {/* Loading / Error */}
             {loading ? (
               <div className="text-center py-6">Loading types…</div>
             ) : error ? (
-              <div className="text-center py-6 text-red-500">
-                Error: {error}
-              </div>
+              <div className="text-center py-6 text-red-500">Error: {error}</div>
             ) : (
               <>
                 <table className="w-full border border-gray-200 overflow-hidden">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
                       <th className="px-4 py-2 text-left">S.No.</th>
+                      <th className="px-4 py-2 text-left">Icon</th>
                       <th className="px-4 py-2 text-left">Restaurant Type</th>
                       <th className="px-4 py-2 text-left">Action</th>
                     </tr>
@@ -167,51 +158,44 @@ function RestroTypeList() {
                             className="border-b border-gray-300 hover:bg-gray-50 transition"
                           >
                             <td className="px-4 py-2">{serial}</td>
+
+                            {/* Icon column */}
                             <td className="px-4 py-2">
-                              <span className=" text-gary-700 px-3 py-1 rounded-full text-md">
+                              {type.icon ? (
+                                <img
+                                  src={`${API_BASE.replace(/\/api\/?$/, "/")}${type.icon}`}
+                                  alt={type.name}
+                                  className="w-10 h-10 object-cover rounded-md border border-gray-300"
+                                />
+                              ) : (
+                                <span className="text-gray-400 text-sm italic">No Icon</span>
+                              )}
+                            </td>
+
+                            <td className="px-4 py-2">
+                              <span className="text-gray-700 px-3 py-1 rounded-full text-md">
                                 {type.name}
                               </span>
                             </td>
+
                             <td className="px-4 py-2">
-                              {/* <div className="flex gap-3">
-                                <button
-                                  onClick={() =>
-                                    navigate(`/RestroType/:id`, {
-                                      state: { id: type.id, name: type.name },
-                                    })
-                                  }
-                                  className="bg-green-500 text-white px-3 py-1 cursor-pointer rounded text-sm"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => setShowDeleteModal(true)}
-                                  className="bg-red-500 text-white  cursor-pointer px-3 py-1 rounded text-sm"
-                                >
-                                  Delete
-                                </button>
-                              </div> */}
                               <div className="flex gap-3">
-                                {/* <button
-                                  className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
-                                  onClick={() =>
-                                    navigate(`/RestroProfile/${restro._id}`)
-                                  }
-                                >
-                                  <Eye size={16} />
-                                </button> */}
                                 <button
-                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600"
                                   onClick={() =>
                                     navigate(`/RestroType/:id`, {
-                                      state: { id: type.id, name: type.name },
+                                      state: {
+                                        id: type.id,
+                                        name: type.name,
+                                        icon: type.icon,
+                                      },
                                     })
                                   }
                                 >
                                   <MdEdit size={16} />
                                 </button>
                                 <button
-                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600"
                                   onClick={() => setShowDeleteModal(true)}
                                 >
                                   <MdDelete size={16} />
@@ -224,7 +208,7 @@ function RestroTypeList() {
                     ) : (
                       <tr>
                         <td
-                          colSpan="3"
+                          colSpan="4"
                           className="text-center py-4 text-gray-500 italic"
                         >
                           No results found
@@ -252,6 +236,7 @@ function RestroTypeList() {
           </div>
         </div>
       </div>
+
       <DeleteModel
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}
