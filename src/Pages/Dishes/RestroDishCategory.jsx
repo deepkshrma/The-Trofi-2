@@ -17,7 +17,7 @@ function RestroDishCategory() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const editCategory = location.state?.category; // 👈 edit ke liye category object
+  const editCategory = location.state?.category; 
 
   // Prefill if editing
   useEffect(() => {
