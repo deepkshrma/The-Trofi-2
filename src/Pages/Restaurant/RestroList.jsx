@@ -131,6 +131,7 @@ function RestroList() {
             <PlusCircle size={18} /> Add Restaurant
           </button>
         </div>
+        
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
             <div>
@@ -186,24 +187,6 @@ function RestroList() {
 
         {/* Table */}
         <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
-          {/* <div className="flex justify-between items-center m-3">
-            <input
-              type="text"
-              placeholder="Search by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
-            />
-            
-            <button
-              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
-              
-              onClick={handleExport}
-            >
-              <CiExport size={20} /> Export
-            </button>
-          </div> */}
-
           <div className="flex justify-between items-center m-3">
             {/* 🔍 Search input */}
             <input

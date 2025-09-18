@@ -180,7 +180,7 @@ export default function DishReviewList() {
           </div>
         </div>
       </div>
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-3">
+      <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
         {/* 
         <div className="mb-2  w-80">
           <input

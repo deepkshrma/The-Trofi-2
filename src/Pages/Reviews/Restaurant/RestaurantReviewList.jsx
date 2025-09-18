@@ -21,6 +21,7 @@ import { FiFilter } from "react-icons/fi";
 import { CiExport } from "react-icons/ci";
 
 export default function RestaurantReviewList() {
+  const [search, setSearch] = useState("");
   const [reviews, setReviews] = useState([
     {
       id: 1,
@@ -170,17 +171,19 @@ export default function RestaurantReviewList() {
         </div>
       </div>
 
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4 mt-3">
+      <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
         {/* Search Field */}
         <div className="flex justify-between items-center m-3">
+          {/* 🔍 Search input */}
           <input
             type="text"
-            placeholder="Search by User or Restaurant..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
 
+          {/* 📂 Right-side controls */}
           <div className="flex items-center gap-3">
             {/* 🧮 Filter button */}
             <button
@@ -193,7 +196,7 @@ export default function RestaurantReviewList() {
               <FiFilter size={20} /> Filter
             </button>
 
-            {/*  Export button */}
+            {/* ⬇ Export button */}
             <button
               className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
               onClick={handleExport}
