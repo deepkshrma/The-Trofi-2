@@ -11,10 +11,10 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
 import {
-  FaStar,
+  FaUtensils,
   FaCheckCircle,
-  FaTimesCircle,
   FaHourglassHalf,
+  FaTrashAlt,
 } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 
@@ -119,18 +119,20 @@ function DishesList() {
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">Total Reviews</h4>
-              <p className="text-[22px] font-semibold">{dishes.length}</p>
+              <h4 className="text-[14px]">Total Dishes</h4>
+              <p className="text-[22px] font-semibold">
+                {pagination.totalRecords}
+              </p>
             </div>
             <div className="">
               <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaStar size={35} className="text-blue-900" />
+                <FaUtensils size={35} className="text-blue-900" />
               </div>
             </div>
           </div>
           <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">Accepted Reviews</h4>
+              <h4 className="text-[14px]">Available Dishes</h4>
               <p className="text-[22px] font-semibold">
                 {dishes.filter((u) => u.status === "active").length}
               </p>
@@ -143,7 +145,7 @@ function DishesList() {
           </div>
           <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">Pending Reviews</h4>
+              <h4 className="text-[14px]">No Available Dishes</h4>
               <p className="text-[22px] font-semibold">
                 {dishes.filter((u) => u.status === "inactive").length}
               </p>
@@ -156,14 +158,14 @@ function DishesList() {
           </div>
           <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">Denied Reviews</h4>
+              <h4 className="text-[14px]">Dishes</h4>
               <p className="text-[22px] font-semibold">
                 {dishes.filter((u) => u.status === "suspended").length}
               </p>
             </div>
             <div className="">
               <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaTimesCircle size={35} className="text-red-500" />
+                <FaTrashAlt size={35} className="text-red-500" />
               </div>
             </div>
           </div>

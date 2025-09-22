@@ -50,7 +50,7 @@ function RestroDishSubCategory() {
     }
   }, [isEdit, editData]);
 
-  // File change
+
   const handleFileChange = (e) => {
     const f = e.target.files[0];
     if (f) {
@@ -59,7 +59,6 @@ function RestroDishSubCategory() {
     }
   };
 
-  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,7 +76,6 @@ function RestroDishSubCategory() {
     try {
       let res;
       if (isEdit) {
-        // UPDATE
         res = await axios.patch(
           `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`,
           formData,
@@ -94,7 +92,7 @@ function RestroDishSubCategory() {
 
       if (res.status === 200 || res.status === 201) {
         toast.success(res.data?.message || "Success");
-        navigate("/RestroDishSubCategoryList"); // back to list
+        navigate("/RestroDishSubCategoryList"); 
       } else {
         toast.error(res.data?.message || "Something went wrong");
       }

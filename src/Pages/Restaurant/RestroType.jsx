@@ -87,6 +87,7 @@ function RestroType() {
           setIconFile(null);
           setIconPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
+          navigate("/RestroTypeList");
         } else {
           toast.error(res.data?.message || "Something went wrong");
         }

@@ -25,7 +25,7 @@ function Recenter({ position }) {
 }
 
 export default function LocationPicker({ address }) {
-  const [position, setPosition] = useState([28.6139, 77.209]); // Default: Delhi
+  const [position, setPosition] = useState([28.6139, 77.209]); 
 
   useEffect(() => {
     if (address) {

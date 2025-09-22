@@ -190,6 +190,140 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
+          name: "Restaurant Management",
+          icon: <FaCog />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            {
+              name: "Restaurant Amenity",
+              link: "#",
+              dropdown: true, // nested
+              subItems: [
+                // { name: "Add Amenity", link: "RestroAmenity", dropdown: false },
+                {
+                  name: "Amenity List",
+                  link: "RestroAmenityList",
+                  dropdown: false,
+                },
+              ],
+            },
+            {
+              name: "Restaurant Type",
+              link: "#",
+              dropdown: true, // nested
+              subItems: [
+                // { name: "Add Type", link: "RestroType", dropdown: false },
+                { name: "Type List", link: "RestroTypeList", dropdown: false },
+              ],
+            },
+            {
+              name: "Restaurant Good For",
+              link: "#",
+              dropdown: true, // nested
+              subItems: [
+                // {
+                //   name: "Add Good For",
+                //   link: "RestroGoodFor",
+                //   dropdown: false,
+                // },
+                {
+                  name: "Good For List",
+                  link: "RestroGoodForList",
+                  dropdown: false,
+                },
+              ],
+            },
+            {
+              name: "Restaurant Cuisine",
+              link: "#",
+              dropdown: true, // nested
+              subItems: [
+                // {
+                //   name: "Add Cuisine",
+                //   link: "RestroCuisine",
+                //   dropdown: false,
+                // },
+                {
+                  name: "Cuisine List",
+                  link: "RestroCuisineList",
+                  dropdown: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      section: "",
+      items: [
+        {
+          name: "Dish Management",
+          icon: <FaConciergeBell />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            {
+              name: "Dish Type",
+              link: "#",
+              dropdown: true,
+              subItems: [
+                // {
+                //   name: "Add Dish Type",
+                //   link: "RestroDishType",
+                //   dropdown: false,
+                // },
+                {
+                  name: "Dish Type List",
+                  link: "RestroDishTypeList",
+                  dropdown: false,
+                },
+              ],
+            },
+            {
+              name: "Dish Category",
+              link: "#",
+              dropdown: true,
+              subItems: [
+                // {
+                //   name: "Add Dish Category",
+                //   link: "RestroDishCategory",
+                //   dropdown: false,
+                // },
+                {
+                  name: "Category List",
+                  link: "RestroDishCategoryList",
+                  dropdown: false,
+                },
+              ],
+            },
+            {
+              name: "Dish Sub Category",
+              link: "#",
+              dropdown: true,
+              subItems: [
+                // {
+                //   name: "Add Sub Category",
+                //   link: "RestroDishSubCategory",
+                //   dropdown: false,
+                // },
+                {
+                  name: "Sub Category List",
+                  link: "RestroDishSubCategoryList",
+                  dropdown: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      border: true,
+    },
+    {
+      section: "",
+      items: [
+        {
           name: "Restaurant",
           icon: <FaStore />,
           link: "#",
@@ -210,75 +344,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       ],
       border: true,
     },
-    {
-      section: "",
-      items: [
-        {
-          name: "Restaurant Management",
-          icon: <FaCog />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            {
-              name: "Restaurant Amenity",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                { name: "Add Amenity", link: "RestroAmenity", dropdown: false },
-                {
-                  name: "Amenity List",
-                  link: "RestroAmenityList",
-                  dropdown: false,
-                },
-              ],
-            },
-            {
-              name: "Restaurant Type",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                { name: "Add Type", link: "RestroType", dropdown: false },
-                { name: "Type List", link: "RestroTypeList", dropdown: false },
-              ],
-            },
-            {
-              name: "Restaurant Good For",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                {
-                  name: "Add Good For",
-                  link: "RestroGoodFor",
-                  dropdown: false,
-                },
-                {
-                  name: "Good For List",
-                  link: "RestroGoodForList",
-                  dropdown: false,
-                },
-              ],
-            },
-            {
-              name: "Restaurant Cuisine",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                {
-                  name: "Add Cuisine",
-                  link: "RestroCuisine",
-                  dropdown: false,
-                },
-                {
-                  name: "Cuisine List",
-                  link: "RestroCuisineList",
-                  dropdown: false,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
+
     {
       section: "",
       items: [
@@ -288,78 +354,14 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           link: "#",
           dropdown: true,
           subItems: [
-            { name: "Add Dish", link: "AddDishes", dropdown: false },
+            // { name: "Add Dish", link: "AddDishes", dropdown: false },
             { name: "Dishes List", link: "DishesList", dropdown: false },
           ],
         },
       ],
       border: true,
     },
-    {
-      section: "",
-      items: [
-        {
-          name: "Dish Management",
-          icon: <FaConciergeBell />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            {
-              name: "Dish Type",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                {
-                  name: "Add Dish Type",
-                  link: "RestroDishType",
-                  dropdown: false,
-                },
-                {
-                  name: "Dish Type List",
-                  link: "RestroDishTypeList",
-                  dropdown: false,
-                },
-              ],
-            },
-            {
-              name: "Dish Category",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                {
-                  name: "Add Dish Category",
-                  link: "RestroDishCategory",
-                  dropdown: false,
-                },
-                {
-                  name: "Category List",
-                  link: "RestroDishCategoryList",
-                  dropdown: false,
-                },
-              ],
-            },
-            {
-              name: "Dish Sub Category",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                {
-                  name: "Add Sub Category",
-                  link: "RestroDishSubCategory",
-                  dropdown: false,
-                },
-                {
-                  name: "Sub Category List",
-                  link: "RestroDishSubCategoryList",
-                  dropdown: false,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      border: true,
-    },
+
     {
       section: "",
       items: [

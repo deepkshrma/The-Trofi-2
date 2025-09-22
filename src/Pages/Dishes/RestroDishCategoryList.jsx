@@ -10,6 +10,7 @@ import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBr
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
+import { PlusCircle } from "lucide-react";
 
 const RestroDishCategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -80,7 +81,17 @@ const RestroDishCategoryList = () => {
             { label: "Dish Categories", path: "/RestroDishCategoryList" },
           ]}
         />
-        <PageTitle title={"Dish Categories"} />
+        <div className="flex justify-between items-center mb-3">
+          <PageTitle title={"Dish Categories"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroDishCategory")}
+          >
+            <PlusCircle size={18} /> Add Dish Categories
+          </button>
+        </div>
+        
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}
           <div className="flex flex-wrap gap-3 m-3">

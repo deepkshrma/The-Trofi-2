@@ -126,7 +126,16 @@ function RestroAmenityList() {
             },
           ]}
         />
-        <PageTitle title={"Restaurant Amenities List"} />
+        <div className="flex justify-between items-center mb-3">
+          <PageTitle title={"Restaurant Amenities List"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroAmenity")}
+          >
+            <PlusCircle size={18} /> Add Amenity
+          </button>
+        </div>
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
@@ -134,7 +143,7 @@ function RestroAmenityList() {
             <div className="flex justify-between items-center m-3">
               <input
                 type="text"
-                placeholder="Search by name..."
+                placeholder="Search by Amenities name..."
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -143,7 +152,7 @@ function RestroAmenityList() {
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 cursor-pointer  text-gray-600 hover:shadow-lg"
                 // style={{ backgroundColor: "#F9832B" }}
                 onClick={handleExport}
               >

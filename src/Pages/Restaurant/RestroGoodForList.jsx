@@ -10,6 +10,7 @@ import { MdDelete } from "react-icons/md";
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import {  PlusCircle } from "lucide-react";
 
 function RestroGoodForList() {
   const API_BASE = "http://trofi-backend.apponedemo.top/api/";
@@ -114,7 +115,17 @@ function RestroGoodForList() {
             { label: "Restaurant - Good For", path: "/RestroGoodForList" },
           ]}
         />
-        <PageTitle title={"Restaurant Good For"} />
+        <div className="flex justify-between items-center mb-3">
+          <PageTitle title={"Restaurant Good For"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroGoodFor")}
+          >
+            <PlusCircle size={18} /> Add Good For
+          </button>
+        </div>
+        
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
@@ -132,7 +143,7 @@ function RestroGoodForList() {
               />
               {/* Export button (right) */}
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 cursor-pointer text-gray-600 hover:shadow-lg"
                 // style={{ backgroundColor: "#F9832B" }}
                 onClick={handleExport}
               >

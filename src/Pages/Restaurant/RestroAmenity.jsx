@@ -94,6 +94,7 @@ function RestroAmenity() {
           setFile(null);
           setPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
+          navigate("/RestroAmenityList");  // navigate amnity list
         } else {
           toast.error(res.data?.message || "Something went wrong");
         }

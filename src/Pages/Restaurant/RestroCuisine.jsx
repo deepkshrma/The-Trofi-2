@@ -6,6 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { toast } from "react-toastify";
 
 function RestroCuisine() {
   const { id } = useParams(); // check if edit mode
@@ -25,7 +26,8 @@ function RestroCuisine() {
     e.preventDefault();
 
     if (!cuisine) {
-      alert("Please enter a cuisine name");
+      
+      toast.error("Please enter a cuisine name");
       return;
     }
 
@@ -44,17 +46,17 @@ function RestroCuisine() {
       }
 
       if (res.status === 200 || res.status === 201 || res.data?.status) {
-        alert(
-          res.data?.message || (id ? "Cuisine updated" : "Cuisine created")
-        );
+        
+        toast.success(res.data?.message || (id ? "Cuisine updated" : "Cuisine created"))
         if (!id) setCuisine(""); // clear only in create
         navigate("/RestroCuisineList");
       } else {
-        alert(res.data?.message || "Something went wrong");
+        
+        toast.error(res.data?.message || "Something went wrong")
       }
     } catch (err) {
       console.error(err);
-      alert("Error while saving cuisine");
+      toast.error(err || "Error while saving cuisine")
     }
   };
 

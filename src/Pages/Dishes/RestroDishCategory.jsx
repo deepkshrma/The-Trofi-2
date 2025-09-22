@@ -182,7 +182,7 @@ function RestroDishCategory() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              {editCategory ? "Update Category" : "Save Category"}
+              {editCategory ? "Update Category" : "Save"}
             </button>
           </div>
         </form>

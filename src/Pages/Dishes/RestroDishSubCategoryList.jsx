@@ -10,6 +10,7 @@ import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBr
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
+import { PlusCircle } from "lucide-react";
 
 function RestroDishSubCategoryList() {
   const [subCategories, setSubCategories] = useState([]);
@@ -83,7 +84,17 @@ function RestroDishSubCategoryList() {
             },
           ]}
         />
-        <PageTitle title={"Dish Sub Categories"} />
+        <div className="flex justify-between items-center mb-3">
+          <PageTitle title={"Dish Sub Categories"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroDishSubCategory")}
+          >
+            <PlusCircle size={18} /> Add Dish Sub Categories
+          </button>
+        </div>
+
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}
 
@@ -168,7 +179,7 @@ function RestroDishSubCategoryList() {
             itemsPerPage={pagination.pageSize}
             onPageChange={(page) => fetchSubCategories(page)}
             totalPages={pagination.totalPages}
-            type="frontend"
+            type="backend"
           />
         </div>
       </div>

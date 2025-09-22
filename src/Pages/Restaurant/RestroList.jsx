@@ -24,6 +24,7 @@ import {
   FaStoreSlash,
   FaBan,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
@@ -48,7 +49,7 @@ function RestroList() {
   const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
   let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2JhMzRmODY5YjZlN2VhYjEzZTMyOCIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4MTc2MDgwLCJleHAiOjE3NTg3ODA4ODB9.saJIPooUdh3DPoviYjFIcMIH-9a9dMrqpNcMfYNs57s";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2QzOTAwNWM4ZjA0NWRjZDRjNjI1MSIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4Mjc5OTM2LCJleHAiOjE3NTg4ODQ3MzZ9.pVPRinrHt75yG4pP8lu6nxDXyyN8HlF60cVuOToD5Ew";
 
   // Fetch restaurants with pagination
   const fetchRestaurants = async (page = 1) => {
@@ -75,6 +76,7 @@ function RestroList() {
       }));
     } catch (error) {
       console.error("Error fetching restaurants:", error);
+      toast.error("Error fetching restaurants:", error);
     } finally {
       setLoading(false);
     }

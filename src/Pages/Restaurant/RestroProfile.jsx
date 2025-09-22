@@ -30,7 +30,7 @@ function RestroProfile() {
   const [restaurant, setRestaurant] = useState([]);
 
   let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2JhMzRmODY5YjZlN2VhYjEzZTMyOCIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4MTc2MDgwLCJleHAiOjE3NTg3ODA4ODB9.saJIPooUdh3DPoviYjFIcMIH-9a9dMrqpNcMfYNs57s";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2QzOTAwNWM4ZjA0NWRjZDRjNjI1MSIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4Mjc5OTM2LCJleHAiOjE3NTg4ODQ3MzZ9.pVPRinrHt75yG4pP8lu6nxDXyyN8HlF60cVuOToD5Ew";
 
   useEffect(() => {
     const fetchRestaurant = async () => {

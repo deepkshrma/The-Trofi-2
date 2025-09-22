@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect ,useRef} from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { toast } from "react-toastify"; 
 
 function RestroGoodFor() {
   const location = useLocation();
   const navigate = useNavigate();
-
   const editData = location.state || null;
+
   const [goodFor, setGoodFor] = useState(editData?.name || "");
   const [icon, setIcon] = useState(null);
   const [preview, setPreview] = useState(editData?.icon || null);
@@ -31,7 +31,7 @@ function RestroGoodFor() {
     e.preventDefault();
 
     if (!goodFor) {
-      alert("Please enter a value");
+      toast.error("Please enter a value");
       return;
     }
 
@@ -49,10 +49,12 @@ function RestroGoodFor() {
         );
 
         if (res.status === 200 || res.data?.status) {
-          alert(res.data?.message || "Updated successfully");
+          
+          toast.success(res.data?.message || "Updated successfully")
           navigate("/RestroGoodForList");
         } else {
-          alert(res.data?.message || "Something went wrong");
+        
+          toast.error(res.data?.message || "Something went wrong");
         }
       } else {
         // Create
@@ -63,17 +65,20 @@ function RestroGoodFor() {
         );
 
         if (res.status === 201 || res.data?.status) {
-          alert(res.data?.message || "Created successfully");
+        
+          toast.success(res.data?.message || "Created successfully")
           setGoodFor("");
           setIcon(null);
           setPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+          navigate("/RestroGoodForList");
         } else {
-          alert(res.data?.message || "Something went wrong");
+          toast.error(res.data?.message || "Something went wrong");
         }
       }
     } catch (err) {
       console.error(err);
-      alert("Error while saving Good For");
+      toast.error("Error while saving Good For");
     }
   };
 

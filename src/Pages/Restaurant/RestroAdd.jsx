@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
+import { Info, MapPin, Utensils } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../../config/Config.js";
 import axios from "axios";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { Listbox } from "@headlessui/react";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 
 function RestroAdd() {
   const [restaurantData, setRestaurantData] = useState({
@@ -55,6 +56,11 @@ function RestroAdd() {
   const navigate = useNavigate();
 
   // const facilityOptions = ['veg', 'non-veg', 'both'];
+  const roles = [
+    { id: "68ccedce42ef86cca285022a", name: "superadmin" },
+    { id: "68ccedce42ef86cca285022e", name: "admin" },
+    { id: "68ccedce42ef86cca2850231", name: "restaurant_owner" },
+  ];
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -122,11 +128,11 @@ function RestroAdd() {
       formData.append("good_for", JSON.stringify(restaurantData.good_for));
       formData.append("cuisines", JSON.stringify(restaurantData.cuisines));
       formData.append("amenities", JSON.stringify(restaurantData.amenities));
-
       formData.append(
         "hygiene_status",
         restaurantData.hygieneStatus || "general"
       );
+
       if (restaurantData.openingTime && restaurantData.closingTime) {
         formData.append(
           "time",
@@ -145,18 +151,24 @@ function RestroAdd() {
         formData.append("restaurant_menu_images", file)
       );
 
-      const response = await fetch(`${BASE_URL}/restro/create-restaurant`, {
-        method: "POST",
-        body: formData,
-      });
+      // ✅ Axios POST request
+      const { data } = await axios.post(
+        `${BASE_URL}/restro/create-restaurant`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      const result = await response.json();
-      console.log("Restaurant Created:", result);
-      toast.success("restro created successfully!");
+      console.log("Restaurant Created:", data);
+      toast.success("Restro created successfully!");
       navigate("/RestroList");
     } catch (err) {
       console.error("Error:", err);
-      toast.error(err);
+      // If Axios error, show message if available
+      const msg =
+        err.response?.data?.message || err.message || "Something went wrong";
+      toast.error(msg);
     }
   };
 
@@ -224,15 +236,56 @@ function RestroAdd() {
           </div>
           <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
-            <select
-              name="role_id"
+            <Listbox
               value={restaurantData.role_id}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring focus:ring-orange-400 focus:border-[#F9832B] transition bg-white"
+              onChange={(value) =>
+                setRestaurantData((prev) => ({ ...prev, role_id: value }))
+              }
             >
-              <option value="68aead7b9db7925a61de75bb">Admin</option>
-              {/* You can add more static roles here if needed */}
-            </select>
+              {({ open }) => (
+                <div className="relative">
+                  <Listbox.Button
+                    className="w-full cursor-pointer rounded-xl border border-gray-300
+                     bg-white px-4 py-3 text-left focus:outline-none
+                     focus:ring-2 focus:ring-orange-400"
+                  >
+                    <span>
+                      {roles.find((r) => r.id === restaurantData.role_id)
+                        ?.name || "Select role"}
+                    </span>
+                    <ChevronUpDownIcon className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+                  </Listbox.Button>
+
+                  <Listbox.Options
+                    className="absolute z-10 mt-1 w-full rounded-xl bg-white shadow-lg
+                     ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  >
+                    {roles.map((role) => (
+                      <Listbox.Option
+                        key={role.id}
+                        value={role.id}
+                        className={({ active }) =>
+                          `cursor-pointer select-none px-4 py-2 rounded-xl ${
+                            active
+                              ? "bg-orange-100 text-orange-700"
+                              : "text-gray-900"
+                          }`
+                        }
+                      >
+                        {({ selected }) => (
+                          <div className="flex justify-between">
+                            <span>{role.name}</span>
+                            {selected && (
+                              <CheckIcon className="h-5 w-5 text-orange-500" />
+                            )}
+                          </div>
+                        )}
+                      </Listbox.Option>
+                    ))}
+                  </Listbox.Options>
+                </div>
+              )}
+            </Listbox>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -522,7 +575,7 @@ function RestroAdd() {
           <label className="block mb-2 font-medium text-gray-600">
             Open Days
           </label>
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex gap-3  flex-wrap">
             {[
               "Monday",
               "Tuesday",
@@ -549,7 +602,7 @@ function RestroAdd() {
             ${
               isSelected
                 ? "bg-[#F9832B] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100 text-gray-700  hover:bg-gray-200"
             }`}
                 >
                   {day}
@@ -564,7 +617,7 @@ function RestroAdd() {
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
           style={{ color: "#F9832B" }}
         >
-          <PlusCircle size={20} /> Additional Details
+          <Info size={20} /> Additional Details
         </h2>
 
         {/* Helper function for rendering selection buttons */}

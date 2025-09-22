@@ -11,6 +11,7 @@ import { FiFilter } from "react-icons/fi";
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { PlusCircle } from "lucide-react";
 
 const RestroDishTypeList = () => {
   const [dishes, setDishes] = useState([]);
@@ -79,27 +80,27 @@ const RestroDishTypeList = () => {
   const paginated = filtered.slice(start, start + pageSize);
 
   const handleExport = () => {
-      // Prepare data for Excel
-      const exportData = reviews.map((rev, index) => ({
-        "S.No.": index + 1,
-        "User Name": rev.userName,
-        "Restaurant Name": rev.restroName,
-        "Rating Label": faceStars[rev.star_value - 1]?.label || rev.rating_label,
-        Stars: rev.star_value,
-        Status: rev.status,
-      }));
-  
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "RestaurantReviews");
-  
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-      const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-      saveAs(blob, "RestaurantReviews.xlsx");
-    };
+    // Prepare data for Excel
+    const exportData = reviews.map((rev, index) => ({
+      "S.No.": index + 1,
+      "User Name": rev.userName,
+      "Restaurant Name": rev.restroName,
+      "Rating Label": faceStars[rev.star_value - 1]?.label || rev.rating_label,
+      Stars: rev.star_value,
+      Status: rev.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "RestaurantReviews");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "RestaurantReviews.xlsx");
+  };
 
   return (
     <>
@@ -112,7 +113,17 @@ const RestroDishTypeList = () => {
             },
           ]}
         />
-        <PageTitle title={"Dish Management"} />
+        <div className="flex justify-between items-center mb-3">
+          <PageTitle title={"Dish Type List"} />
+          <button
+            className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
+            style={{ backgroundColor: "#F9832B" }}
+            onClick={() => navigate("/RestroDishType")}
+          >
+            <PlusCircle size={18} /> Add Dish Type
+          </button>
+        </div>
+
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* Search
           <div className="flex flex-wrap gap-3 m-3">

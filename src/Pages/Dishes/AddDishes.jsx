@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PageTittle from "../../components/PageTitle/PageTitle";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function AddDishes() {
   const [ingredient, setIngredient] = useState("");
+  const [ingredientIcon, setIngredientIcon] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [images, setImages] = useState([]);
 
@@ -32,7 +32,7 @@ function AddDishes() {
 
   useEffect(() => {
     const token =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2JhMzRmODY5YjZlN2VhYjEzZTMyOCIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4MTc2MDgwLCJleHAiOjE3NTg3ODA4ODB9.saJIPooUdh3DPoviYjFIcMIH-9a9dMrqpNcMfYNs57s";
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2QzOTAwNWM4ZjA0NWRjZDRjNjI1MSIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4Mjc5OTM2LCJleHAiOjE3NTg4ODQ3MzZ9.pVPRinrHt75yG4pP8lu6nxDXyyN8HlF60cVuOToD5Ew";
 
     const config = {
       headers: {
@@ -85,37 +85,62 @@ function AddDishes() {
 
   const addIngredient = () => {
     if (ingredient.trim() !== "") {
-      setIngredients([...ingredients, ingredient]);
+      const newIngredient = {
+        name: ingredient,
+        icon: ingredientIcon,
+      };
+      setIngredients([...ingredients, newIngredient]);
       setIngredient("");
+      setIngredientIcon(null);
     }
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append("restaurantId", selectedRestaurant?.value);
-    formData.append("dish_category", selectedDishCategory?.value);
-    formData.append("dish_sub_category", selectedDishSubCategory?.value);
-    formData.append("dish_type", selectedDishType?.value);
-    formData.append("cuisines", selectedCuisine?.value);
-    formData.append("dish_name", e.target.dish_name.value);
-    formData.append("price", e.target.price.value);
-    formData.append("description", e.target.description.value);
-    images.forEach((img) => formData.append("dish_images", img));
-    formData.append("dish_ingredients", JSON.stringify(ingredients));
-    formData.append("isAvailable", e.target.isAvailable.checked);
+  e.preventDefault();
+  const formData = new FormData();
 
-    axios
-      .post(`${BASE_URL}/dishes/create-dish`, formData)
-      .then((res) => {
-        toast.success("Dish created successfully!");
-        navigate("/DishesList");
-      })
-      .catch((err) => {
-        console.error(err);
-        toast.error("Failed to create dish. Please try again.");
-      });
-  };
+  // Basic fields
+  formData.append("restaurantId", selectedRestaurant?.value);
+  formData.append("dish_category", selectedDishCategory?.value);
+  formData.append("dish_sub_category", selectedDishSubCategory?.value);
+  formData.append("dish_type", selectedDishType?.value);
+  formData.append("cuisines[0]", selectedCuisine?.value); // match Postman key
+  formData.append("dish_name", e.target.dish_name.value);
+  formData.append("price", e.target.price.value);
+  formData.append("description", e.target.description.value);
+  formData.append("isAvailable", e.target.isAvailable.checked);
+
+  // ---------- Dish images (separate) ----------
+  images.forEach(img => {
+    formData.append('dish_images', img)
+
+  });
+
+  // ---------- Ingredients ----------
+  const ingredientsData = ingredients.map(ing => ({
+    name: ing.name
+    // don’t include file object here, just name
+  }));
+  formData.append("dish_ingredients", JSON.stringify(ingredientsData));
+
+  // Ingredient icons, each file appended under the same key
+  ingredients.forEach(ing => {
+    if (ing.icon) {
+      formData.append("ingredient_icons", ing.icon);
+    }
+  });
+
+  axios.post(`${BASE_URL}/dishes/create-dish`, formData)
+    .then(() => {
+      toast.success("Dish created successfully!");
+      navigate("/DishesList");
+    })
+    .catch(err => {
+      console.error(err);
+      toast.error("Failed to create dish. Please try again.");
+    });
+};
+
 
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
@@ -219,7 +244,7 @@ function AddDishes() {
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">Type</label>
+            <label className="block text-gray-600 mb-2 font-medium">Type</label>
             <Select
               options={dishTypes.map((dt) => ({
                 value: dt._id,
@@ -233,7 +258,7 @@ function AddDishes() {
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">
+            <label className="block text-gray-600 mb-2 font-medium">
               Cuisine
             </label>
             <Select
@@ -253,36 +278,86 @@ function AddDishes() {
               Ingredients
             </label>
 
-            <div className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={ingredient}
-                onChange={(e) => setIngredient(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault(); // prevent form submission if inside a form
-                    addIngredient(); // call your existing addIngredient function
+            <div className="space-y-4 mb-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={ingredient}
+                  onChange={(e) => setIngredient(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addIngredient();
+                    }
+                  }}
+                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
+                  placeholder="Enter ingredient name"
+                />
+                <button
+                  type="button"
+                  onClick={addIngredient}
+                  className="px-4 py-2 cursor-pointer rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  id="ingredientIcon"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setIngredientIcon(e.target.files[0])}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById("ingredientIcon").click()
                   }
-                }}
-                className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
-                placeholder="Enter ingredient"
-              />
-              <button
-                type="button"
-                onClick={addIngredient}
-                className="px-4 py-2 cursor-pointer rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition"
-              >
-                Add
-              </button>
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
+                >
+                  Choose Icon
+                </button>
+                {ingredientIcon && (
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={
+                        URL.createObjectURL(ingredientIcon) ||
+                        "/placeholder.svg"
+                      }
+                      alt="ingredient icon preview"
+                      className="w-8 h-8 object-cover rounded border"
+                    />
+                    <span className="text-sm text-gray-600">
+                      {ingredientIcon.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIngredientIcon(null)}
+                      className="text-red-500 hover:text-red-700 cursor-pointer text-sm"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ing, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-1 rounded-full"
+                  className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-2 rounded-full"
                 >
-                  <span>{ing}</span>
+                  {ing.icon && (
+                    <img
+                      src={URL.createObjectURL(ing.icon) || "/placeholder.svg"}
+                      alt={`${ing.name} icon`}
+                      className="w-5 h-5 object-cover rounded-full"
+                    />
+                  )}
+                  <span>{ing.name}</span>
                   <button
                     type="button"
                     onClick={() =>
@@ -330,7 +405,7 @@ function AddDishes() {
                       {img.name}
                     </p>
                     <img
-                      src={URL.createObjectURL(img)}
+                      src={URL.createObjectURL(img) || "/placeholder.svg"}
                       alt={`preview-${index}`}
                       className="w-20 h-20 object-cover rounded-md border"
                     />
