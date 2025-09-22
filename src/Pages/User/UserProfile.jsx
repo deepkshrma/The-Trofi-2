@@ -1,62 +1,48 @@
-// @ts-nocheck
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { BASE_URL } from "../../config/Config";
 
 function UserProfile() {
-  // Dummy API response (with extra fields)
-  const user = {
-    _id: "68c2bda448dad81c525ccb0b",
-    name: "John",
-    email: "john@cena.com",
-    country_code: "+91",
-    phone: "8398367750",
-    fullPhone: "+918398367750",
-    profile_picture: "",
-    account_status: "active",
-    isSpam: false,
-    is_social_login: false,
-    isDeleted: false,
-    deletedAt: null,
-    deletedBy: null,
-    notes: "VIP User. Keep track of his reviews.",
-    emailVerified: true,
-    phoneVerified: true,
-    last_login_at: "2025-09-11T12:16:36.545Z",
-    createdAt: "2025-09-11T12:16:36.559Z",
-    addresses: [
-      {
-        _id: "68c2bda548dad81c525ccb0e",
-        addressLabel: "current_location",
-        address:
-          "2, Niwaru Road, Talaiwai Dham, Jhotwara, Jaipur, 302012, Rajasthan, India",
-        city: "Jaipur",
-        state: "Rajasthan",
-        postalCode: "302012",
-        country: "India",
-        latitude: "26.936533",
-        longitude: "75.767451",
-        isActive: true,
-      },
-    ],
-    favourites: [{ id: 1, name: "Royal Bites" }],
-    ratings: [{ id: 1, restaurant: "Cafe Aroma", stars: 5 }],
-    comments: [{ id: 1, text: "Great food at Bake House!" }],
-    checkIns: [{ id: 1, place: "Pizza Hub", date: "2025-09-10T10:00:00Z" }],
-    devices: [
-      {
-        _id: "68c2bda5a987708a3c5a0e50",
-        deviceId: "device11231",
-        lastUsedAt: "2025-09-11T12:16:37.114Z",
-        linkedUsers: [
+  const [user, setUser] = useState(null);
+  const userID = "68d0e3826aad22d8b7553476"; // Replace with dynamic userID if needed
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/admin/get-all-users?userID=${userID}`,
           {
-            _id: "68c2bda448dad81c525ccb0b",
-            name: "John",
-            email: "john@cena.com",
-          },
-        ],
-      },
-    ],
-  };
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.data.success) {
+          setUser(response.data.data);
+        } else {
+          toast.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong while fetching user data");
+      }
+    };
+
+    fetchUser();
+  }, [userID, BASE_URL]);
+
+  if (!user) return <p className="p-6">Loading user data...</p>;
 
   const initials = user.name ? user.name.charAt(0).toUpperCase() : "U";
 
@@ -96,10 +82,6 @@ function UserProfile() {
             <p className="text-gray-500">
               {user.country_code} {user.phone}
             </p>
-            {/* <p className="text-sm text-gray-500">
-              Login Method:{" "}
-              {user.is_social_login ? "Social Login" : "Email/Phone Login"}
-            </p> */}
             <p className="text-sm text-gray-500">
               Status:{" "}
               <span
@@ -116,51 +98,19 @@ function UserProfile() {
         </div>
       </div>
 
-      {/* Tier & Points (static since API has no points yet) */}
-      {/* <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-        <h3 className="text-lg font-semibold mb-2" style={{ color: "#F9832B" }}>
-          Tier Status
-        </h3>
-        <p>
-          Current Tier: <span className="font-semibold">White</span> 🎖️
-        </p>
-        <p>
-          Points: <span className="font-semibold">0 / 500</span> (Next: Silver)
-        </p>
-        <div className="w-full bg-gray-200 h-3 rounded-full mt-3">
-          <div
-            className="h-3 rounded-full"
-            style={{ width: `0%`, backgroundColor: "#F9832B" }}
-          ></div>
-        </div>
-      </div> */}
-
-      {/* Admin Notes */}
-      {/* <div className="bg-white rounded-xl shadow-md p-6 mt-6">
-        <h3 className="text-lg font-semibold mb-2" style={{ color: "#F9832B" }}>
-          Admin Notes
-        </h3>
-        <p className="text-sm text-gray-600">
-          {user.notes || "No notes added."}
-        </p>
-      </div> */}
-
       {/* Addresses */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
           Addresses
         </h3>
-        {user.addresses.length > 0 ? (
-          user.addresses.map((addr) => (
+        {user.addresses && user.addresses.length > 0 ? (
+          user.addresses.map((addr, idx) => (
             <div
-              key={addr._id}
+              key={addr._id || idx}
               className="border border-gray-300 p-4 rounded-lg mb-3 bg-gray-50"
             >
-              <p className="font-medium">{addr.addressLabel}</p>
-              <p className="text-sm text-gray-600">{addr.address}</p>
-              {/* <p className="text-xs text-gray-500">
-                {addr.city}, {addr.state}, {addr.country} - {addr.postalCode}
-              </p> */}
+              <p className="font-medium">{addr.addressLabel || "Address"}</p>
+              <p className="text-sm text-gray-600">{addr.address || "N/A"}</p>
             </div>
           ))
         ) : (
@@ -173,7 +123,7 @@ function UserProfile() {
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
           Devices
         </h3>
-        {user.devices.length > 0 ? (
+        {user.devices && user.devices.length > 0 ? (
           user.devices.map((dev) => (
             <div
               key={dev._id}
@@ -184,7 +134,10 @@ function UserProfile() {
                 Last Used: {new Date(dev.lastUsedAt).toLocaleString()}
               </p>
               <p className="text-sm text-gray-600">
-                Linked Users: {dev.linkedUsers.map((u) => u.name).join(", ")}
+                Linked Users:{" "}
+                {dev.linkedUsers
+                  ? dev.linkedUsers.map((u) => u.name).join(", ")
+                  : "None"}
               </p>
             </div>
           ))
@@ -200,31 +153,33 @@ function UserProfile() {
         </h3>
         <div className="flex flex-col gap-3">
           <div>
-            <p className="text-sm">Ratings: {user.ratings.length}</p>
-            {user.ratings.map((r) => (
-              <>
+            <p className="text-sm">Ratings: {user.ratings?.length || 0}</p>
+            {user.ratings?.map((r, idx) => (
+              <p key={idx}>
                 ⭐ {r.stars} at {r.restaurant}
-              </>
+              </p>
             ))}
           </div>
           <div>
-            <p className="text-sm">Comments: {user.comments.length}</p>
-            {user.comments.map((c) => (
-              <> 💬 {c.text}</>
+            <p className="text-sm">Comments: {user.comments?.length || 0}</p>
+            {user.comments?.map((c, idx) => (
+              <p key={idx}>💬 {c.text}</p>
             ))}
           </div>
           <div>
-            <p className="text-sm">Check-ins: {user.checkIns.length}</p>{" "}
-            {user.checkIns.map((c) => (
-              <>
+            <p className="text-sm">Check-ins: {user.checkIns?.length || 0}</p>
+            {user.checkIns?.map((c, idx) => (
+              <p key={idx}>
                 📍 {c.place} on {new Date(c.date).toDateString()}
-              </>
+              </p>
             ))}
           </div>
           <div>
-            <p className="text-sm">Favourites: {user.favourites.length}</p>{" "}
-            {user.favourites.map((f) => (
-              <> ❤️ Favorited {f.name}</>
+            <p className="text-sm">
+              Favourites: {user.favourites?.length || 0}
+            </p>
+            {user.favourites?.map((f, idx) => (
+              <p key={idx}>❤️ Favorited {f.name}</p>
             ))}
           </div>
         </div>

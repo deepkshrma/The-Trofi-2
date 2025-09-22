@@ -198,12 +198,12 @@ function RestroCuisineList() {
                                 >
                                   <MdEdit size={18} />
                                 </button>
-                                <button
+                                {/* <button
                                   onClick={() => setShowDeleteModal(true)}
                                   className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
                                 >
                                   <MdDelete size={18} />
-                                </button>
+                                </button> */}
                               </div>
                             </td>
                           </tr>

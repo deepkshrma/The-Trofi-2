@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import PageTittle from "../../components/PageTitle/PageTitle";
 import Select from "react-select";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
-function AddDishes() {
+function UpdateDishes() {
+  const { id } = useParams(); // dish ID from URL
+  const navigate = useNavigate();
+
+  // Form states
+  const [dishData, setDishData] = useState(null);
+
   const [ingredient, setIngredient] = useState("");
   const [ingredientIcon, setIngredientIcon] = useState(null);
   const [ingredients, setIngredients] = useState([]);
@@ -28,55 +34,76 @@ function AddDishes() {
   const [cuisines, setCuisines] = useState([]);
   const [selectedCuisine, setSelectedCuisine] = useState(null);
 
-  const navigate = useNavigate();
+  const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+  if (!token) return toast.error("Please login first");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
+  // Fetch initial dropdowns and dish data
   useEffect(() => {
-    const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
-    if (!token) return toast.error("Please login first");
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
+    // Fetch restaurants
     axios
       .get(`${BASE_URL}/restro/get-restaurant-list`, config)
-      .then((res) => {
-        console.log("Restaurant API Response:", res.data);
-        setRestaurants(res.data?.data || []); // Adjust based on actual data shape
-      })
+      .then((res) => setRestaurants(res.data?.data || []))
       .catch((err) => console.error(err));
 
+    // Fetch categories, subcategories, types, cuisines
     axios
       .get(`${BASE_URL}/restro/get-dish-category`)
-      .then((res) => setDishCategories(res.data?.data || []))
-      .catch((err) => console.error(err));
-
+      .then((res) => setDishCategories(res.data?.data || []));
     axios
       .get(`${BASE_URL}/restro/get-dish-sub-category`)
-      .then((res) => setDishSubCategories(res.data?.data || []))
-      .catch((err) => console.error(err));
-
+      .then((res) => setDishSubCategories(res.data?.data || []));
     axios
       .get(`${BASE_URL}/restro/get-dish-type`)
-      .then((res) => setDishTypes(res.data?.data || []))
-      .catch((err) => console.error(err));
-
+      .then((res) => setDishTypes(res.data?.data || []));
     axios
       .get(`${BASE_URL}/restro/get-cusine`)
-      .then((res) => setCuisines(res.data?.data || []))
-      .catch((err) => console.error(err));
+      .then((res) => setCuisines(res.data?.data || []));
 
+    // Fetch the dish by ID
     axios
-      .get(`${BASE_URL}/dishes/get-dishes-categories`)
+      .get(`${BASE_URL}/dishes/get-dishes-by-id/${id}`)
       .then((res) => {
         if (res.data.success) {
-          setDishCategories(res.data.data.categories || []);
-          setDishSubCategories(res.data.data.subCategories || []);
+          const d = res.data.data;
+          setDishData(d);
+          setSelectedRestaurant({
+            value: d.restaurantId._id,
+            label: d.restaurantId.restro_name,
+          });
+          setSelectedDishCategory({
+            value: d.dish_category._id,
+            label: d.dish_category.category_name,
+          });
+          setSelectedDishSubCategory({
+            value: d.dish_sub_category._id,
+            label: d.dish_sub_category.sub_categ_name,
+          });
+          setSelectedDishType({
+            value: d.dish_type._id,
+            label: d.dish_type.name,
+          });
+          setSelectedCuisine({
+            value: d.cuisines._id,
+            label: d.cuisines.name,
+          });
+          setIngredients(
+            d.dish_ingredients.map((ing) => ({
+              name: ing.name,
+              icon: ing.icon ? { url: `${BASE_URL}/${ing.icon}` } : null,
+            }))
+          );
+          setImages(
+            d.dish_images.map((img) => ({ url: `${IMAGE_URL}/${img}` }))
+          );
         }
       })
       .catch((err) => console.error(err));
-  }, []);
+  }, [id]);
 
   const filteredSubCategories = dishSubCategories.filter(
     (sc) => sc.parentCategoryId === selectedDishCategory?.value
@@ -84,11 +111,10 @@ function AddDishes() {
 
   const addIngredient = () => {
     if (ingredient.trim() !== "") {
-      const newIngredient = {
-        name: ingredient,
-        icon: ingredientIcon,
-      };
-      setIngredients([...ingredients, newIngredient]);
+      setIngredients([
+        ...ingredients,
+        { name: ingredient, icon: ingredientIcon },
+      ]);
       setIngredient("");
       setIngredientIcon(null);
     }
@@ -98,56 +124,51 @@ function AddDishes() {
     e.preventDefault();
     const formData = new FormData();
 
-    // Basic fields
     formData.append("restaurantId", selectedRestaurant?.value);
     formData.append("dish_category", selectedDishCategory?.value);
     formData.append("dish_sub_category", selectedDishSubCategory?.value);
     formData.append("dish_type", selectedDishType?.value);
-    formData.append("cuisines[0]", selectedCuisine?.value); // match Postman key
+    formData.append("cuisines[0]", selectedCuisine?.value);
     formData.append("dish_name", e.target.dish_name.value);
     formData.append("price", e.target.price.value);
     formData.append("description", e.target.description.value);
     formData.append("isAvailable", e.target.isAvailable.checked);
 
-    // ---------- Dish images (separate) ----------
+    // Dish images (file uploads)
     images.forEach((img) => {
-      formData.append("dish_images", img);
+      if (img instanceof File) formData.append("dish_images", img);
     });
 
-    // ---------- Ingredients ----------
-    const ingredientsData = ingredients.map((ing) => ({
-      name: ing.name,
-      // don’t include file object here, just name
-    }));
+    // Ingredients
+    const ingredientsData = ingredients.map((ing) => ({ name: ing.name }));
     formData.append("dish_ingredients", JSON.stringify(ingredientsData));
 
-    // Ingredient icons, each file appended under the same key
+    // Ingredient icons
     ingredients.forEach((ing) => {
-      if (ing.icon) {
-        formData.append("ingredient_icons", ing.icon);
-      }
+      if (ing.icon) formData.append("ingredient_icons", ing.icon);
     });
 
     axios
-      .post(`${BASE_URL}/dishes/create-dish`, formData)
+      .patch(`${BASE_URL}/dishes/update-dish/${id}`, formData, config)
       .then(() => {
-        toast.success("Dish created successfully!");
+        toast.success("Dish updated successfully!");
         navigate("/DishesList");
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Failed to create dish. Please try again.");
+        toast.error("Failed to update dish. Please try again.");
       });
   };
+
+  if (!dishData) return <div>Loading...</div>;
 
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Add New Dish", path: "/AddDishes" }]}
+        customTrail={[{ label: "Update Dish", path: `/UpdateDishes/${id}` }]}
       />
-      <div className=" bg-white shadow-lg rounded-2xl p-10">
-        <PageTittle title={"Add New Dish"} />
-
+      <div className="bg-white shadow-lg rounded-2xl p-10">
+        <PageTittle title={"Update Dish"} />
         <form
           onSubmit={handleSubmit}
           className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10"
@@ -159,8 +180,8 @@ function AddDishes() {
             <input
               type="text"
               name="dish_name"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
-              placeholder="Enter dish name"
+              defaultValue={dishData.dish_name}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none"
               required
             />
           </div>
@@ -173,8 +194,8 @@ function AddDishes() {
               type="number"
               name="price"
               min={0}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
-              placeholder="Enter price"
+              defaultValue={dishData.price}
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none"
               required
             />
           </div>
@@ -185,12 +206,13 @@ function AddDishes() {
             </label>
             <textarea
               name="description"
+              defaultValue={dishData.description}
               rows="4"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition resize-none"
-              placeholder="Enter dish description"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none resize-none"
             ></textarea>
           </div>
 
+          {/* Dropdowns: Restaurant, Category, SubCategory, Type, Cuisine */}
           <div>
             <label className="block text-gray-600 font-medium mb-2">
               Restaurant
@@ -219,7 +241,7 @@ function AddDishes() {
               value={selectedDishCategory}
               onChange={(cat) => {
                 setSelectedDishCategory(cat);
-                setSelectedDishSubCategory(null); // reset subcategory when category changes
+                setSelectedDishSubCategory(null);
               }}
               placeholder="Select Category"
             />
@@ -237,12 +259,12 @@ function AddDishes() {
               value={selectedDishSubCategory}
               onChange={setSelectedDishSubCategory}
               placeholder="Select Sub Category"
-              isDisabled={!selectedDishCategory} // disable until category selected
+              isDisabled={!selectedDishCategory}
             />
           </div>
 
           <div>
-            <label className="block text-gray-600 mb-2 font-medium">Type</label>
+            <label className="block text-gray-600 font-medium mb-2">Type</label>
             <Select
               options={dishTypes.map((dt) => ({
                 value: dt._id,
@@ -251,12 +273,11 @@ function AddDishes() {
               value={selectedDishType}
               onChange={setSelectedDishType}
               placeholder="Select Type"
-              className="w-full"
             />
           </div>
 
           <div>
-            <label className="block text-gray-600 mb-2 font-medium">
+            <label className="block text-gray-600 font-medium mb-2">
               Cuisine
             </label>
             <Select
@@ -267,15 +288,14 @@ function AddDishes() {
               value={selectedCuisine}
               onChange={setSelectedCuisine}
               placeholder="Select Cuisine"
-              className="w-full"
             />
           </div>
 
+          {/* Ingredients */}
           <div className="md:col-span-2">
             <label className="block text-gray-600 mb-2 font-medium">
               Ingredients
             </label>
-
             <div className="space-y-4 mb-4">
               <div className="flex gap-2">
                 <input
@@ -288,80 +308,32 @@ function AddDishes() {
                       addIngredient();
                     }
                   }}
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
+                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2"
                   placeholder="Enter ingredient name"
                 />
                 <button
                   type="button"
                   onClick={addIngredient}
-                  className="px-4 py-2 cursor-pointer rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition"
+                  className="px-4 py-2 bg-orange-500 text-white cursor-pointer rounded-lg"
                 >
                   Add
                 </button>
               </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  id="ingredientIcon"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setIngredientIcon(e.target.files[0])}
-                  className="hidden"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    document.getElementById("ingredientIcon").click()
-                  }
-                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
-                >
-                  Choose Icon
-                </button>
-                {ingredientIcon && (
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={
-                        URL.createObjectURL(ingredientIcon) ||
-                        "/placeholder.svg"
-                      }
-                      alt="ingredient icon preview"
-                      className="w-8 h-8 object-cover rounded border"
-                    />
-                    <span className="text-sm text-gray-600">
-                      {ingredientIcon.name}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIngredientIcon(null)}
-                      className="text-red-500 hover:text-red-700 cursor-pointer text-sm"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {ingredients.map((ing, index) => (
+              {ingredients.map((ing, idx) => (
                 <div
-                  key={index}
+                  key={idx}
                   className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-2 rounded-full"
                 >
-                  {ing.icon && (
-                    <img
-                      src={URL.createObjectURL(ing.icon) || "/placeholder.svg"}
-                      alt={`${ing.name} icon`}
-                      className="w-5 h-5 object-cover rounded-full"
-                    />
-                  )}
                   <span>{ing.name}</span>
                   <button
                     type="button"
                     onClick={() =>
-                      setIngredients(ingredients.filter((_, i) => i !== index))
+                      setIngredients(ingredients.filter((_, i) => i !== idx))
                     }
-                    className="text-red-500 hover:text-red-700 cursor-pointer text-sm"
+                    className="text-red-500"
                   >
                     ✕
                   </button>
@@ -370,64 +342,69 @@ function AddDishes() {
             </div>
           </div>
 
+          {/* Images */}
           <div className="md:col-span-2">
             <label className="block text-gray-600 mb-2 font-medium">
               Dish Images
             </label>
             <input
-              id="dishImage"
               type="file"
               multiple
               accept="image/*"
               onChange={(e) =>
-                setImages((prev) => [...prev, ...Array.from(e.target.files)])
+                setImages([...images, ...Array.from(e.target.files)])
               }
               className="hidden"
+              id="dishImage"
             />
             <button
               type="button"
               onClick={() => document.getElementById("dishImage").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg cursor-pointer shadow hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white cursor-pointer rounded-lg"
             >
               Choose Images
             </button>
-
-            {images.length > 0 && (
-              <div className="flex flex-wrap gap-4 mt-4">
-                {images.map((img, index) => (
-                  <div
-                    key={index}
-                    className="relative w-28 rounded-lg border shadow bg-white p-2 flex flex-col items-center"
+            <div className="flex flex-wrap gap-4 mt-4">
+              {images.map((img, index) => (
+                <div
+                  key={index}
+                  className="relative w-28 rounded-lg border shadow bg-white p-2 flex flex-col items-center"
+                >
+                  <p className="text-xs text-gray-600 mb-2 truncate w-full">
+                    {img.name || `Image ${index + 1}`}
+                  </p>
+                  <img
+                    src={
+                      img.url ||
+                      (img instanceof File
+                        ? URL.createObjectURL(img)
+                        : "/placeholder.svg")
+                    }
+                    alt={`preview-${index}`}
+                    className="w-20 h-20 object-cover rounded-md border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImages(images.filter((_, i) => i !== index))
+                    }
+                    className="absolute -top-2 -right-2 w-6 h-6 flex justify-center items-center bg-red-500 text-white rounded-full text-xs"
                   >
-                    <p className="text-xs text-gray-600 mb-2 text-center truncate w-full">
-                      {img.name}
-                    </p>
-                    <img
-                      src={URL.createObjectURL(img) || "/placeholder.svg"}
-                      alt={`preview-${index}`}
-                      className="w-20 h-20 object-cover rounded-md border"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setImages(images.filter((_, i) => i !== index))
-                      }
-                      className="absolute -top-2 -right-2 w-6 h-6 flex justify-center cursor-pointer items-center bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-md"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
+          {/* Availability */}
           <div className="flex items-center gap-2 md:col-span-2">
             <input
               type="checkbox"
               name="isAvailable"
               id="isAvailable"
-              className="h-5 w-5 appearance-none rounded-md border border-gray-300 checked:bg-orange-500 checked:before:content-['✔'] checked:before:text-white checked:before:block checked:before:text-center"
+              defaultChecked={dishData.isAvailable}
+              className="h-5 w-5"
             />
             <label htmlFor="isAvailable" className="text-gray-600 font-medium">
               Available
@@ -437,9 +414,9 @@ function AddDishes() {
           <div className="md:col-span-2">
             <button
               type="submit"
-              className="w-full bg-orange-500 text-white py-3 cursor-pointer rounded-xl font-semibold hover:bg-orange-600 transition shadow-md text-lg"
+              className="w-full bg-orange-500 text-white py-3 rounded-xl  font-semibold hover:bg-orange-600 transition shadow-md cursor-pointer text-lg"
             >
-              Add Dish
+              Update Dish
             </button>
           </div>
         </form>
@@ -448,4 +425,4 @@ function AddDishes() {
   );
 }
 
-export default AddDishes;
+export default UpdateDishes;

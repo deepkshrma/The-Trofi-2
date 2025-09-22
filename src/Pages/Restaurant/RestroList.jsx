@@ -48,8 +48,12 @@ function RestroList() {
 
   const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
-  let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2QzOTAwNWM4ZjA0NWRjZDRjNjI1MSIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4Mjc5OTM2LCJleHAiOjE3NTg4ODQ3MzZ9.pVPRinrHt75yG4pP8lu6nxDXyyN8HlF60cVuOToD5Ew";
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
+  if (!token) {
+    toast.error("Please login first");
+    return;
+  }
 
   // Fetch restaurants with pagination
   const fetchRestaurants = async (page = 1) => {
@@ -57,7 +61,7 @@ function RestroList() {
       setLoading(true);
 
       const response = await axios.get(
-        `${BASE_URL}/restro/get-restaurant?page=${page}&limit=${pagination.pageSize}`,
+        `${BASE_URL}/restro/get-restaurant-list?page=${page}&limit=${pagination.pageSize}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -133,7 +137,7 @@ function RestroList() {
             <PlusCircle size={18} /> Add Restaurant
           </button>
         </div>
-        
+
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
             <div>
@@ -202,7 +206,7 @@ function RestroList() {
             {/* 📂 Right-side controls */}
             <div className="flex items-center gap-3">
               {/* 🧮 Filter button */}
-              <button
+              {/* <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
                 onClick={() => {
                   // TODO: open a filter modal / drawer
@@ -212,7 +216,7 @@ function RestroList() {
                 }}
               >
                 <FiFilter size={20} /> Filter
-              </button>
+              </button> */}
 
               {/* ⬇ Export button */}
               <button
@@ -290,12 +294,12 @@ function RestroList() {
                             >
                               <MdEdit size={16} />
                             </button>
-                            <button
+                            {/* <button
                               className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
                               onClick={() => setShowDeleteModal(true)}
                             >
                               <MdDelete size={16} />
-                            </button>
+                            </button> */}
                           </div>
                         </div>
                       </td>

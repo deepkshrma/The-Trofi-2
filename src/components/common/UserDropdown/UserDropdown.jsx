@@ -24,7 +24,8 @@ const UserDropdown = ({
   };
   const confirmDelete = async () => {
     setAuthData(null);
-    localStorage.removeItem("broom_auth");
+    localStorage.removeItem("trofi_user");
+    sessionStorage.removeItem("trofi_user");
     localStorage.removeItem("profile_photo");
     localStorage.removeItem("sidebar_open_dropdown");
     localStorage.removeItem("sidebar_active_item");

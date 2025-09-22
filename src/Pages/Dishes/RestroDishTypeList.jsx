@@ -151,8 +151,8 @@ const RestroDishTypeList = () => {
 
             {/* 📂 Right-side controls */}
             <div className="flex items-center gap-3">
-              {/* 🧮 Filter button */}
-              <button
+             
+              {/* <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
                 onClick={() => {
                   // TODO: open a filter modal / drawer
@@ -164,13 +164,13 @@ const RestroDishTypeList = () => {
                 <FiFilter size={20} /> Filter
               </button>
 
-              {/* ⬇ Export button */}
+             
               <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
                 onClick={handleExport}
               >
                 <CiExport size={20} /> Export
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -230,12 +230,12 @@ const RestroDishTypeList = () => {
                             >
                               <MdEdit size={18} />
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => setShowDeleteModal(true)}
                               className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
                             >
                               <MdDelete size={18} />
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>

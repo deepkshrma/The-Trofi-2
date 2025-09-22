@@ -39,9 +39,9 @@ function AdminProfile() {
               <h2 className="text-xl md:text-2xl font-bold text-gray-800">
                 Admin
               </h2>
-              <button className="text-white bg-[#e67220] hover:bg-[#d45f16] focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 cursor-pointer">
+              {/* <button className="text-white bg-[#e67220] hover:bg-[#d45f16] focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-4 py-2 md:px-5 md:py-2.5 cursor-pointer">
                 Edit Profile
-              </button>
+              </button> */}
             </div>
 
             {/* Right Section - User Details */}

@@ -5,6 +5,7 @@ import {
   FaCaretLeft,
   FaCaretRight,
 } from "react-icons/fa";
+
 import guestImg from "../../assets/images/guest.png";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -12,6 +13,7 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import AdminRoleChangeModel from "../../components/AdminRoleChangeModal/AdminRoleChangeModal";
 import { BASE_URL } from "../../config/Config";
+import { IMAGE_URL } from "../../config/Config";
 import {
   useReactTable,
   getCoreRowModel,
@@ -31,32 +33,7 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 const AdminList = () => {
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState([]);
-  const [admins, setAdmins] = useState([
-    {
-      empId: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      role: "Super Admin",
-      profilePhoto: guestImg,
-      status: "active",
-    },
-    {
-      empId: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "Editor",
-      profilePhoto: guestImg,
-      status: "inactive",
-    },
-    {
-      empId: "3",
-      name: "Mike Johnson",
-      email: "mike@example.com",
-      role: "Manager",
-      profilePhoto: guestImg,
-      status: "suspended",
-    },
-  ]);
+  const [admins, setAdmins] = useState([]);
   const [rolesMap, setRolesMap] = useState({});
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState("all");
@@ -71,6 +48,48 @@ const AdminList = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedAdminForRoleChange, setSelectedAdminForRoleChange] =
     useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        if (!token) {
+          toast.error("Please login first");
+          return;
+        }
+
+        // Fetch admins from API
+        const res = await axios.get(`${BASE_URL}/admin/admins`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data.success) {
+          const transformedAdmins = res.data.admins.map((admin) => ({
+  empId: admin._id,
+  name: admin.name,
+  email: admin.email,
+  role: typeof admin.role === "string" ? admin.role : admin.role?.name || "Unknown",
+  profilePhoto: admin.profile_picture ? `${IMAGE_URL}/${admin.profile_picture}` : guestImg,
+  status: admin.status,
+  status_reason: admin.status_reason || "",
+  dob: admin.dob || "",           // <-- add this
+  gender: admin.gender || "",     // <-- add this
+  address: admin.address || "",   // <-- add this
+}));
+
+
+          setAdmins(transformedAdmins);
+        }
+      } catch (error) {
+        const errorMessage =
+          error?.response?.data?.message || "Failed to fetch admins";
+        toast.error(errorMessage);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // const fetchAdminDetails = async (empId) => {
   //   try {
@@ -318,74 +337,17 @@ const AdminList = () => {
         header: "Action",
         size: 100,
         cell: ({ row }) => {
-          const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-          const dropdownRef = React.useRef(null);
-
-          React.useEffect(() => {
-            const handleClickOutside = (event) => {
-              if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target)
-              ) {
-                setIsDropdownOpen(false);
-              }
-            };
-
-            document.addEventListener("mousedown", handleClickOutside);
-            return () => {
-              document.removeEventListener("mousedown", handleClickOutside);
-            };
-          }, []);
-
           return (
-            <div className="relative flex items-center gap-2 text-[14px]  py-2 text-left">
-              <div className="relative " ref={dropdownRef}>
-                <div
-                  onClick={() => setIsDropdownOpen((prev) => !prev)}
-                  className={`flex justify-center items-center w-[40px] h-[25px] border border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white rounded cursor-pointer ${
-                    isDropdownOpen ? "bg-orange-400 text-white" : ""
-                  } `}
-                >
-                  <TfiLayoutMenuSeparated className="text-[15px]" />
-                </div>
-
-                {isDropdownOpen && (
-                  <ul className="absolute bottom-[-340%] right-[-165%] text-sm shadow-lg bg-blue-50   rounded z-10 ">
-                    <li
-                      className="flex gap-3 hover:shadow-md  px-4 py-1 rounded cursor-pointer text-green-500 font-[600]"
-                      onClick={() =>
-                        navigate(`/update_profile/${row.original.empId}`)
-                      }
-                    >
-                      <MdEdit className="text-[15px]" />
-                      Edit
-                    </li>
-                    <li
-                      className="flex gap-3 hover:shadow-md  px-4 py-1 rounded cursor-pointer text-red-500 font-[600]"
-                      onClick={() => openDeleteModal(row.original.empId)}
-                    >
-                      <RiDeleteBin5Line className="text-[15px] " />
-                      Delete
-                    </li>
-                    <li
-                      className="flex gap-3 hover:shadow-md px-4 py-1 rounded cursor-pointer text-yellow-700 font-[600]"
-                      onClick={() => {
-                        setSelectedAdminForRoleChange({
-                          id: row.original.empId,
-                          currentRoleId:
-                            allRoles.find((r) => r.name === row.original.role)
-                              ?._id || "",
-                        });
-                        setShowRoleModal(true);
-                      }}
-                    >
-                      <AiOutlineExclamationCircle className="text-[15px]" />
-                      Role
-                    </li>
-                  </ul>
-                )}
-              </div>
-            </div>
+            <button
+              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+              onClick={() =>
+                navigate(`/UpdateAdmin/${row.original.empId}`, {
+                  state: { admin: row.original }, // <-- pass the admin object
+                })
+              }
+            >
+              <MdEdit size={16} />
+            </button>
           );
         },
       },

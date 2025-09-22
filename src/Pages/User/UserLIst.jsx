@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { CiExport } from "react-icons/ci";
 import axios from "axios";
 import guest from "../../assets/images/guest.png";
-import { USER_BASE_URL } from "../../config/Config";
+import { BASE_URL } from "../../config/Config";
 import { toast } from "react-toastify";
 import { FiEye } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
@@ -15,140 +15,82 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { FaUsers } from "react-icons/fa";
-import { FaUserAlt } from "react-icons/fa";
-import { FaUserXmark } from "react-icons/fa6";
-import { FaUserShield } from "react-icons/fa6";
+import { FaUsers, FaUserAlt } from "react-icons/fa";
+import { FaUserXmark, FaUserShield } from "react-icons/fa6";
 import { IoFilterSharp } from "react-icons/io5";
 
 function UserList() {
-  const [users, setUsers] = useState([
-    {
-      _id: "u1",
-      first_name: "John",
-      last_name: "Doe",
-      email: "john.doe@example.com",
-      phone: "+91 9876543210",
-      status: "active",
-      createdAt: "2024-07-12T10:20:30Z",
-      profile_picture: null,
-      address: { city: "Mumbai" },
-    },
-    {
-      _id: "u2",
-      first_name: "Jane",
-      last_name: "Smith",
-      email: "jane.smith@example.com",
-      phone: "+91 9988776655",
-      status: "inactive",
-      createdAt: "2024-06-20T14:05:00Z",
-      profile_picture: null,
-      address: { city: "Delhi" },
-    },
-    {
-      _id: "u3",
-      first_name: "Raj",
-      last_name: "Kumar",
-      email: "raj.kumar@example.com",
-      phone: "+91 9123456780",
-      status: "suspended",
-      createdAt: "2024-05-01T09:45:15Z",
-      profile_picture: null,
-      address: { city: "Bangalore" },
-    },
-    {
-      _id: "u4",
-      first_name: "Emily",
-      last_name: "Johnson",
-      email: "emily.johnson@example.com",
-      phone: "+91 9001122334",
-      status: "active",
-      createdAt: "2024-04-18T12:30:45Z",
-      profile_picture: null,
-      address: { city: "Hyderabad" },
-    },
-    {
-      _id: "u5",
-      first_name: "Amit",
-      last_name: "Verma",
-      email: "amit.verma@example.com",
-      phone: "+91 9112233445",
-      status: "inactive",
-      createdAt: "2024-03-25T08:15:10Z",
-      profile_picture: null,
-      address: { city: "Kolkata" },
-    },
-  ]);
+  const [users, setUsers] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const pageSize = 10;
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10,
-    totalRecords: 0,
+    totalUsers: 0,
   });
 
   const navigate = useNavigate();
 
-  // const fetchUsers = async () => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
+  const fetchUsers = async (page = 1) => {
+    try {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
 
-  //     const response = await axios.get(
-  //       `${USER_BASE_URL}/get-all-users?role=user`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
+      const response = await axios.get(
+        `${BASE_URL}/admin/get-all-users?page=${page}&limit=10`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  //     if (response.data.success) {
-  //       setUsers(response.data.data);
-  //       setPagination(response.data.pagination);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchUsers(pagination.currentPage);
-  // }, [pagination.currentPage]);
-
-  const renderStatusBadge = (user) => {
-    const colorMap = {
-      active: "bg-green-100 text-green-800",
-      inactive: "bg-yellow-100 text-yellow-800",
-      suspended: "bg-red-100 text-red-800",
-    };
-
-    return (
-      <span
-        className={`text-xs font-medium px-2.5 py-0.5 rounded cursor-pointer ${
-          colorMap[user.status] || "bg-[#FFFEF6] text-gray-800"
-        }`}
-        onClick={() => {
-          setSelectedCustomer(user);
-          setShowStatusModal(true);
-        }}
-        title="Click to change status"
-      >
-        {user.status}
-      </span>
-    );
+      if (response.data.success) {
+        setUsers(response.data.data.users);
+        setPagination({
+          currentPage: response.data.data.page,
+          totalPages: response.data.data.totalPages,
+          totalUsers: response.data.data.totalUsers,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to fetch users");
+    }
   };
 
-  const handleDropdownClick = (userId, action) => {
-    if (action === "status") {
-      const customer = users.find((u) => u._id === userId);
-      setSelectedCustomer(customer);
-      setShowStatusModal(true);
-    }
+  useEffect(() => {
+    fetchUsers(pagination.currentPage);
+  }, [pagination.currentPage]);
+
+  const handleExport = () => {
+    const exportData = users.map((user, index) => ({
+      SL: index + 1,
+      Name: user.name,
+      Email: user.email,
+      Phone: user.fullPhone,
+      Status: user.account_status,
+      Created_At: new Date(user.createdAt).toLocaleString(),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const fileData = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(fileData, "Users.xlsx");
   };
 
   const openDeleteModal = (id) => {
@@ -160,80 +102,30 @@ function UserList() {
     setSelectedCustomerId(null);
     setShowDeleteModal(false);
   };
+
   const confirmDelete = () => {
     setUsers((prevUsers) =>
       prevUsers.filter((user) => user._id !== selectedCustomerId)
     );
-  };
-  // const confirmDelete = async () => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
-
-  //     const response = await axios.delete(
-  //       `${USER_BASE_URL}/delete-user/${selectedCustomerId}`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     if (response.data.success) {
-  //       toast.success("User deleted successfully.");
-  //       setUsers((prevUsers) =>
-  //         prevUsers.filter((user) => user._id !== selectedCustomerId)
-  //       );
-  //     } else {
-  //       toast.error("Failed to delete user.");
-  //     }
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error?.response?.data?.message || "failed to delete !";
-  //     toast.error(errorMessage);
-  //   } finally {
-  //     closeDeleteModal();
-  //   }
-  // };
-
-  const handleExport = () => {
-    const exportData = users.map((user, index) => ({
-      SL: index + 1,
-      Name: `${user.first_name} ${user.last_name}`,
-      Email: user.email,
-      Phone: user.phone,
-      City: user.address?.city || "N/A",
-      Status: user.status,
-      Created_At: new Date(user.createdAt).toLocaleString(),
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const fileData = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
-    saveAs(fileData, "Customers.xlsx");
+    closeDeleteModal();
   };
 
   return (
-    <div className="main main_page  font-Montserrat space-y-4 duration-900">
+    <div className="main main_page font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[{ label: "Users List", path: "/CustomerList" }]}
       />
       <PageTitle title={"Users"} />
 
+      {/* Summary Cards */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+        <div className="bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
           <div>
             <h4 className="text-[14px]">Total Users</h4>
-            <p className="text-[22px] font-semibold">{users.length}</p>
+            <p className="text-[22px] font-semibold">{pagination.totalUsers}</p>
           </div>
-          <div className="">
-            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+          <div>
+            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
               <FaUsers size={35} className="text-blue-900" />
             </div>
           </div>
@@ -242,11 +134,11 @@ function UserList() {
           <div>
             <h4 className="text-[14px]">Active Users</h4>
             <p className="text-[22px] font-semibold">
-              {users.filter((u) => u.status === "active").length}
+              {users.filter((u) => u.account_status === "active").length}
             </p>
           </div>
-          <div className="">
-            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+          <div>
+            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
               <FaUserAlt size={35} className="text-green-500" />
             </div>
           </div>
@@ -255,11 +147,11 @@ function UserList() {
           <div>
             <h4 className="text-[14px]">Inactive Users</h4>
             <p className="text-[22px] font-semibold">
-              {users.filter((u) => u.status === "inactive").length}
+              {users.filter((u) => u.account_status === "inactive").length}
             </p>
           </div>
-          <div className="">
-            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+          <div>
+            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
               <FaUserXmark size={35} className="text-yellow-500" />
             </div>
           </div>
@@ -268,17 +160,18 @@ function UserList() {
           <div>
             <h4 className="text-[14px]">Suspended</h4>
             <p className="text-[22px] font-semibold">
-              {users.filter((u) => u.status === "suspended").length}
+              {users.filter((u) => u.account_status === "suspended").length}
             </p>
           </div>
-          <div className="">
-            <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
+          <div>
+            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
               <FaUserShield size={35} className="text-red-500" />
             </div>
           </div>
         </div>
       </div>
 
+      {/* User Table */}
       <div className="w-full h-auto p-2 mt-2 bg-white rounded-lg">
         <div className="flex justify-between h-[40px] mb-2">
           <form className="flex gap-1">
@@ -322,6 +215,7 @@ function UserList() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="overflow-x-auto">
           <table className="mt-2 w-full border-collapse">
             <thead className="bg-gray-100">
@@ -346,30 +240,27 @@ function UserList() {
               {users
                 .filter(
                   (item) =>
-                    (statusFilter === "all" || item.status === statusFilter) &&
-                    `${item.first_name} ${item.last_name} ${item.email} ${item.phone}`
+                    (statusFilter === "all" ||
+                      item.account_status === statusFilter) &&
+                    `${item.name} ${item.email} ${item.fullPhone}`
                       .toLowerCase()
                       .includes(searchQuery.toLowerCase())
                 )
                 .map((item, index) => (
                   <tr key={item._id} className="border-b border-gray-200">
                     <td className="text-[14px] px-8 py-3 text-left">
-                      {(pagination.currentPage - 1) * pageSize + index + 1}
+                      {(pagination.currentPage - 1) * 10 + index + 1}
                     </td>
 
                     <td className="text-[14px] px-8 py-3 text-left min-w-[180px]">
                       <div className="flex items-center gap-3">
                         <img
-                          src={
-                            item.profile_picture
-                              ? `${USER_BASE_URL}/${item.profile_picture}`
-                              : guest
-                          }
-                          alt={`${item.first_name} ${item.last_name}`}
+                          src={item.profile_picture || guest}
+                          alt={item.name}
                           className="w-10 h-10 rounded-full object-cover bg-amber-200"
                         />
                         <div className="whitespace-nowrap font-semibold">
-                          {item.first_name} {item.last_name}
+                          {item.name}
                         </div>
                       </div>
                     </td>
@@ -377,9 +268,9 @@ function UserList() {
                     <td className="text-[14px] px-8 py-3 text-left min-w-[250px]">
                       <div>
                         <div className="font-semibold">
-                          {item.address?.city || "N/A"}
+                          {item.device_type || "N/A"}
                         </div>
-                        <div className="text-gray-500">{item.phone}</div>
+                        <div className="text-gray-500">{item.fullPhone}</div>
                         <div className="text-gray-500">{item.email}</div>
                       </div>
                     </td>
@@ -387,38 +278,36 @@ function UserList() {
                     <td className="text-[14px] px-4 py-2">
                       <div
                         onClick={() => {
-                          setSelectedCustomer(item);
-                          setShowStatusModal(true);
+                          // setSelectedCustomer(item);
+                          // setShowStatusModal(true);
                         }}
                         className={`cursor-pointer px-2 py-1 w-full flex justify-center items-center ${
-                          item.status === "active"
+                          item.account_status === "active"
                             ? "bg-green-200 text-green-500"
-                            : item.status === "inactive"
+                            : item.account_status === "inactive"
                             ? "bg-yellow-200 text-yellow-500"
                             : "bg-red-200 text-red-500"
                         } font-semibold rounded-full hover:opacity-90 transition`}
                         title="Click to change status"
                       >
-                        {item.status}
+                        {item.account_status}
                       </div>
                     </td>
 
                     <td className="text-[14px] px-8 py-3 text-center">
-                      <div className="flex justify-center items-center">
-                        <div className="flex gap-3">
-                          <button
-                            className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
-                            onClick={() => navigate(`/UserProfile`)}
-                          >
-                            <FiEye size={16} />
-                          </button>
-                          <button
-                            className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
-                            onClick={() => openDeleteModal(item._id)}
-                          >
-                            <RiDeleteBinLine size={16} />
-                          </button>
-                        </div>
+                      <div className="flex justify-center items-center gap-3">
+                        <button
+                          className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                          onClick={() => navigate(`/UserProfile/${item._id}`)}
+                        >
+                          <FiEye size={16} />
+                        </button>
+                        {/* <button
+                          className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
+                          onClick={() => openDeleteModal(item._id)}
+                        >
+                          <RiDeleteBinLine size={16} />
+                        </button> */}
                       </div>
                     </td>
                   </tr>
@@ -432,63 +321,20 @@ function UserList() {
               )}
             </tbody>
           </table>
-          {/* pagination button */}
-          {/* <div className="flex justify-end mt-4 space-x-2">
-            <button
-              disabled={pagination.currentPage === 1}
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  currentPage: prev.currentPage - 1,
-                }))
-              }
-              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-            >
-              Prev
-            </button>
 
-            {Array.from({ length: pagination.totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                onClick={() =>
-                  setPagination((prev) => ({
-                    ...prev,
-                    currentPage: i + 1,
-                  }))
-                }
-                className={`px-3 py-1 border rounded ${
-                  pagination.currentPage === i + 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-
-            <button
-              disabled={pagination.currentPage === pagination.totalPages}
-              onClick={() =>
-                setPagination((prev) => ({
-                  ...prev,
-                  currentPage: prev.currentPage + 1,
-                }))
-              }
-              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div> */}
+          {/* Pagination */}
           <Pagination
             currentPage={pagination.currentPage}
             totalItems={pagination.totalUsers}
-            itemsPerPage={10} // Same limit as API
-            onPageChange={(page) => fetchUsers(page)} // Call API on page change
-            totalPages={pagination.totalPages} // Backend total pages
+            itemsPerPage={10}
+            onPageChange={(page) => fetchUsers(page)}
+            totalPages={pagination.totalPages}
             type="backend"
           />
         </div>
       </div>
+
+      {/* Delete Modal */}
       <DeleteModel
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}
@@ -496,18 +342,18 @@ function UserList() {
         redbutton="Yes, Delete"
         para="Do you really want to delete this User? This action cannot be undone."
       />
+
       {/* Status Update Modal */}
       {showStatusModal && selectedCustomer && (
         <UserUpdateStatus
           userId={selectedCustomer._id}
-          status={selectedCustomer.status}
-          reason={selectedCustomer.status_reason}
+          status={selectedCustomer.account_status}
           onClose={() => {
             setShowStatusModal(false);
             setSelectedCustomer(null);
           }}
           onSuccess={() => {
-            fetchUsers();
+            fetchUsers(pagination.currentPage);
             setShowStatusModal(false);
             setSelectedCustomer(null);
           }}

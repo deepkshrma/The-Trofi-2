@@ -35,10 +35,15 @@ import RestaurantReview from "./Pages/Reviews/Restaurant/RestaurantReview";
 import UpdateRestaurant from "./Pages/Restaurant/UpdateRestaurant";
 import DishReview from "./Pages/Reviews/Dishes/DishReview";
 import RestroOwnerDashboard from "./Pages/Dashboard/RestroOwnerDashboard";
+import ProtectedRoute from "./ProtectedRoute";
+import UpdateRole from "./Pages/Role/UpdateRole";
+import CreateAdmin from "./Pages/Admin/CreateAdmin";
+import UpdateAdmin from "./Pages/Admin/UpdateAdmin";
+import UpdateDishes from "./Pages/Dishes/UpdateDishes";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
-    JSON.parse(localStorage.getItem("broom_auth"))
+    JSON.parse(localStorage.getItem("trofi_user"))
   );
   return (
     <ContextApi.Provider value={{ authData, setAuthData }}>
@@ -47,70 +52,90 @@ const Allroutes = () => {
           <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
           <Route element={<Layout />}>
-            {/* <Route path="/Sidebar1" element={<Sidebar1 />} /> */}
-            <Route path="/Dashboard" element={<Dashboard />} />
-            <Route path="/RoleList" element={<RoleList />} />
-            <Route path="/RoleCreate" element={<RoleCreate />} />
-            <Route path="/AdminProfile" element={<AdminProfile />} />
-            <Route path="/AdminList" element={<AdminList />} />
-            <Route path="/UserList" element={<UserList />} />
-            <Route path="/RestroAdd" element={<RestroAdd />} />
-            <Route path="/RestroList" element={<RestroList />} />
-            <Route path="/UserProfile" element={<UserProfile />} />
-            <Route path="/RestroAmenity" element={<RestroAmenity />} />
-            <Route path="/RestroAmenity/:id" element={<RestroAmenity />} />
-            <Route path="/RestroType" element={<RestroType />} />
-            <Route path="/RestroType/:id" element={<RestroType />} />
-            <Route path="/RestroGoodFor" element={<RestroGoodFor />} />
-            <Route path="/RestroGoodFor/:id" element={<RestroGoodFor />} />
-            <Route path="/RestroCuisine" element={<RestroCuisine />} />
-            <Route path="/RestroCuisine/:id" element={<RestroCuisine />} />
-            <Route path="/RestroAmenityList" element={<RestroAmenityList />} />
-            <Route path="/RestroTypeList" element={<RestroTypeList />} />
-            <Route path="/RestroCuisineList" element={<RestroCuisineList />} />
-            <Route path="/RestroGoodForList" element={<RestroGoodForList />} />
-            <Route
-              path="/UpdateRestaurant/:id"
-              element={<UpdateRestaurant />}
-            />
-            <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
-            <Route path="/AddDishes" element={<AddDishes />} />
-            <Route path="/RestroDishType" element={<RestroDishType />} />
-            <Route
-              path="/RestroDishTypeList"
-              element={<RestroDishTypeList />}
-            />
-            <Route path="/DishesList" element={<DishesList />} />
-            <Route path="/RestroProfile" element={<RestroProfile />} />
-            <Route
-              path="/RestroDishCategory"
-              element={<RestroDishCategory />}
-            />
-            <Route
-              path="/RestroDishCategoryList"
-              element={<RestroDishCategoryList />}
-            />
-            <Route
-              path="/RestroDishSubCategory"
-              element={<RestroDishSubCategory />}
-            />
-            <Route
-              path="/RestroDishSubCategoryList"
-              element={<RestroDishSubCategoryList />}
-            />
-            <Route path="/RestroProfile/:id" element={<RestroProfile />} />
-            <Route
-              path="/RestaurantReviewList"
-              element={<RestaurantReviewList />}
-            />
-            <Route path="/RestaurantReview" element={<RestaurantReview />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/Dashboard" element={<Dashboard />} />
+              <Route path="/RoleList" element={<RoleList />} />
+              <Route path="/RoleCreate" element={<RoleCreate />} />
+              <Route path="/AdminProfile" element={<AdminProfile />} />
+              <Route path="/CreateAdmin" element={<CreateAdmin />} />
+              <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />
+              <Route path="/AdminList" element={<AdminList />} />
+              <Route path="/UserList" element={<UserList />} />
+              <Route path="/RestroAdd" element={<RestroAdd />} />
+              <Route path="/RestroList" element={<RestroList />} />
+              <Route path="/UserProfile" element={<UserProfile />} />
+              <Route path="/UserProfile/:id" element={<UserProfile />} />
+              <Route path="/RestroAmenity" element={<RestroAmenity />} />
+              <Route path="/RestroAmenity/:id" element={<RestroAmenity />} />
+              <Route path="/RestroType" element={<RestroType />} />
+              <Route path="/RestroType/:id" element={<RestroType />} />
+              <Route path="/RestroGoodFor" element={<RestroGoodFor />} />
+              <Route path="/RestroGoodFor/:id" element={<RestroGoodFor />} />
+              <Route path="/RestroCuisine" element={<RestroCuisine />} />
+              <Route path="/RestroCuisine/:id" element={<RestroCuisine />} />
 
-            <Route path="/DishReviewList" element={<DishReviewList />} />
-            <Route path="/DishReview" element={<DishReview />} />
-            <Route
-              path="/RestroOwnerDashboard"
-              element={<RestroOwnerDashboard />}
-            />
+              <Route
+                path="/RestroAmenityList"
+                element={<RestroAmenityList />}
+              />
+              <Route path="/RestroTypeList" element={<RestroTypeList />} />
+              <Route
+                path="/RestroCuisineList"
+                element={<RestroCuisineList />}
+              />
+              <Route
+                path="/RestroGoodForList"
+                element={<RestroGoodForList />}
+              />
+              <Route
+                path="/UpdateRestaurant/:id"
+                element={<UpdateRestaurant />}
+              />
+              <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
+              <Route path="/AddDishes" element={<AddDishes />} />
+              <Route path="/UpdateDishes/:id" element={<UpdateDishes />} />
+              <Route path="/AddDishes/:id" element={<AddDishes />} />
+
+              <Route path="/RestroDishType" element={<RestroDishType />} />
+              <Route
+                path="/RestroDishTypeList"
+                element={<RestroDishTypeList />}
+              />
+              <Route path="/DishesList" element={<DishesList />} />
+              <Route path="/RestroProfile" element={<RestroProfile />} />
+              <Route
+                path="/RestroDishCategory"
+                element={<RestroDishCategory />}
+              />
+              <Route
+                path="/RestroDishCategoryList"
+                element={<RestroDishCategoryList />}
+              />
+              <Route
+                path="/RestroDishSubCategory"
+                element={<RestroDishSubCategory />}
+              />
+              <Route
+                path="/RestroDishSubCategoryList"
+                element={<RestroDishSubCategoryList />}
+              />
+              <Route path="/RestroProfile/:id" element={<RestroProfile />} />
+              <Route
+                path="/RestaurantReviewList"
+                element={<RestaurantReviewList />}
+              />
+              <Route path="/RestaurantReview" element={<RestaurantReview />} />
+              <Route path="/DishReviewList" element={<DishReviewList />} />
+              <Route path="/DishReview" element={<DishReview />} />
+              <Route
+                path="/RestroOwnerDashboard"
+                element={<RestroOwnerDashboard />}
+              />
+              <Route
+                path="/RoleUpdate/:id"
+                element={<UpdateRole />}
+              />
+            </Route>
           </Route>
         </Routes>
       </Router>

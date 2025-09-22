@@ -205,12 +205,13 @@ function RestroTypeList() {
                                 >
                                   <MdEdit size={16} />
                                 </button>
-                                <button
+
+                                {/* <button
                                   className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600"
                                   onClick={() => setShowDeleteModal(true)}
                                 >
                                   <MdDelete size={16} />
-                                </button>
+                                </button> */}
                               </div>
                             </td>
                           </tr>

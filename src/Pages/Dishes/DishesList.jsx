@@ -9,6 +9,7 @@ import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { MdEdit } from "react-icons/md";
 import { BASE_URL } from "../../config/Config";
 import {
   FaUtensils,
@@ -186,7 +187,7 @@ function DishesList() {
             {/* 📂 Right-side controls */}
             <div className="flex items-center gap-3">
               {/* 🧮 Filter button */}
-              <button
+              {/* <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
                 onClick={() => {
                   // TODO: open a filter modal / drawer
@@ -196,7 +197,7 @@ function DishesList() {
                 }}
               >
                 <FiFilter size={20} /> Filter
-              </button>
+              </button> */}
 
               {/* ⬇ Export button */}
               <button
@@ -218,7 +219,7 @@ function DishesList() {
                 <th className="p-3 border-b border-gray-300">Restaurant</th>
                 <th className="p-3 border-b border-gray-300">Description</th>
                 <th className="p-3 border-b border-gray-300">Price (₹)</th>
-                <th className="p-3 border-b border-gray-300">Available</th>
+                <th className="p-3 border-b border-gray-300">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -264,13 +265,21 @@ function DishesList() {
                       ₹{dish.price}
                     </td>
                     <td className="p-3 border-b border-gray-200">
-                      {dish.isAvailable ? (
+                      {/* {dish.isAvailable ? (
                         <span className="text-green-600 font-semibold">
                           Yes
                         </span>
                       ) : (
                         <span className="text-red-600 font-semibold">No</span>
-                      )}
+                      )} */}
+                      <button
+                              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                              onClick={() =>
+                                navigate(`/UpdateDishes/${dish._id}`)
+                              }
+                            >
+                              <MdEdit size={16} />
+                            </button>
                     </td>
                   </tr>
                 ))

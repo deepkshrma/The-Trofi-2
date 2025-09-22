@@ -29,14 +29,16 @@ function RestroProfile() {
 
   const [restaurant, setRestaurant] = useState([]);
 
-  let token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Y2QzOTAwNWM4ZjA0NWRjZDRjNjI1MSIsImVtYWlsIjoiam9obkBjZW5hLmNvbSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU4Mjc5OTM2LCJleHAiOjE3NTg4ODQ3MzZ9.pVPRinrHt75yG4pP8lu6nxDXyyN8HlF60cVuOToD5Ew";
+  const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+  if (!token) return toast.error("Please login first");
 
   useEffect(() => {
     const fetchRestaurant = async () => {
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) return toast.error("Please login first");
       try {
         setLoading(true);
-        const res = await axios.get(`${BASE_URL}/restro/get-restaurant/${id}`, {
+        const res = await axios.get(`${BASE_URL}/restro/get-restaurant-list/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -14,44 +14,15 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { MdEdit } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-// import { BASE_URL } from "../../config/Config";
 import { FaSearch } from "react-icons/fa";
 import Pagination from "../../components/common/Pagination/Pagination";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RoleList() {
-  const [roles, setRoles] = useState([
-    {
-      id: "1",
-      name: "Admin",
-      description: "Has full access to the system",
-      status: "active",
-    },
-    {
-      id: "2",
-      name: "Editor",
-      description: "Can edit content but has limited access",
-      status: "inactive",
-    },
-    {
-      id: "3",
-      name: "Viewer",
-      description: "Read-only access",
-      status: "active",
-    },
-    {
-      id: "3",
-      name: "Viewer",
-      description: "Read-only access",
-      status: "active",
-    },
-  ]);
-
+  const [roles, setRoles] = useState([]);
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState([]);
-
   const [statusFilter, setStatusFilter] = useState("All");
-
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
@@ -60,129 +31,119 @@ function RoleList() {
 
   const navigate = useNavigate();
 
-  // Fetch all roles
-  // const fetchRoles = async () => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
+  // === Fetch roles from API ===
+  const fetchRoles = async () => {
+    try {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
 
-  //     if (!token) {
-  //       // toast.error("Token not found!");
-  //       return;
-  //     }
+      const res = await axios.get(
+        "http://trofi-backend.apponedemo.top/api/admin/admins-roles",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-  //     const res = await axios.get(`${BASE_URL}/admin/get-all-roles`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
+      const rolesData = (res.data.roles || []).map((role) => ({
+        id: role._id,
+        name: role.name,
+        description: role.description || "-",
+        status: role.status?.toLowerCase() === "active" ? "active" : "inactive",
+      }));
 
-  //     const rolesData = res.data.data.map((role) => ({
-  //       id: role._id,
-  //       name: role.name,
-  //       description: role.description || "-",
-  //       status: role.isActive ? "active" : "inactive",
-  //     }));
+      setRoles(rolesData);
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || "Failed to fetch roles. Please retry.";
+      toast.error(msg);
+    }
+  };
 
-  //     setRoles(rolesData);
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error?.response?.data?.message || "failed to fetch  roles !";
-  //     // toast.error(errorMessage);
-  //   }
-  // };
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
-  // useEffect(() => {
-  //   fetchRoles();
-  // }, []);
+  // reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
-  // //pagination
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [search, statusFilter]);
-
-  // Filtered roles by status
+  // === filters & pagination ===
   const filteredRoles = useMemo(() => {
-    if (statusFilter === "All") return roles;
-    return roles.filter(
-      (role) => role.status.toLowerCase() === statusFilter.toLowerCase()
+    const base =
+      statusFilter === "All"
+        ? roles
+        : roles.filter(
+            (r) => r.status.toLowerCase() === statusFilter.toLowerCase()
+          );
+    if (!search) return base;
+    return base.filter(
+      (r) =>
+        r.name.toLowerCase().includes(search.toLowerCase()) ||
+        r.description.toLowerCase().includes(search.toLowerCase())
     );
-  }, [statusFilter, roles]);
+  }, [roles, statusFilter, search]);
 
   const paginatedRoles = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
-    return filteredRoles.slice(startIndex, startIndex + pageSize);
+    const start = (currentPage - 1) * pageSize;
+    return filteredRoles.slice(start, start + pageSize);
   }, [filteredRoles, currentPage]);
 
-  // Handle role deletion
+  // === delete & status toggle ===
   const openDeleteModal = (roleId) => {
     setSelectedRoleId(roleId);
     setShowDeleteModal(true);
   };
-
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
     setSelectedRoleId(null);
   };
 
-  const confirmDelete = async () => {};
-  // const confirmDelete = async () => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
+  const confirmDelete = async () => {
+    try {
+      const authData = JSON.parse(localStorage.getItem("broom_auth"));
+      const token = authData?.token;
+      await axios.delete(
+        `http://trofi-backend.apponedemo.top/api/admin/delete-role/${selectedRoleId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success("Role deleted");
+      fetchRoles();
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to delete role. Try again."
+      );
+    } finally {
+      closeDeleteModal();
+    }
+  };
 
-  //     await axios.delete(`${BASE_URL}/admin/delete-role/${selectedRoleId}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
+  const toggleRoleStatus = async (roleId, currentStatus) => {
+    try {
+      const authData = JSON.parse(localStorage.getItem("broom_auth"));
+      const token = authData?.token;
+      const newStatus = currentStatus === "active" ? "inactive" : "active";
+      await axios.patch(
+        `http://trofi-backend.apponedemo.top/api/admin/change-status/${roleId}`,
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Role is now ${newStatus}`);
+      setRoles((prev) =>
+        prev.map((r) => (r.id === roleId ? { ...r, status: newStatus } : r))
+      );
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to update status.");
+    }
+  };
 
-  //     fetchRoles();
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error?.response?.data?.message ||
-  //       "failed to delete role , please try again !";
-  //     toast.error(errorMessage);
-  //   } finally {
-  //     closeDeleteModal();
-  //   }
-  // };
-
-  // const toggleRoleStatus = async (roleId, currentStatus) => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
-
-  //     if (!token) return toast.error("Unauthorized");
-
-  //     const newStatus = currentStatus === "active" ? false : true;
-
-  //     await axios.patch(
-  //       `${BASE_URL}/admin/change-status/${roleId}`,
-  //       { isActive: newStatus },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     toast.success(`Role is now ${newStatus ? "active" : "deactive"}`);
-
-  //     setRoles((prev) =>
-  //       prev.map((role) =>
-  //         role.id === roleId
-  //           ? {
-  //               ...role,
-  //               status: newStatus ? "active" : "inactive",
-  //             }
-  //           : role
-  //       )
-  //     );
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error?.response?.data?.message || "Failed to change status!";
-  //     // toast.error(errorMessage);
-  //   }
-  // };
-
-  const toggleRoleStatus = async (roleId, currentStatus) => {};
-  const columns = useMemo(() => {
-    return [
+  // === columns ===
+  const columns = useMemo(
+    () => [
       {
         header: "SL",
         cell: (info) => (currentPage - 1) * pageSize + info.row.index + 1,
@@ -191,11 +152,10 @@ function RoleList() {
         header: "Role Name",
         accessorKey: "name",
         cell: (info) => {
-          const status = info.row.original.status;
-          const name = info.row.original.name;
+          const { name, status } = info.row.original;
           return (
             <span
-              className={`font-semibold  ${
+              className={`font-semibold ${
                 status === "inactive" ? "text-red-500" : "text-green-500"
               }`}
             >
@@ -204,20 +164,16 @@ function RoleList() {
           );
         },
       },
-
-      {
-        header: "Description",
-        accessorKey: "description",
-      },
+      { header: "Description", accessorKey: "description" },
       {
         header: "Status",
         accessorKey: "status",
         cell: (info) => (
           <div
-            className={`flex gap-1 justify-center items-center rounded-full px-4 py-1   ${
+            className={`flex gap-1 justify-center items-center rounded-full px-4 py-1 ${
               info.row.original.status === "active"
-                ? "bg-green-100 text-green-500  font-semibold"
-                : "bg-red-100 text-red-500  font-semibold"
+                ? "bg-green-100 text-green-500 font-semibold"
+                : "bg-red-100 text-red-500 font-semibold"
             }`}
           >
             <span className="text-[14px] capitalize">
@@ -243,34 +199,33 @@ function RoleList() {
               title={`Make ${
                 info.row.original.status === "active" ? "Inactive" : "Active"
               }`}
-              className={`flex justify-center items-center w-[25px] h-[25px] border rounded cursor-pointer ${
-                info.row.original.status === "active"
-                  ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                  : "border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-              }`}
+              className={`flex justify-center items-center w-[25px] h-[25px] border rounded
+    border-red-500 text-red-500
+    pointer-events-none cursor-not-allowed opacity-50  ${
+      info.row.original.status === "active"
+        ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+        : "border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+    }`}
             >
               <TiTick className="text-[15px]" />
             </div>
-
-            <div
+            {/* <div
               onClick={() => openDeleteModal(info.row.original.id)}
               className="flex justify-center items-center w-[25px] h-[25px] border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded cursor-pointer"
             >
               <RiDeleteBin5Line className="text-[15px]" />
-            </div>
+            </div> */}
           </div>
         ),
       },
-    ];
-  }, [navigate, currentPage, pageSize]);
+    ],
+    [navigate, currentPage, pageSize]
+  );
 
   const table = useReactTable({
     data: paginatedRoles,
     columns,
-    state: {
-      globalFilter: search,
-      sorting,
-    },
+    state: { globalFilter: search, sorting },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -282,12 +237,6 @@ function RoleList() {
       <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/Roles" }]} />
       <div className="flex justify-between items-center">
         <PageTitle title={"All Roles"} />
-        <button
-          className="bg-[#F9832B] text-white cursor-pointer px-4 py-2 rounded hover:bg-[#e67220] text-[12px]"
-          onClick={() => navigate("/RoleUpdate")}
-        >
-          <span className="font-bold">+ </span>ADD ROLE
-        </button>
       </div>
 
       <div className="px-4 rounded-lg shadow-md flex justify-between font-bold bg-white">
@@ -315,7 +264,7 @@ function RoleList() {
 
       <div className="bg-white p-3 shadow-xl">
         <form className="flex gap-1 mb-3">
-          <div className="relative flex gap-2 px-3 py-2  bg-gray-100 w-[300px] rounded-md">
+          <div className="relative flex gap-2 px-3 py-2 bg-gray-100 w-[300px] rounded-md">
             <FaSearch className="absolute opacity-40 top-3" size={15} />
             <input
               type="text"
@@ -329,9 +278,9 @@ function RoleList() {
 
         <table className="w-full text-sm table-auto p-3">
           <thead className="bg-gray-100">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+            {table.getHeaderGroups().map((hg) => (
+              <tr key={hg.id}>
+                {hg.headers.map((header) => (
                   <th
                     key={header.id}
                     className={`p-3 ${
@@ -361,7 +310,7 @@ function RoleList() {
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className={`p-3  ${
+                      className={`p-3 ${
                         cell.column.columnDef.header === "Status"
                           ? "text-center px-10"
                           : "text-left"
@@ -391,6 +340,7 @@ function RoleList() {
             )}
           </tbody>
         </table>
+
         <Pagination
           currentPage={currentPage}
           totalItems={filteredRoles.length}
@@ -404,8 +354,7 @@ function RoleList() {
         onClose={closeDeleteModal}
         onConfirm={confirmDelete}
         redbutton="Yes, Delete"
-        para="Do you really want to delete this Role? This action cannot be
-            undone."
+        para="Do you really want to delete this Role? This action cannot be undone."
       />
     </div>
   );

@@ -158,12 +158,19 @@ function UpdateRestaurant() {
 
     const fetchRestaurant = async () => {
       try {
-        // If you keep a token in localStorage, use it. Otherwise call without header.
-        const token = localStorage.getItem("token"); // optional
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        if (!token) {
+          toast.error("Please login first");
+          return;
+        }
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await axios.get(`${BASE_URL}/restro/get-restaurant/${id}`, {
-          headers,
-        });
+        const res = await axios.get(
+          `${BASE_URL}/restro/get-restaurant-list/${id}`,
+          {
+            headers,
+          }
+        );
         const data = res.data?.data || {};
 
         // parse time parts
@@ -274,11 +281,16 @@ function UpdateRestaurant() {
         formData.append("restaurant_menu_images", file)
       );
 
-      const token = localStorage.getItem("token");
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
       const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
 
       const response = await axios.patch(
-        `${BASE_URL}/restro/update-restaurant/${id}`,
+        `${BASE_URL}/restro/update-restro/${id}`,
         formData,
         {
           headers: {
@@ -317,7 +329,7 @@ function UpdateRestaurant() {
         >
           <Utensils size={20} /> Basic Information
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           <div>
             <label className="block text-gray-600 font-medium mb-2">
               Email Address
@@ -343,7 +355,7 @@ function UpdateRestaurant() {
               className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           {" "}
@@ -362,14 +374,15 @@ function UpdateRestaurant() {
           <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
             <select
-              name="role_id"
-              value={restaurantData.role_id}
-              onChange={handleChange}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring focus:ring-orange-400 focus:border-[#F9832B] transition bg-white"
-            >
-              <option value="68aead7b9db7925a61de75bb">Admin</option>
-              {/* You can add more static roles here if needed */}
-            </select>
+  name="role_id"
+  value={restaurantData.role_id}
+  onChange={handleChange}
+  disabled
+  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 text-gray-700 cursor-not-allowed"
+>
+  <option value="68aead7b9db7925a61de75bb">Restro Owner</option>
+</select>
+
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -202,7 +202,7 @@ function RestroAdd() {
               name="email"
               value={restaurantData.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
 
@@ -215,7 +215,7 @@ function RestroAdd() {
               name="password"
               value={restaurantData.password}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
         </div>
@@ -231,7 +231,7 @@ function RestroAdd() {
               name="name"
               value={restaurantData.name}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
           <div>
@@ -246,7 +246,7 @@ function RestroAdd() {
                 <div className="relative">
                   <Listbox.Button
                     className="w-full cursor-pointer rounded-xl border border-gray-300
-                     bg-white px-4 py-3 text-left focus:outline-none
+                     bg-white px-4 py-2 text-left focus:outline-none
                      focus:ring-2 focus:ring-orange-400"
                   >
                     <span>
@@ -299,7 +299,7 @@ function RestroAdd() {
               onChange={(phone) =>
                 setRestaurantData((prev) => ({ ...prev, phone }))
               }
-              inputClass="!w-full !h-12 !p-3 !pl-14 !rounded-lg !border-gray-300"
+              inputClass="!w-full !h-12 !p-2 !pl-14 !rounded-lg !border-gray-300"
             />
           </div>
 
@@ -527,7 +527,7 @@ function RestroAdd() {
               name="birthYear"
               value={restaurantData.birthYear}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3.5 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             >
               <option value="" className="text-gray-600">
                 Select Year
@@ -553,7 +553,7 @@ function RestroAdd() {
                 name="openingTime"
                 value={restaurantData.openingTime}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               />
             </div>
             <div>
@@ -565,7 +565,7 @@ function RestroAdd() {
                 name="closingTime"
                 value={restaurantData.closingTime}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+                className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
               />
             </div>
           </div>
@@ -689,7 +689,7 @@ function RestroAdd() {
           placeholder="Full Address + Landmark"
           value={restaurantData.address}
           onChange={handleChange}
-          className="w-full border border-gray-300 p-3 rounded-lg shadow-sm mb-3 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+          className="w-full border border-gray-300 p-2 rounded-lg shadow-sm mb-3 focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
@@ -699,7 +699,7 @@ function RestroAdd() {
             placeholder="City"
             value={restaurantData.city}
             onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            className="border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
           <input
             type="text"
@@ -707,7 +707,7 @@ function RestroAdd() {
             placeholder="State"
             value={restaurantData.state}
             onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            className="border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
           <input
             type="text"
@@ -715,7 +715,7 @@ function RestroAdd() {
             placeholder="Postal Code"
             value={restaurantData.postalCode}
             onChange={handleChange}
-            className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            className="border border-gray-300 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>

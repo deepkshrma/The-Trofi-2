@@ -249,12 +249,15 @@ function RestroAmenityList() {
                                 >
                                   <MdEdit size={16} />
                                 </button>
+                                {/*
                                 <button
                                   className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
                                   onClick={() => setShowDeleteModal(true)}
                                 >
                                   <MdDelete size={16} />
                                 </button>
+
+                                */}
                               </div>
                             </td>
                           </tr>

@@ -293,7 +293,7 @@ export default function Dashboard() {
           brand={BRAND}
         />
         <StatCard
-          title="Orders"
+          title="Reviews"
           value="785"
           changeType="up"
           Icon={FiFileText}
@@ -301,7 +301,7 @@ export default function Dashboard() {
           brand={BRAND}
         />
         <StatCard
-          title="Customers"
+          title="Users"
           value="56"
           changeType="down"
           Icon={FiUsers}
@@ -406,7 +406,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-2xl shadow-md p-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h3 className="text-xl font-semibold">Customer Map</h3>
+              <h3 className="text-xl font-semibold">Users Map</h3>
               <p className="text-sm text-gray-400">
                 Data based on {customerFilter}
               </p>
