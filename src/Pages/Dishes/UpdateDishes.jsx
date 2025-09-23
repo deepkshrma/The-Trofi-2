@@ -33,7 +33,7 @@ function UpdateDishes() {
 
   const [cuisines, setCuisines] = useState([]);
   const [selectedCuisine, setSelectedCuisine] = useState(null);
-
+  const [loading, setLoading] = useState(true);
   const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
   if (!token) return toast.error("Please login first");
   const config = {
@@ -66,7 +66,7 @@ function UpdateDishes() {
 
     // Fetch the dish by ID
     axios
-      .get(`${BASE_URL}/dishes/get-dishes-by-id/${id}`)
+      .get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`)
       .then((res) => {
         if (res.data.success) {
           const d = res.data.data;
@@ -165,7 +165,10 @@ function UpdateDishes() {
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Update Dish", path: `/UpdateDishes/${id}` }]}
+        customTrail={[
+          { label: "Dishes List", path: "/DishesList" },
+          { label: "Update Dish", path: `/UpdateDishes/${id}` },
+        ]}
       />
       <div className="bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Update Dish"} />

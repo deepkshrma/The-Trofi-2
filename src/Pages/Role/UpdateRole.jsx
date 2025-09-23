@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { BASE_URL } from "../../config/Config";
 
 function UpdateRole() {
   const { id } = useParams();
@@ -28,7 +29,7 @@ function UpdateRole() {
       }
 
       const res = await axios.get(
-        `http://trofi-backend.apponedemo.top/api/admin/admins-roles/${id}`,
+        `${BASE_URL}/admin/admins-roles/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

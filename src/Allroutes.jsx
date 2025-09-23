@@ -40,6 +40,8 @@ import UpdateRole from "./Pages/Role/UpdateRole";
 import CreateAdmin from "./Pages/Admin/CreateAdmin";
 import UpdateAdmin from "./Pages/Admin/UpdateAdmin";
 import UpdateDishes from "./Pages/Dishes/UpdateDishes";
+import HashtagList from "./Pages/HashTag/HashtagList";
+import CreateHashtag from "./Pages/HashTag/CreateHashtag";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -131,6 +133,8 @@ const Allroutes = () => {
                 path="/RestroOwnerDashboard"
                 element={<RestroOwnerDashboard />}
               />
+              <Route path="/HashtagList" element={<HashtagList />} />
+              <Route path="/CreateHashtag" element={<CreateHashtag />} />
               <Route
                 path="/RoleUpdate/:id"
                 element={<UpdateRole />}

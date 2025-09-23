@@ -3,7 +3,7 @@ import { IoMdClose } from "react-icons/io";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-import { USER_BASE_URL } from "../../config/Config";
+import { BASE_URL } from "../../config/Config";
 
 const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
   const [selectedStatus, setSelectedStatus] = useState(status || "");
@@ -23,14 +23,18 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
 
     try {
       setLoading(true);
-      const authData = JSON.parse(localStorage.getItem("broom_auth"));
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
       const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
 
-      const response = await axios.put(
-        `${USER_BASE_URL}/change-status-users/${userId}`,
+      const response = await axios.patch(
+        `${BASE_URL}/user/update-status/${userId}`,
         {
           status: selectedStatus,
-          status_reason: statusReason,
+          reason: statusReason,
         },
         {
           headers: {
@@ -74,8 +78,9 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
           >
             <option value="">-- Select Status --</option>
             <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="spam">Spam</option>
             <option value="suspended">Suspended</option>
+            <option value="banned">Banned</option>
           </select>
         </div>
 

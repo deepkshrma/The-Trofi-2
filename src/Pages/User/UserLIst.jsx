@@ -200,8 +200,9 @@ function UserList() {
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="banned">Banned</option>
                 <option value="suspended">Suspended</option>
+                <option value="spam">Spam</option>
               </select>
             </div>
 
@@ -278,13 +279,13 @@ function UserList() {
                     <td className="text-[14px] px-4 py-2">
                       <div
                         onClick={() => {
-                          // setSelectedCustomer(item);
-                          // setShowStatusModal(true);
+                          setSelectedCustomer(item);
+                          setShowStatusModal(true);
                         }}
                         className={`cursor-pointer px-2 py-1 w-full flex justify-center items-center ${
                           item.account_status === "active"
                             ? "bg-green-200 text-green-500"
-                            : item.account_status === "inactive"
+                            : item.account_status === "suspended"
                             ? "bg-yellow-200 text-yellow-500"
                             : "bg-red-200 text-red-500"
                         } font-semibold rounded-full hover:opacity-90 transition`}
@@ -346,18 +347,20 @@ function UserList() {
       {/* Status Update Modal */}
       {showStatusModal && selectedCustomer && (
         <UserUpdateStatus
-          userId={selectedCustomer._id}
-          status={selectedCustomer.account_status}
-          onClose={() => {
-            setShowStatusModal(false);
-            setSelectedCustomer(null);
-          }}
-          onSuccess={() => {
-            fetchUsers(pagination.currentPage);
-            setShowStatusModal(false);
-            setSelectedCustomer(null);
-          }}
-        />
+  userId={selectedCustomer._id}
+  status={selectedCustomer.account_status}
+  reason={selectedCustomer.status_reason || ""} // <-- use status_reason
+  onClose={() => {
+    setShowStatusModal(false);
+    setSelectedCustomer(null);
+  }}
+  onSuccess={() => {
+    fetchUsers(pagination.currentPage);
+    setShowStatusModal(false);
+    setSelectedCustomer(null);
+  }}
+/>
+
       )}
     </div>
   );

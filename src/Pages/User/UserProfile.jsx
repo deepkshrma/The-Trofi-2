@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -6,7 +7,7 @@ import { BASE_URL } from "../../config/Config";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
-  const userID = "68d0e3826aad22d8b7553476"; // Replace with dynamic userID if needed
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,11 +20,10 @@ function UserProfile() {
 
       try {
         const response = await axios.get(
-          `${BASE_URL}/admin/get-all-users?userID=${userID}`,
+          `${BASE_URL}/admin/get-all-users?userID=${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
             },
           }
         );
@@ -40,7 +40,7 @@ function UserProfile() {
     };
 
     fetchUser();
-  }, [userID, BASE_URL]);
+  }, [id, BASE_URL]);
 
   if (!user) return <p className="p-6">Loading user data...</p>;
 
@@ -212,6 +212,63 @@ function UserProfile() {
             {user.phoneVerified ? "Yes" : "No"}
           </span>
         </p>
+      </div>
+
+      {/* Status History */}
+      <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+        <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
+          Account Status History
+        </h3>
+
+        {user.statusHistory && user.statusHistory.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 text-sm">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-2 text-left border-b">Status</th>
+                  <th className="px-4 py-2 text-left border-b">Reason</th>
+                  <th className="px-4 py-2 text-left border-b">Changed By</th>
+                  <th className="px-4 py-2 text-left border-b">Changed At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user.statusHistory
+                  .slice() // clone
+                  .reverse() // latest first
+                  .map((item, idx) => (
+                    <tr key={item._id || idx} className="border-b">
+                      <td className="px-4 py-2 capitalize">
+                        <span
+                          className={`font-medium ${
+                            item.status === "active"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2">{item.reason || "-"}</td>
+                      <td className="px-4 py-2">
+                        {/* If you populated changedBy with name/email, show name; fallback to ID */}
+                        {item.changedBy?.name ||
+                          item.changedBy?.email ||
+                          item.changedBy ||
+                          "—"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {item.changedAt
+                          ? new Date(item.changedAt).toLocaleString()
+                          : "-"}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-gray-500">No status changes recorded</p>
+        )}
       </div>
     </div>
   );

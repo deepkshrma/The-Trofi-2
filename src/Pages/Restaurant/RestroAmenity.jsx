@@ -125,7 +125,7 @@ function RestroAmenity() {
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Icon Name
+              Amenity Name
             </label>
             <input
               type="text"
@@ -141,7 +141,7 @@ function RestroAmenity() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Icon Image
+              Upload Amenity Icon
             </label>
             <input
               type="file"
@@ -174,7 +174,7 @@ function RestroAmenity() {
       shadow-md transition hover:bg-orange-600 hover:shadow-lg 
       focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              {isEdit ? "Update Amenity" : "Create Amenity"}
+              {isEdit ? "Update Amenity" : "Save"}
             </button>
           </div>
         </form>

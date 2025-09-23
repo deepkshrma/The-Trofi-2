@@ -3,11 +3,13 @@ import { FaRegEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import star1 from "../../../assets/images/untitled_folder_6/star1.png";
-import star2 from "../../../assets/images/untitled_folder_6/star2.png";
-import star3 from "../../../assets/images/untitled_folder_6/star3.png";
-import star4 from "../../../assets/images/untitled_folder_6/star4.png";
-import star5 from "../../../assets/images/untitled_folder_6/star5.png";
+// import star1 from "../../../assets/images/untitled_folder_6/star1.png";
+// import star2 from "../../../assets/images/untitled_folder_6/star2.png";
+// import star3 from "../../../assets/images/untitled_folder_6/star3.png";
+// import star4 from "../../../assets/images/untitled_folder_6/star4.png";
+// import star5 from "../../../assets/images/untitled_folder_6/star5.png";
+import { STAR_RATINGS } from "../../../config/hashtagconfig";
+
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
@@ -65,13 +67,13 @@ export default function RestaurantReviewList() {
     },
   ]);
 
-  const faceStars = [
-    { img: star1, label: "Very Bad" },
-    { img: star2, label: "Bad" },
-    { img: star3, label: "Okay" },
-    { img: star4, label: "Good" },
-    { img: star5, label: "Excellent" },
-  ];
+  // const faceStars = [
+  //   { img: star1, label: "Very Bad" },
+  //   { img: star2, label: "Bad" },
+  //   { img: star3, label: "Okay" },
+  //   { img: star4, label: "Good" },
+  //   { img: star5, label: "Excellent" },
+  // ];
 
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
@@ -89,7 +91,8 @@ export default function RestaurantReviewList() {
       "S.No.": index + 1,
       "User Name": rev.userName,
       "Restaurant Name": rev.restroName,
-      "Rating Label": faceStars[rev.star_value - 1]?.label || rev.rating_label,
+      "Rating Label":
+        STAR_RATINGS[rev.star_value - 1]?.label || rev.rating_label,
       Stars: rev.star_value,
       Status: rev.status,
     }));
@@ -228,15 +231,16 @@ export default function RestaurantReviewList() {
                 <td className="p-3 whitespace-nowrap">{rev.userName}</td>
                 <td className="p-3 whitespace-nowrap">{rev.restroName}</td>
                 <td className="p-3 whitespace-nowrap">
-                  {faceStars[rev.star_value - 1].label}
+                  {STAR_RATINGS[rev.star_value - 1]?.label || rev.rating_label}
                 </td>
                 <td className="p-3">
                   <img
-                    src={faceStars[rev.star_value - 1].img}
-                    alt={faceStars[rev.star_value - 1].label}
+                    src={STAR_RATINGS[rev.star_value - 1]?.img}
+                    alt={STAR_RATINGS[rev.star_value - 1]?.label || "star"}
                     className="w-10 h-10 md:w-12 md:h-12"
                   />
                 </td>
+
                 <td className="p-3">
                   <span
                     className={`inline-block w-24 text-center  px-2 py-1 rounded-full text-xs font-semibold ${

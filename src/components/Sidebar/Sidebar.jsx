@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown, FaCog } from "react-icons/fa";
-import { FaStore, FaConciergeBell } from "react-icons/fa";
+import { FaStore, FaConciergeBell,FaCommentDots } from "react-icons/fa";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
@@ -65,16 +65,13 @@ const SidebarItem = ({
         <Link
           to={item.link}
           onClick={handleClick}
-          className={`flex w-full justify-between items-center pl-3 pr-3 py-4 cursor-pointer 
-            rounded-tl-full rounded-bl-full ${
-              item.name === "Dashboard" ? "" : "hover:text-gray-300"
-            }   
-             
-            ${
-              activePath === item.link
-                ? "bg-white text-[#F9832B] mb-2"
-                : "text-white"
-            }`}
+          className={`
+    flex w-full justify-between items-center pl-3 pr-3 py-4 mb-2 cursor-pointer
+    rounded-tl-full rounded-bl-full
+    ${item.indent ? "ml-6" : ""}
+    hover:bg-white hover:text-[#F9832B]
+    ${activePath === "/" + item.link ? "bg-white text-[#F9832B]" : "text-white"}
+  `}
         >
           <div className="flex items-center gap-3 text-[100%]">
             {item.icon}
@@ -150,9 +147,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           icon: <AdminPanelSettingsIcon />,
           link: "#",
           dropdown: true,
-          subItems: [
-            { name: "Admin List", link: "AdminList", dropdown: false },
-          ],
+          subItems: [{ name: "Admins", link: "AdminList", dropdown: false }],
         },
       ],
       border: true,
@@ -167,7 +162,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           dropdown: true,
           subItems: [
             // { name: "Add Role", link: "RoleCreate", dropdown: false },
-            { name: "Role List", link: "RoleList", dropdown: false },
+            { name: "Roles", link: "RoleList", dropdown: false },
           ],
         },
       ],
@@ -181,7 +176,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           icon: <PeopleIcon />,
           link: "#",
           dropdown: true,
-          subItems: [{ name: "User List", link: "UserList", dropdown: false }],
+          subItems: [{ name: "Users", link: "UserList", dropdown: false }],
         },
       ],
       border: true,
@@ -197,64 +192,34 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           subItems: [
             {
               name: "Restaurant Amenity",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                // { name: "Add Amenity", link: "RestroAmenity", dropdown: false },
-                {
-                  name: "Amenity List",
-                  link: "RestroAmenityList",
-                  dropdown: false,
-                },
-              ],
+              link: "RestroAmenityList",
+              dropdown: false,
+              indent: true,
             },
             {
               name: "Restaurant Type",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                // { name: "Add Type", link: "RestroType", dropdown: false },
-                { name: "Type List", link: "RestroTypeList", dropdown: false },
-              ],
+              link: "RestroTypeList",
+              dropdown: false,
+              indent: true,
             },
             {
               name: "Restaurant Good For",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                // {
-                //   name: "Add Good For",
-                //   link: "RestroGoodFor",
-                //   dropdown: false,
-                // },
-                {
-                  name: "Good For List",
-                  link: "RestroGoodForList",
-                  dropdown: false,
-                },
-              ],
+              link: "RestroGoodForList",
+              dropdown: false,
+              indent: true,
             },
             {
               name: "Restaurant Cuisine",
-              link: "#",
-              dropdown: true, // nested
-              subItems: [
-                // {
-                //   name: "Add Cuisine",
-                //   link: "RestroCuisine",
-                //   dropdown: false,
-                // },
-                {
-                  name: "Cuisine List",
-                  link: "RestroCuisineList",
-                  dropdown: false,
-                },
-              ],
+              link: "RestroCuisineList",
+              dropdown: false,
+              indent: true,
             },
           ],
         },
       ],
     },
+
+    ,
     {
       section: "",
       items: [
@@ -266,54 +231,21 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           subItems: [
             {
               name: "Dish Type",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                // {
-                //   name: "Add Dish Type",
-                //   link: "RestroDishType",
-                //   dropdown: false,
-                // },
-                {
-                  name: "Dish Type List",
-                  link: "RestroDishTypeList",
-                  dropdown: false,
-                },
-              ],
+              link: "RestroDishTypeList",
+              dropdown: false,
+              indent: true,
             },
             {
-              name: "Dish Category",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                // {
-                //   name: "Add Dish Category",
-                //   link: "RestroDishCategory",
-                //   dropdown: false,
-                // },
-                {
-                  name: "Category List",
-                  link: "RestroDishCategoryList",
-                  dropdown: false,
-                },
-              ],
+              name: "Dish Category ",
+              link: "RestroDishCategoryList",
+              dropdown: false,
+              indent: true,
             },
             {
-              name: "Dish Sub Category",
-              link: "#",
-              dropdown: true,
-              subItems: [
-                // {
-                //   name: "Add Sub Category",
-                //   link: "RestroDishSubCategory",
-                //   dropdown: false,
-                // },
-                {
-                  name: "Sub Category List",
-                  link: "RestroDishSubCategoryList",
-                  dropdown: false,
-                },
-              ],
+              name: "Dish Sub Category ",
+              link: "RestroDishSubCategoryList",
+              dropdown: false,
+              indent: true,
             },
           ],
         },
@@ -329,13 +261,13 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           link: "#",
           dropdown: true,
           subItems: [
+            // {
+            //   name: "Add Restaurant",
+            //   link: "RestroAdd",
+            //   dropdown: false,
+            // },
             {
-              name: "Add Restaurant",
-              link: "RestroAdd",
-              dropdown: false,
-            },
-            {
-              name: " Restaurant List",
+              name: " Restaurant's",
               link: "RestroList",
               dropdown: false,
             },
@@ -355,7 +287,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           dropdown: true,
           subItems: [
             // { name: "Add Dish", link: "AddDishes", dropdown: false },
-            { name: "Dishes List", link: "DishesList", dropdown: false },
+            { name: "Dishes", link: "DishesList", dropdown: false },
           ],
         },
       ],
@@ -366,8 +298,8 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       section: "",
       items: [
         {
-          name: "Users Review",
-          icon: <FaStore />,
+          name: "Feedback Management",
+          icon: <FaCommentDots />,
           link: "#",
           dropdown: true,
           subItems: [
@@ -381,11 +313,17 @@ function Sidebar({ setIs_Toggle, isToggle }) {
               link: "DishReviewList",
               dropdown: false,
             },
+            {
+              name: "Manage HashTag's",
+              link: "HashtagList",
+              dropdown: false,
+            },
           ],
         },
       ],
       border: true,
     },
+    
   ];
 
   const handleSubClick = (link) => {
@@ -425,7 +363,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         <div className="bg-[#F9832B] h-[90vh] overflow-y-auto scrollbar-thin-line">
           {/* Navigation */}
           <nav>
-            <ul className="flex flex-col h-[90vh]">
+            <ul className="flex flex-col ">
               {filteredSidebarData.map((section, sectionIndex) => (
                 <React.Fragment key={sectionIndex}>
                   {section.items.map((item, idx) => (

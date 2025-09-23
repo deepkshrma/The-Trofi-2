@@ -294,10 +294,14 @@ function RestroAdd() {
               Phone Number
             </label>
             <PhoneInput
-              country="us" // default country
+              country="in"
               value={restaurantData.phone}
-              onChange={(phone) =>
-                setRestaurantData((prev) => ({ ...prev, phone }))
+              onChange={(phone, country) =>
+                setRestaurantData((prev) => ({
+                  ...prev,
+                  phone,
+                  country_code: `+${country.dialCode}`, // <-- capture country code
+                }))
               }
               inputClass="!w-full !h-12 !p-2 !pl-14 !rounded-lg !border-gray-300"
             />

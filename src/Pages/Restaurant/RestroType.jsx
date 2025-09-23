@@ -168,7 +168,7 @@ function RestroType() {
                 shadow-md transition hover:bg-orange-600 hover:shadow-lg 
                 focus:ring-2 focus:ring-orange-300 whitespace-nowrap"
             >
-              {isEdit ? "Update Restaurant Type" : "Create Restaurant Type"}
+              {isEdit ? "Update Restaurant Type" : "Save"}
             </button>
           </div>
         </form>
