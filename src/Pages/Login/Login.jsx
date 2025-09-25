@@ -110,8 +110,8 @@ export default function Login() {
         {/* Right side */}
         <div className="w-full md:w-1/2 bg-[#F9832B] text-white p-10 flex flex-col justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">Welcome to Trofi</h2>
-            <p className="mb-6 text-sm">Sign in by entering information below</p>
+            <h2 className="text-2xl font-bold mb-2 mt-4">Welcome to Trofi</h2>
+            <p className="mb-12 text-sm">Sign in by entering information below</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -121,6 +121,7 @@ export default function Login() {
                 <input
                   type="email"
                   value={email}
+                  placeholder="Enter email address"
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                   required
@@ -133,6 +134,7 @@ export default function Login() {
                 <input
                   type="password"
                   value={password}
+                  placeholder="Enter password"
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg text-gray-900 bg-white/90 focus:outline-none"
                   required

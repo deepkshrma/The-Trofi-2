@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { CiExport } from "react-icons/ci";
 import axios from "axios";
 import guest from "../../assets/images/guest.png";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import { toast } from "react-toastify";
 import { FiEye } from "react-icons/fi";
 import { RiDeleteBinLine } from "react-icons/ri";
@@ -145,9 +145,9 @@ function UserList() {
         </div>
         <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
           <div>
-            <h4 className="text-[14px]">Inactive Users</h4>
+            <h4 className="text-[14px]">Spam Users</h4>
             <p className="text-[22px] font-semibold">
-              {users.filter((u) => u.account_status === "inactive").length}
+              {users.filter((u) => u.account_status === "spam").length}
             </p>
           </div>
           <div>
@@ -256,10 +256,15 @@ function UserList() {
                     <td className="text-[14px] px-8 py-3 text-left min-w-[180px]">
                       <div className="flex items-center gap-3">
                         <img
-                          src={item.profile_picture || guest}
-                          alt={item.name}
+                          src={
+                            item.profile_picture
+                              ? `${IMAGE_URL}${item.profile_picture}`
+                              : guest
+                          }
+                          alt={item.name || "Guest"}
                           className="w-10 h-10 rounded-full object-cover bg-amber-200"
                         />
+
                         <div className="whitespace-nowrap font-semibold">
                           {item.name}
                         </div>
@@ -347,20 +352,19 @@ function UserList() {
       {/* Status Update Modal */}
       {showStatusModal && selectedCustomer && (
         <UserUpdateStatus
-  userId={selectedCustomer._id}
-  status={selectedCustomer.account_status}
-  reason={selectedCustomer.status_reason || ""} // <-- use status_reason
-  onClose={() => {
-    setShowStatusModal(false);
-    setSelectedCustomer(null);
-  }}
-  onSuccess={() => {
-    fetchUsers(pagination.currentPage);
-    setShowStatusModal(false);
-    setSelectedCustomer(null);
-  }}
-/>
-
+          userId={selectedCustomer._id}
+          status={selectedCustomer.account_status}
+          reason={selectedCustomer.status_reason || ""} // <-- use status_reason
+          onClose={() => {
+            setShowStatusModal(false);
+            setSelectedCustomer(null);
+          }}
+          onSuccess={() => {
+            fetchUsers(pagination.currentPage);
+            setShowStatusModal(false);
+            setSelectedCustomer(null);
+          }}
+        />
       )}
     </div>
   );
