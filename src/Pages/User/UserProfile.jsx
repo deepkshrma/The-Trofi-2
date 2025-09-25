@@ -4,6 +4,7 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BASE_URL } from "../../config/Config";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -48,6 +49,9 @@ function UserProfile() {
 
   return (
     <div className="main main_page min-h-screen p-6 duration-900 ">
+      <BreadcrumbsNav
+        customTrail={[{ label: "Users List", path: "/UserList" }, { label: "Users Profile", path: "/UserProfile" }]}
+      />
       <PageTitle title="User Profile" />
 
       {/* Profile Header */}
@@ -85,11 +89,10 @@ function UserProfile() {
             <p className="text-sm text-gray-500">
               Status:{" "}
               <span
-                className={`font-medium ${
-                  user.account_status === "active"
+                className={`font-medium ${user.account_status === "active"
                     ? "text-green-600"
                     : "text-red-600"
-                }`}
+                  }`}
               >
                 {user.account_status}
               </span>
@@ -239,11 +242,10 @@ function UserProfile() {
                     <tr key={item._id || idx} className="border-b">
                       <td className="px-4 py-2 capitalize">
                         <span
-                          className={`font-medium ${
-                            item.status === "active"
+                          className={`font-medium ${item.status === "active"
                               ? "text-green-600"
                               : "text-red-600"
-                          }`}
+                            }`}
                         >
                           {item.status}
                         </span>

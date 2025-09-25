@@ -234,7 +234,7 @@ function RoleList() {
 
   return (
     <div className="main main_page w-full h-full font-Montserrat space-y-4 duration-900">
-      <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/Roles" }]} />
+      <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/RoleList" }]} />
       <div className="flex justify-between items-center">
         <PageTitle title={"All Roles"} />
       </div>

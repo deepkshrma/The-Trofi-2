@@ -143,7 +143,7 @@ function AddDishes() {
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Add New Dish", path: "/AddDishes" }]}
+        customTrail={[{ label: "Dishes List", path: "/DishesList" }, { label: "Add New Dish", path: "/AddDishes" }]}
       />
       <div className=" bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Add New Dish"} />
@@ -272,101 +272,101 @@ function AddDishes() {
           </div>
 
           <div className="md:col-span-2">
-  <label className="block text-gray-600 mb-2 font-medium">
-    Ingredients
-  </label>
+            <label className="block text-gray-600 mb-2 font-medium">
+              Ingredients
+            </label>
 
-  <div className="space-y-4 mb-4">
-    {/* name + icon + add in one row */}
-    <div className="flex gap-2 items-center">
-      <input
-        type="text"
-        value={ingredient}
-        onChange={(e) => setIngredient(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            addIngredient();
-          }
-        }}
-        className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
-        placeholder="Enter ingredient name"
-      />
+            <div className="space-y-4 mb-4">
+              {/* name + icon + add in one row */}
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={ingredient}
+                  onChange={(e) => setIngredient(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addIngredient();
+                    }
+                  }}
+                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400"
+                  placeholder="Enter ingredient name"
+                />
 
-      {/* icon choose button */}
-      <input
-        id="ingredientIcon"
-        type="file"
-        accept="image/*"
-        onChange={(e) => setIngredientIcon(e.target.files[0])}
-        className="hidden"
-      />
-      <button
-        type="button"
-        onClick={() => document.getElementById("ingredientIcon").click()}
-        className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
-      >
-        Choose Icon
-      </button>
+                {/* icon choose button */}
+                <input
+                  id="ingredientIcon"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setIngredientIcon(e.target.files[0])}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("ingredientIcon").click()}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
+                >
+                  Choose Icon
+                </button>
 
-      {/* add button */}
-      <button
-        type="button"
-        onClick={addIngredient}
-        className="px-4 py-2 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition"
-      >
-        Add
-      </button>
-    </div>
+                {/* add button */}
+                <button
+                  type="button"
+                  onClick={addIngredient}
+                  className="px-4 py-2 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition"
+                >
+                  Add
+                </button>
+              </div>
 
-    {/* icon preview (inline if you like) */}
-    {ingredientIcon && (
-      <div className="flex items-center gap-2 mt-2">
-        <img
-          src={URL.createObjectURL(ingredientIcon)}
-          alt="ingredient icon preview"
-          className="w-8 h-8 object-cover rounded border"
-        />
-        <span className="text-sm text-gray-600">{ingredientIcon.name}</span>
-        <button
-          type="button"
-          onClick={() => setIngredientIcon(null)}
-          className="text-red-500 hover:text-red-700 cursor-pointer text-sm"
-        >
-          ✕
-        </button>
-      </div>
-    )}
-  </div>
+              {/* icon preview (inline if you like) */}
+              {ingredientIcon && (
+                <div className="flex items-center gap-2 mt-2">
+                  <img
+                    src={URL.createObjectURL(ingredientIcon)}
+                    alt="ingredient icon preview"
+                    className="w-8 h-8 object-cover rounded border"
+                  />
+                  <span className="text-sm text-gray-600">{ingredientIcon.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setIngredientIcon(null)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
 
-  {/* list of added ingredients */}
-  <div className="flex flex-wrap gap-2">
-    {ingredients.map((ing, index) => (
-      <div
-        key={index}
-        className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-2 rounded-full"
-      >
-        {ing.icon && (
-          <img
-            src={URL.createObjectURL(ing.icon)}
-            alt={`${ing.name} icon`}
-            className="w-5 h-5 object-cover rounded-full"
-          />
-        )}
-        <span>{ing.name}</span>
-        <button
-          type="button"
-          onClick={() =>
-            setIngredients(ingredients.filter((_, i) => i !== index))
-          }
-          className="text-red-500 hover:text-red-700 text-sm"
-        >
-          ✕
-        </button>
-      </div>
-    ))}
-  </div>
-</div>
+            {/* list of added ingredients */}
+            <div className="flex flex-wrap gap-2">
+              {ingredients.map((ing, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-2 rounded-full"
+                >
+                  {ing.icon && (
+                    <img
+                      src={URL.createObjectURL(ing.icon)}
+                      alt={`${ing.name} icon`}
+                      className="w-5 h-5 object-cover rounded-full"
+                    />
+                  )}
+                  <span>{ing.name}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIngredients(ingredients.filter((_, i) => i !== index))
+                    }
+                    className="text-red-500 hover:text-red-700 text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
 
 
           <div className="md:col-span-2">

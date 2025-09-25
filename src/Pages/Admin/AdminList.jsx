@@ -66,17 +66,17 @@ const AdminList = () => {
 
         if (res.data.success) {
           const transformedAdmins = res.data.admins.map((admin) => ({
-  empId: admin._id,
-  name: admin.name,
-  email: admin.email,
-  role: typeof admin.role === "string" ? admin.role : admin.role?.name || "Unknown",
-  profilePhoto: admin.profile_picture ? `${IMAGE_URL}/${admin.profile_picture}` : guestImg,
-  status: admin.status,
-  status_reason: admin.status_reason || "",
-  dob: admin.dob || "",           // <-- add this
-  gender: admin.gender || "",     // <-- add this
-  address: admin.address || "",   // <-- add this
-}));
+            empId: admin._id,
+            name: admin.name,
+            email: admin.email,
+            role: typeof admin.role === "string" ? admin.role : admin.role?.name || "Unknown",
+            profilePhoto: admin.profile_picture ? `${IMAGE_URL}/${admin.profile_picture}` : guestImg,
+            status: admin.status,
+            status_reason: admin.status_reason || "",
+            dob: admin.dob || "",           // <-- add this
+            gender: admin.gender || "",     // <-- add this
+            address: admin.address || "",   // <-- add this
+          }));
 
 
           setAdmins(transformedAdmins);
@@ -226,7 +226,7 @@ const AdminList = () => {
     setSelectedAdmin(null);
   };
 
-  const confirmDelete = async () => {};
+  const confirmDelete = async () => { };
 
   // const confirmDelete = async () => {
   //   try {
@@ -283,8 +283,8 @@ const AdminList = () => {
             status === "active"
               ? "text-green-600"
               : status === "inactive"
-              ? "text-yellow-600"
-              : "text-red-600";
+                ? "text-yellow-600"
+                : "text-red-600";
 
           return (
             <div>
@@ -319,8 +319,8 @@ const AdminList = () => {
             status === "active"
               ? "bg-green-100 text-green-600"
               : status === "inactive"
-              ? "bg-yellow-100 text-yellow-600"
-              : "bg-red-100 text-red-600";
+                ? "bg-yellow-100 text-yellow-600"
+                : "bg-red-100 text-red-600";
 
           return (
             <div
@@ -397,7 +397,7 @@ const AdminList = () => {
   return (
     <div className="main main_page  font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Admin List", path: "/admin_list" }]}
+        customTrail={[{ label: "Admin List", path: "/AdminList" }]}
       />
       <div className="flex justify-between items-center">
         <PageTitle title={"Admin List"} />
@@ -414,9 +414,8 @@ const AdminList = () => {
           {["all", "active", "inactive", "Suspend"].map((status) => (
             <li
               key={status}
-              className={`p-2 cursor-pointer ${
-                statusFilter === status ? "text-black" : "text-gray-400"
-              }`}
+              className={`p-2 cursor-pointer ${statusFilter === status ? "text-black" : "text-gray-400"
+                }`}
               onClick={() => setStatusFilter(status)}
             >
               {status === "Suspend"
@@ -463,11 +462,10 @@ const AdminList = () => {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className={`p-3 ${
-                        header.column.columnDef.header === "Status"
+                      className={`p-3 ${header.column.columnDef.header === "Status"
                           ? "text-center px-10"
                           : "text-left"
-                      }`}
+                        }`}
                       style={{ width: header.getSize() }}
                     >
                       {flexRender(
@@ -488,11 +486,10 @@ const AdminList = () => {
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className={`p-3  ${
-                        cell.column.columnDef.header === "Status"
+                      className={`p-3  ${cell.column.columnDef.header === "Status"
                           ? "text-center px-10"
                           : "text-left"
-                      }`}
+                        }`}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -543,10 +540,10 @@ const AdminList = () => {
               prevAdmins.map((admin) =>
                 admin.empId === selectedAdmin.empId
                   ? {
-                      ...admin,
-                      status: updatedStatus,
-                      status_reason: updatedReason,
-                    }
+                    ...admin,
+                    status: updatedStatus,
+                    status_reason: updatedReason,
+                  }
                   : admin
               )
             );

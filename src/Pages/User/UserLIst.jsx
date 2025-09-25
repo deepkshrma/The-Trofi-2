@@ -113,7 +113,7 @@ function UserList() {
   return (
     <div className="main main_page font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Users List", path: "/CustomerList" }]}
+        customTrail={[{ label: "Users List", path: "/UserList" }]}
       />
       <PageTitle title={"Users"} />
 
