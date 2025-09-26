@@ -294,7 +294,7 @@ export default function Dashboard() {
         />
         <StatCard
           title="Reviews"
-          value="785"
+          value="166"
           changeType="up"
           Icon={FiFileText}
           gid="orders"
@@ -302,15 +302,15 @@ export default function Dashboard() {
         />
         <StatCard
           title="Users"
-          value="56"
+          value="9"
           changeType="down"
           Icon={FiUsers}
           gid="customers"
           brand={BRAND}
         />
         <StatCard
-          title="Income"
-          value="$6231"
+          title="Admins"
+          value="12"
           changeType="down"
           Icon={FiDollarSign}
           gid="income"

@@ -43,11 +43,11 @@ function CreateAdmin() {
     axios
       .post(
         `${BASE_URL}/admin/create-admin`,
-        formData, // <-- request body
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data", // since you are sending FormData
+            "Content-Type": "multipart/form-data",
           },
         }
       )

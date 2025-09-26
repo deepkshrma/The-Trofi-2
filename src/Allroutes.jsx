@@ -42,6 +42,7 @@ import UpdateAdmin from "./Pages/Admin/UpdateAdmin";
 import UpdateDishes from "./Pages/Dishes/UpdateDishes";
 import HashtagList from "./Pages/HashTag/HashtagList";
 import CreateHashtag from "./Pages/HashTag/CreateHashtag";
+import NotFound from "./Pages/NotFound/NotFound";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -141,6 +142,7 @@ const Allroutes = () => {
               />
             </Route>
           </Route>
+           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ContextApi.Provider>

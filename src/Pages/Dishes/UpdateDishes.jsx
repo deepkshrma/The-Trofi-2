@@ -94,7 +94,7 @@ function UpdateDishes() {
           setIngredients(
             d.dish_ingredients.map((ing) => ({
               name: ing.name,
-              icon: ing.icon ? { url: `${BASE_URL}/${ing.icon}` } : null,
+              icon: ing.icon ? { url: `${IMAGE_URL}/${ing.icon}` } : null,
             }))
           );
           setImages(
@@ -184,7 +184,7 @@ function UpdateDishes() {
               type="text"
               name="dish_name"
               defaultValue={dishData.dish_name}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none"
               required
             />
           </div>
@@ -198,7 +198,7 @@ function UpdateDishes() {
               name="price"
               min={0}
               defaultValue={dishData.price}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none"
               required
             />
           </div>
@@ -217,7 +217,7 @@ function UpdateDishes() {
 
           {/* Dropdowns: Restaurant, Category, SubCategory, Type, Cuisine */}
           <div>
-            <label className="block text-gray-600 font-medium mb-2">
+            <label className="block text-gray-600  font-medium mb-2">
               Restaurant
             </label>
             <Select
@@ -299,44 +299,82 @@ function UpdateDishes() {
             <label className="block text-gray-600 mb-2 font-medium">
               Ingredients
             </label>
-            <div className="space-y-4 mb-4">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={ingredient}
-                  onChange={(e) => setIngredient(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addIngredient();
-                    }
-                  }}
-                  className="flex-1 border border-gray-200 rounded-lg px-4 py-2"
-                  placeholder="Enter ingredient name"
-                />
-                <button
-                  type="button"
-                  onClick={addIngredient}
-                  className="px-4 py-2 bg-orange-500 text-white cursor-pointer rounded-lg"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
 
+            {/* Add ingredient form */}
+            <div className="flex flex-wrap items-center gap-3">
+  {/* Ingredient Name Input */}
+  <input
+    type="text"
+    value={ingredient}
+    onChange={(e) => setIngredient(e.target.value)}
+    className="flex-1 border border-gray-200 rounded-lg focus:outline-none px-4 py-1 mb-2"
+    placeholder="Enter ingredient name"
+  />
+
+  {/* Hidden File Input */}
+  <input
+    id="ingredientIcon"
+    type="file"
+    accept="image/*"
+    onChange={(e) => setIngredientIcon(e.target.files[0])}
+    className="hidden"
+  />
+
+  {/* Choose Icon Button */}
+  <button
+    type="button"
+    onClick={() => document.getElementById("ingredientIcon").click()}
+    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
+  >
+    Choose Icon
+  </button>
+
+  {/* Preview Icon */}
+  {ingredientIcon && (
+    <img
+      src={URL.createObjectURL(ingredientIcon)}
+      alt="Preview"
+      className="w-8 h-8 rounded-full object-cover border"
+    />
+  )}
+
+  {/* Add Button */}
+  <button
+    type="button"
+    onClick={addIngredient}
+    className="px-4 py-2 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition"
+  >
+    Add
+  </button>
+</div>
+
+
+            {/* Ingredient chips */}
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ing, idx) => (
                 <div
                   key={idx}
                   className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-2 rounded-full"
                 >
+                  {ing.icon && (
+                    <img
+                      src={
+                        ing.icon.url ||
+                        (ing.icon instanceof File
+                          ? URL.createObjectURL(ing.icon)
+                          : "/placeholder.svg")
+                      }
+                      alt={ing.name}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  )}
                   <span>{ing.name}</span>
                   <button
                     type="button"
                     onClick={() =>
                       setIngredients(ingredients.filter((_, i) => i !== idx))
                     }
-                    className="text-red-500"
+                    className="text-red-500 cursor-pointer"
                   >
                     ✕
                   </button>
@@ -344,6 +382,9 @@ function UpdateDishes() {
               ))}
             </div>
           </div>
+
+
+
 
           {/* Images */}
           <div className="md:col-span-2">
@@ -407,7 +448,7 @@ function UpdateDishes() {
               name="isAvailable"
               id="isAvailable"
               defaultChecked={dishData.isAvailable}
-              className="h-5 w-5"
+              className="h-5 w-5 appearance-none rounded-md border border-gray-300 checked:bg-orange-500 checked:before:content-['✔'] checked:before:text-white checked:before:block checked:before:text-center"
             />
             <label htmlFor="isAvailable" className="text-gray-600 font-medium">
               Available

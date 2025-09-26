@@ -6,6 +6,7 @@ import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { BASE_URL } from "../../config/Config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,8 +14,6 @@ export default function Login() {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const BASE_URL = "http://trofi-backend.apponedemo.top/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +28,7 @@ export default function Login() {
       if (res.data.success) {
         toast.success(res.data.message || "Login successful");
 
-        // Save token, name, email
+ 
         const { token, admin } = res.data;
         const userData = {
           token,
@@ -37,7 +36,7 @@ export default function Login() {
           email: admin.email,
         };
 
-        // remember → localStorage, else sessionStorage
+        
         localStorage.setItem("trofi_user", JSON.stringify(userData));
 
         navigate("/Dashboard");

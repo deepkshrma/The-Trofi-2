@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Pagination from "../../components/common/Pagination/Pagination";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
@@ -9,11 +9,173 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { PlusCircle } from "lucide-react";
+import { STAR_RATINGS } from "../../config/hashtagconfig";
+import { Building2, Utensils } from "lucide-react";
+
+
+/* ------------------ TypeDropdown component ------------------ */
+function TypeDropdown({ type, setType, fetchHashtags }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  const options = [
+    { value: "Restaurant", label: "Restaurant", icon: <Building2 size={18} /> },
+    { value: "Dish", label: "Dish", icon: <Utensils size={18} /> },
+  ];
+
+  // close on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selected = options.find((opt) => opt.value === type);
+
+  const handleSelect = (val) => {
+    setType(val);
+    fetchHashtags(1, val);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center justify-between w-48 px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white cursor-pointer"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-2 text-sm">
+          {selected?.icon}
+          {selected?.label}
+        </div>
+        <span className="text-gray-400">▾</span>
+      </button>
+
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+        >
+          {options.map((opt) => (
+            <li
+              key={opt.value}
+              onClick={() => handleSelect(opt.value)}
+              className={`flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm ${type === opt.value ? "bg-orange-50 font-medium" : ""
+                }`}
+            >
+              {opt.icon}
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+/* ------------------ RatingDropdown component ------------------ */
+/* Put this right after the imports */
+function RatingDropdown({ ratingFilter, setRatingFilter }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // close on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selected = ratingFilter ? STAR_RATINGS[Number(ratingFilter) - 1] : null;
+
+  const handleSelect = (val) => {
+    setRatingFilter(val);
+    setOpen(false);
+  };
+
+  const clear = (e) => {
+    e.stopPropagation();
+    setRatingFilter("");
+    setOpen(false);
+  };
+
+
+
+  return (
+    <div className="relative" ref={ref}>
+      {/* Selected area */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center justify-between w-56 md:w-48 lg:w-56 px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white cursor-pointer"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {selected ? (
+          <div className="flex items-center gap-2">
+            <img src={selected.img} alt={selected.label} className="w-6 h-6" />
+            <span className="text-sm">{`${Number(ratingFilter)} - ${selected.label}`}</span>
+          </div>
+        ) : (
+          <span className="text-sm text-gray-500">All Ratings</span>
+        )}
+
+        <div className="flex items-center gap-2">
+          {selected && (
+            <button
+              onClick={clear}
+              className="text-gray-400 hover:text-gray-700 text-sm"
+              title="Clear"
+            >
+              ✕
+            </button>
+          )}
+          <span className="text-gray-400">▾</span>
+        </div>
+      </button>
+
+      {/* Dropdown list */}
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-50 mt-1 w-56 md:w-48 lg:w-56 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-auto"
+        >
+          <li
+            onClick={() => handleSelect("")}
+            className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm text-gray-700"
+          >
+            All Ratings
+          </li>
+
+          {STAR_RATINGS.map((star, idx) => (
+            <li
+              key={idx}
+              onClick={() => handleSelect(String(idx + 1))}
+              className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
+            >
+              <img src={star.img} alt={star.label} className="w-6 h-6" />
+              <span className="text-sm">{`${idx + 1} • ${star.label}`}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+/* ------------------ end RatingDropdown ------------------ */
 
 function HashtagList() {
   const [hashtags, setHashtags] = useState([]);
   const [type, setType] = useState("Restaurant"); // default type
   const [search, setSearch] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("");
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -79,9 +241,15 @@ function HashtagList() {
     // eslint-disable-next-line
   }, []);
 
-  const filteredHashtags = hashtags.filter((tag) =>
-    tag.hashTagTitle.toLowerCase().includes(search.toLowerCase())
-  );
+  // robust filter: coerce star_value to string for comparison
+  const filteredHashtags = hashtags.filter((tag) => {
+    const matchTitle = tag.hashTagTitle
+      .toLowerCase()
+      .includes(search.toLowerCase());
+    const tagStar = String(tag.star_value);
+    const matchStars = ratingFilter ? tagStar === String(ratingFilter) : true;
+    return matchTitle && matchStars;
+  });
 
   const confirmDelete = async () => {
     if (!selectedHashtag) return;
@@ -141,14 +309,7 @@ function HashtagList() {
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* Filters */}
           <div className="flex flex-wrap gap-3 m-3 items-center">
-            <select
-              value={type}
-              onChange={handleTypeChange}
-              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-            >
-              <option value="Restaurant">Restaurant</option>
-              <option value="Dish">Dish</option>
-            </select>
+            <TypeDropdown type={type} setType={setType} fetchHashtags={fetchHashtags} />
 
             <input
               type="text"
@@ -156,6 +317,12 @@ function HashtagList() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+
+            {/* Replace the plain select with this custom dropdown */}
+            <RatingDropdown
+              ratingFilter={ratingFilter}
+              setRatingFilter={setRatingFilter}
             />
           </div>
 
@@ -180,7 +347,19 @@ function HashtagList() {
                       {index + 1}
                     </td>
                     <td className="p-3 text-gray-700">{tag.type}</td>
-                    <td className="p-3 text-gray-700">{tag.star_value}</td>
+                    <td className="p-3">
+                      <img
+                        src={
+                          STAR_RATINGS[Number(tag.star_value) - 1]?.img
+                        }
+                        alt={
+                          STAR_RATINGS[Number(tag.star_value) - 1]?.label ||
+                          "star"
+                        }
+                        className="w-8 h-8 md:w-10 md:h-10"
+                      />
+                    </td>
+
                     <td className="p-3 text-gray-700">{tag.hashTagTitle}</td>
                     <td className="p-3">
                       <div className="flex gap-3">

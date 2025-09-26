@@ -151,14 +151,14 @@ function RestroProfile() {
   const bannerImages = Array.isArray(restaurant.restaurant_images)
     ? restaurant.restaurant_images
     : Array.isArray(restaurant.images)
-    ? restaurant.images
-    : [];
+      ? restaurant.images
+      : [];
 
   const menuImagesRaw = Array.isArray(restaurant.restaurant_menu_images)
     ? restaurant.restaurant_menu_images
     : Array.isArray(restaurant.menu)
-    ? restaurant.menu
-    : [];
+      ? restaurant.menu
+      : [];
 
   const amenitiesRaw =
     restaurant.amenities ??
@@ -175,9 +175,8 @@ function RestroProfile() {
 
   return (
     <div
-      className={`w-[100%] pt-[1.5rem] pb-[1rem] ${
-        isToggle ? "pl-[19.3rem]" : ""
-      } duration-900 min-h-screen `}
+      className={`w-[100%] pt-[1.5rem] pb-[1rem] ${isToggle ? "pl-[19.3rem]" : ""
+        } duration-900 min-h-screen `}
     >
       {/* Banner Carousel */}
       <div className="relative w-full h-100">
@@ -319,6 +318,93 @@ function RestroProfile() {
           </ul>
         </div>
 
+        {/* Dish Types */}
+        {Array.isArray(restaurant.dish_type) && restaurant.dish_type.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Dish Types</h2>
+            <div className="flex flex-wrap gap-3">
+              {restaurant.dish_type.map((dish) => (
+                <div
+                  key={dish._id}
+                  className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm"
+                >
+                  <img
+                    src={getImageUrl(dish.icon)}
+                    alt={dish.name}
+                    className="w-6 h-6 object-contain"
+                  />
+                  <span className="text-gray-700">{dish.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Restaurant Type */}
+        {Array.isArray(restaurant.restaurant_type) &&
+          restaurant.restaurant_type.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Restaurant Type</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {restaurant.restaurant_type.map((type) => (
+                  <div
+                    key={type._id}
+                    className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"
+                  >
+                    <img
+                      src={getImageUrl(type.icon)}
+                      alt={type.name}
+                      className="w-10 h-10 object-contain mb-2"
+                    />
+                    <span className="text-gray-700 font-medium">{type.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
+        {/* Good For */}
+        {Array.isArray(restaurant.good_for) && restaurant.good_for.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Good For</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {restaurant.good_for.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"
+                >
+                  <img
+                    src={getImageUrl(item.icon)}
+                    alt={item.name}
+                    className="w-10 h-10 object-contain mb-2"
+                  />
+                  <span className="text-gray-700">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
+        {/* Cuisines */}
+        {Array.isArray(restaurant.cuisines) && restaurant.cuisines.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Cuisines</h2>
+            <div className="flex flex-wrap gap-3">
+              {restaurant.cuisines.map((cuisine) => (
+                <span
+                  key={cuisine._id}
+                  className="px-4 py-2 bg-[#F9832B]/10 text-[#F9832B] rounded-full text-sm font-medium"
+                >
+                  {cuisine.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+
         {/* Top Dishes Section */}
         {Array.isArray(restaurant.top_dishes) &&
           restaurant.top_dishes.length > 0 && (
@@ -374,11 +460,11 @@ function RestroProfile() {
                 );
               })}
             </div>
-            <div className="flex justify-end text-blue-500 mt-5">
+            {/* <div className="flex justify-end text-blue-500 mt-5">
               <Link to="" className="link">
                 View all
               </Link>
-            </div>
+            </div> */}
           </div>
         )}
 

@@ -8,6 +8,7 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 
 function UserProfile() {
   const [user, setUser] = useState(null);
+  const [userAddress, setUserAddress] = useState([]);
   const { id } = useParams();
 
   useEffect(() => {
@@ -31,6 +32,7 @@ function UserProfile() {
 
         if (response.data.success) {
           setUser(response.data.data);
+          setUserAddress(response.data.userAddress || []);
         } else {
           toast.error("Failed to fetch user data");
         }
@@ -90,8 +92,8 @@ function UserProfile() {
               Status:{" "}
               <span
                 className={`font-medium ${user.account_status === "active"
-                    ? "text-green-600"
-                    : "text-red-600"
+                  ? "text-green-600"
+                  : "text-red-600"
                   }`}
               >
                 {user.account_status}
@@ -106,48 +108,126 @@ function UserProfile() {
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
           Addresses
         </h3>
-        {user.addresses && user.addresses.length > 0 ? (
-          user.addresses.map((addr, idx) => (
-            <div
-              key={addr._id || idx}
-              className="border border-gray-300 p-4 rounded-lg mb-3 bg-gray-50"
-            >
-              <p className="font-medium">{addr.addressLabel || "Address"}</p>
-              <p className="text-sm text-gray-600">{addr.address || "N/A"}</p>
-            </div>
-          ))
+
+        {userAddress && userAddress.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-4">
+            {userAddress.map((addr, idx) => (
+              <div
+                key={addr._id || idx}
+                className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
+              >
+                {/* Address Label */}
+                <p className="font-semibold text-gray-800 mb-1">
+                  {addr.addressLabel
+                    ? addr.addressLabel.replace("_", " ")
+                    : "Address"}
+                </p>
+
+                {/* Full Address */}
+                <p className="text-sm text-gray-600 mb-2">{addr.address || "N/A"}</p>
+
+                {/* Extra Info */}
+                <div className="grid grid-cols-2 gap-2 text-sm text-gray-500">
+                  <p>
+                    <span className="font-medium">City:</span> {addr.city || "—"}
+                  </p>
+                  <p>
+                    <span className="font-medium">State:</span> {addr.state || "—"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Postal:</span>{" "}
+                    {addr.postalCode || "—"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Country:</span> {addr.country || "—"}
+                  </p>
+                </div>
+
+                {/* Coordinates */}
+                {addr.latitude && addr.longitude && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    📍 Lat: {addr.latitude}, Lng: {addr.longitude}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         ) : (
           <p className="text-gray-500">No addresses available</p>
         )}
       </div>
+
 
       {/* Devices */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
           Devices
         </h3>
+
         {user.devices && user.devices.length > 0 ? (
-          user.devices.map((dev) => (
-            <div
-              key={dev._id}
-              className="border border-gray-300 p-4 rounded-lg mb-3 bg-gray-50"
-            >
-              <p className="font-medium">Device ID: {dev.deviceId}</p>
-              <p className="text-sm text-gray-600">
-                Last Used: {new Date(dev.lastUsedAt).toLocaleString()}
-              </p>
-              <p className="text-sm text-gray-600">
-                Linked Users:{" "}
-                {dev.linkedUsers
-                  ? dev.linkedUsers.map((u) => u.name).join(", ")
-                  : "None"}
-              </p>
-            </div>
-          ))
+          <div className="grid gap-4">
+            {user.devices.map((dev) => (
+              <div
+                key={dev._id}
+                className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex flex-wrap justify-between items-center">
+                  <div>
+                    <p className="font-medium text-gray-800">
+                      Device ID: <span className="text-gray-600">{dev.deviceId}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Last Used:{" "}
+                      {dev.lastUsedAt
+                        ? new Date(dev.lastUsedAt).toLocaleString()
+                        : "—"}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Linked Users:{" "}
+                      {dev.linkedUsers?.length > 0
+                        ? dev.linkedUsers.map((u) => u.name).join(", ")
+                        : "None"}
+                    </p>
+                  </div>
+
+                  {/* Device Type Badge */}
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${dev.device_type?.toLowerCase() === "android"
+                        ? "bg-green-100 text-green-700"
+                        : dev.device_type?.toLowerCase() === "ios"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                  >
+                    {dev.device_type || "Unknown"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p className="text-gray-500">No devices linked</p>
+          // ✅ fallback when API gives only single device info
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <p className="font-medium text-gray-800">
+              Device ID: <span className="text-gray-600">{user.deviceId || "—"}</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Device Type:{" "}
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${user.device_type?.toLowerCase() === "android"
+                    ? "bg-green-100 text-green-700"
+                    : user.device_type?.toLowerCase() === "ios"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
+              >
+                {user.device_type || "Unknown"}
+              </span>
+            </p>
+          </div>
         )}
       </div>
+
 
       {/* Activity Section */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
@@ -225,43 +305,55 @@ function UserProfile() {
 
         {user.statusHistory && user.statusHistory.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 text-sm">
+            <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 text-left border-b">Status</th>
-                  <th className="px-4 py-2 text-left border-b">Reason</th>
-                  <th className="px-4 py-2 text-left border-b">Changed By</th>
-                  <th className="px-4 py-2 text-left border-b">Changed At</th>
+                <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Reason</th>
+                  <th className="px-4 py-3 font-semibold">Changed By</th>
+                  <th className="px-4 py-3 font-semibold">Changed At</th>
                 </tr>
               </thead>
               <tbody>
                 {user.statusHistory
-                  .slice() // clone
-                  .reverse() // latest first
+                  .slice()
+                  .reverse()
                   .map((item, idx) => (
-                    <tr key={item._id || idx} className="border-b">
-                      <td className="px-4 py-2 capitalize">
+                    <tr
+                      key={item._id || idx}
+                      className="border-t border-gray-200 hover:bg-gray-50 transition"
+                    >
+                      {/* Status with Badge */}
+                      <td className="px-4 py-3">
                         <span
-                          className={`font-medium ${item.status === "active"
-                              ? "text-green-600"
-                              : "text-red-600"
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
                             }`}
                         >
                           {item.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{item.reason || "-"}</td>
-                      <td className="px-4 py-2">
-                        {/* If you populated changedBy with name/email, show name; fallback to ID */}
-                        {item.changedBy?.name ||
-                          item.changedBy?.email ||
-                          item.changedBy ||
-                          "—"}
+
+                      {/* Reason */}
+                      <td className="px-4 py-3 text-gray-700">
+                        {item.reason || "—"}
                       </td>
-                      <td className="px-4 py-2">
+
+                      {/* Changed By */}
+                      <div className="flex items-start gap-2">
+                        <div>
+                          <p className="font-medium text-gray-800">{item.changedBy?.name}</p>
+                          <p className="text-sm text-gray-400">{item.changedBy?.email}</p>
+                        </div>
+                      </div>
+
+
+                      {/* Changed At */}
+                      <td className="px-4 py-3 text-gray-500">
                         {item.changedAt
                           ? new Date(item.changedAt).toLocaleString()
-                          : "-"}
+                          : "—"}
                       </td>
                     </tr>
                   ))}
@@ -272,6 +364,7 @@ function UserProfile() {
           <p className="text-gray-500">No status changes recorded</p>
         )}
       </div>
+
     </div>
   );
 }

@@ -159,7 +159,7 @@ function AddDishes() {
             <input
               type="text"
               name="dish_name"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
               placeholder="Enter dish name"
               required
             />
@@ -173,7 +173,7 @@ function AddDishes() {
               type="number"
               name="price"
               min={0}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-0 focus:ring-orange-400 transition"
               placeholder="Enter price"
               required
             />

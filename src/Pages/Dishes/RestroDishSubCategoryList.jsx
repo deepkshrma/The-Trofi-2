@@ -65,7 +65,7 @@ function RestroDishSubCategoryList() {
 
   useEffect(() => {
     fetchSubCategories(1);
-    // eslint-disable-next-line
+    
   }, []);
 
   // Filter by search

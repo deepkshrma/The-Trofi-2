@@ -10,7 +10,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
 import { MdEdit } from "react-icons/md";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL,IMAGE_URL } from "../../config/Config";
 import {
   FaUtensils,
   FaCheckCircle,
@@ -18,8 +18,8 @@ import {
   FaTrashAlt,
 } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
+import guest from "../../assets/images/guest.png";
 
-const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
 function DishesList() {
   const navigate = useNavigate();
@@ -248,7 +248,7 @@ function DishesList() {
                         alt={dish.dish_name}
                         className="w-12 h-12 rounded-md object-cover"
                         onError={(e) =>
-                          (e.target.src = "https://via.placeholder.com/50")
+                          (e.target.src = guest)
                         }
                       />
                     </td>
