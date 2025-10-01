@@ -5,7 +5,7 @@ import { Eye, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import axios from "axios";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL ,IMAGE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
@@ -46,7 +46,7 @@ function RestroList() {
 
   const navigate = useNavigate();
 
-  const IMAGE_URL = "http://trofi-backend.apponedemo.top";
+  // const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
   const authData = JSON.parse(localStorage.getItem("trofi_user"));
   const token = authData?.token;

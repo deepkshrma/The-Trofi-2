@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown, FaCog } from "react-icons/fa";
-import { FaStore, FaConciergeBell,FaCommentDots } from "react-icons/fa";
+import { FaStore, FaConciergeBell, FaCommentDots } from "react-icons/fa";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
@@ -56,9 +56,8 @@ const SidebarItem = ({
             {item.name}
           </div>
           <FaChevronDown
-            className={`w-3 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </div>
       ) : (
@@ -117,25 +116,25 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       items: [
         ...(userRole === "admin"
           ? [
-              {
-                name: "Dashboard",
-                icon: <DashboardIcon className="w-4 h-4" />,
-                link: "/Dashboard",
-                dropdown: false,
-                // subItems: [{ name: "Dashboard", link: "/Dashboard" }],
-              },
-            ]
+            {
+              name: "Dashboard",
+              icon: <DashboardIcon className="w-4 h-4" />,
+              link: "/Dashboard",
+              dropdown: false,
+              // subItems: [{ name: "Dashboard", link: "/Dashboard" }],
+            },
+          ]
           : []),
         ...(userRole === "superadmin"
           ? [
-              {
-                name: "Dashboard",
-                icon: <DashboardIcon className="w-4 h-4" />,
-                link: "#",
-                dropdown: false,
-                subItems: [{ name: "Dashboard", link: "/Dashboard" }],
-              },
-            ]
+            {
+              name: "Dashboard",
+              icon: <DashboardIcon className="w-4 h-4" />,
+              link: "#",
+              dropdown: false,
+              subItems: [{ name: "Dashboard", link: "/Dashboard" }],
+            },
+          ]
           : []),
       ],
     },
@@ -323,7 +322,47 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       ],
       border: true,
     },
-    
+    {
+      section: "",
+      items: [
+        {
+          name: "CMS Management",
+          icon: <GroupWorkIcon />,
+          link: "#",
+          dropdown: true,
+          subItems: [
+            {
+              name: "Query & Feedback",
+              link: "#",
+              dropdown: true,
+              subItems: [
+                {
+                  name: "Query FAQ",
+                  link: "QueryFAQ",
+                  dropdown: false,
+                },
+                {
+                  name: "App Feedback",
+                  link: "AppFeedback",
+                  dropdown: false,
+                },
+              ],
+            },
+            {
+              name: "FAQ",
+              link: "FAQList",
+              dropdown: false,
+            },
+            {
+              name: "Policies",
+              link: "PoliciesList",
+              dropdown: false,
+            }
+          ],
+        },
+      ],
+      border: true,
+    }
   ];
 
   const handleSubClick = (link) => {

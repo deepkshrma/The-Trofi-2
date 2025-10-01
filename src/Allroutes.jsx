@@ -42,7 +42,17 @@ import UpdateAdmin from "./Pages/Admin/UpdateAdmin";
 import UpdateDishes from "./Pages/Dishes/UpdateDishes";
 import HashtagList from "./Pages/HashTag/HashtagList";
 import CreateHashtag from "./Pages/HashTag/CreateHashtag";
+import FAQList from "./Pages/FAQ/FAQList";
+import CreateFAQ from "./Pages/FAQ/CreateFAQ";
 import NotFound from "./Pages/NotFound/NotFound";
+import QueryFAQ from "./Pages/FAQ/QueryFAQ";
+import FAQInDetail from "./Pages/FAQ/FAQInDetail";
+import QueryFAQSee from "./Pages/FAQ/QueryFAQSee";
+import Policies from "./Pages/Policies/Policies";
+import PoliciesList from "./Pages/Policies/PoliciesList";
+import CreatePolicy from "./Pages/Policies/CreatePolicy";
+import AppFeedback from "./Pages/FAQ/AppFeedback";
+import AppFeedbackSee from "./Pages/FAQ/AppFeedbackSee";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -140,6 +150,17 @@ const Allroutes = () => {
                 path="/RoleUpdate/:id"
                 element={<UpdateRole />}
               />
+              <Route path="/FAQList" element={<FAQList />} />
+              <Route path="/CreateFAQ" element={<CreateFAQ />} />
+              <Route path="/FAQInDetail/:id" element={<FAQInDetail />} />
+              <Route path="/QueryFAQ" element={<QueryFAQ />} />
+              <Route path="/QueryFAQSee/:id" element={<QueryFAQSee />} />
+              <Route path="/Policies/:id" element={<Policies />} />
+              <Route path="/PoliciesList" element={<PoliciesList />} />
+              <Route path="/CreatePolicy" element={<CreatePolicy/>} />
+              <Route path="/AppFeedback" element={<AppFeedback />} />
+              <Route path="/AppFeedback/:id" element={<AppFeedbackSee />} />
+
             </Route>
           </Route>
            <Route path="*" element={<NotFound />} />

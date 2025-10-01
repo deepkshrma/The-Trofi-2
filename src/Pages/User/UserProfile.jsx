@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function UserProfile() {
@@ -62,7 +62,7 @@ function UserProfile() {
           <div className="w-28 h-28 rounded-full border-4 border-[#F9832B] shadow-md flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 overflow-hidden">
             {user.profile_picture ? (
               <img
-                src={user.profile_picture}
+                src={`${IMAGE_URL}/${user.profile_picture || ""}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -193,10 +193,10 @@ function UserProfile() {
                   {/* Device Type Badge */}
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${dev.device_type?.toLowerCase() === "android"
-                        ? "bg-green-100 text-green-700"
-                        : dev.device_type?.toLowerCase() === "ios"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700"
+                      ? "bg-green-100 text-green-700"
+                      : dev.device_type?.toLowerCase() === "ios"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-700"
                       }`}
                   >
                     {dev.device_type || "Unknown"}
@@ -215,10 +215,10 @@ function UserProfile() {
               Device Type:{" "}
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${user.device_type?.toLowerCase() === "android"
-                    ? "bg-green-100 text-green-700"
-                    : user.device_type?.toLowerCase() === "ios"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-gray-100 text-gray-700"
+                  ? "bg-green-100 text-green-700"
+                  : user.device_type?.toLowerCase() === "ios"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-700"
                   }`}
               >
                 {user.device_type || "Unknown"}
@@ -327,8 +327,8 @@ function UserProfile() {
                       <td className="px-4 py-3">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${item.status === "active"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
                             }`}
                         >
                           {item.status}

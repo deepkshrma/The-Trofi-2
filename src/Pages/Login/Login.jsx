@@ -28,18 +28,26 @@ export default function Login() {
       if (res.data.success) {
         toast.success(res.data.message || "Login successful");
 
- 
-        const { token, admin } = res.data;
+        // Extract role and details
+        const { token } = res.data;
+        const role = res.data.admin?.role || res.data.restaurant?.role;
+
         const userData = {
           token,
-          name: admin.name,
-          email: admin.email,
+          role,
+          name: res.data.admin?.name || res.data.restaurant?.name,
+          email: res.data.admin?.email || res.data.restaurant?.email,
+          profile_picture: res.data.restaurant?.profile_picture || null,
         };
 
-        
         localStorage.setItem("trofi_user", JSON.stringify(userData));
 
-        navigate("/Dashboard");
+        // Redirect based on role
+        if (role === "restaurant_owner") {
+          navigate("/RestroOwnerDashboard");
+        } else {
+          navigate("/Dashboard");
+        }
       } else {
         toast.error(res.data.message || "Login failed");
       }
@@ -51,6 +59,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
 
   return (
     <div

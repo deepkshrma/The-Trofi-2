@@ -258,7 +258,7 @@ function UserList() {
                         <img
                           src={
                             item.profile_picture
-                              ? `${IMAGE_URL}${item.profile_picture}`
+                              ? `${IMAGE_URL}/${item.profile_picture}`
                               : guest
                           }
                           alt={item.name || "Guest"}

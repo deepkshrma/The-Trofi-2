@@ -38,6 +38,7 @@
     "react-select": "^5.10.2",
     "react-toastify": "^11.0.5",
     "recharts": "^3.1.2",
+    "suneditor-react": "^3.6.1",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.1.11",
     "xlsx": "^0.18.5"
