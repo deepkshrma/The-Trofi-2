@@ -1,32 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 import star1 from "../../../assets/images/untitled_folder_6/star1.png";
 import star2 from "../../../assets/images/untitled_folder_6/star2.png";
 import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import PageTitle from "../../../components/PageTitle/PageTitle";
-import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import { BASE_URL, IMAGE_URL } from "../../../config/Config";
 
 function DishReview() {
-  const [editMode, setEditMode] = useState(false);
-
-  const [review, setReview] = useState({
-    dishImage:
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
-    dishName: "Paneer Butter Masala",
-    rating_label: "Excellent taste!",
-    star_value: 4,
-    comment:
-      "The paneer was soft and fresh, gravy was rich and flavorful. Perfectly balanced spices!",
-    qa: [
-      { question: "Was the dish served hot?", answer: "Yes, piping hot." },
-      { question: "Would you order this dish again?", answer: "Definitely!" },
-    ],
-    images: [
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-    ],
-  });
+  const { id: ratingId } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [review, setReview] = useState(null);
 
   const faceStars = [
     { img: star1, label: "Very Bad" },
@@ -36,29 +23,92 @@ function DishReview() {
     { img: star5, label: "Excellent" },
   ];
 
-  // Handle input changes
-  const handleChange = (field, value) => {
-    setReview((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    if (ratingId) fetchRating();
+  }, [ratingId]);
+
+  const fetchRating = async () => {
+    setLoading(true);
+    try {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      const res = await axios.get(`${BASE_URL}/admin/get-ratings/${ratingId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const api = res?.data?.data;
+
+      const images = (api.images || []).map((it) => ({
+        _id: it._id,
+        src: it.image?.startsWith("http") ? it.image : `${IMAGE_URL}/${it.image}`,
+        status: api.status || "pending",
+      }));
+
+      const mappedQA = (api.tell_us || []).map((t) => ({
+        question: t.question || "",
+        answer: typeof t.answer === "boolean" ? (t.answer ? "Yes" : "No") : String(t.answer || ""),
+      }));
+
+      setReview({
+        id: api._id,
+        dishImage:
+          images[0]?.src ||
+          "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
+        dishName:
+          api.type === "Restaurant"
+            ? api.typeId?.restro_name || ""
+            : api.typeId?.dish_name || api.typeId?.name || "",
+        rating_label: api.rating_label,
+        star_value: api.star_value,
+        comment: api.reviewComment,
+        qa: mappedQA,
+        images,
+        status: api.status || "pending",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch rating details");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Handle Q&A changes
-  const handleQAChange = (idx, key, value) => {
-    const newQA = [...review.qa];
-    newQA[idx][key] = value;
-    setReview((prev) => ({ ...prev, qa: newQA }));
+  const handleDecision = async (section, decision, id = null, reason = "") => {
+    try {
+      const url = id
+        ? `${BASE_URL}/admin/rating-images/${id}/action`
+        : `${BASE_URL}/admin/update-ratings/${review.id}/action`;
+
+      await axios.post(url, { section, decision, reason });
+      toast.success(`${section} ${decision}d`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update decision");
+    }
   };
+
+  if (!ratingId) {
+    return (
+      <div className="p-4 text-gray-700">
+        No rating id provided. Open this page from the ratings list.
+      </div>
+    );
+  }
+
+  if (loading || !review) {
+    return <div className="p-4 text-gray-500">Loading...</div>;
+  }
 
   return (
-    <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
+    <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <PageTitle title={"Dish Review Details"} />
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className="px-4 py-2 bg-orange-500 text-white rounded shadow hover:bg-orange-600 transition cursor-pointer"
-        >
-          {editMode ? "Save" : "Edit"}
-        </button>
       </div>
 
       {/* Dish Info */}
@@ -68,105 +118,57 @@ function DishReview() {
           alt={review.dishName}
           className="w-full md:w-40 h-40 object-cover rounded-lg"
         />
-        <div className="flex flex-col justify-center gap-3">
+        <div className="flex flex-col justify-center gap-3 w-full">
           <h2 className="text-xl md:text-2xl font-bold text-gray-800">
             {review.dishName}
           </h2>
-
-          <p className="text-gray-600 mb-1">
-            {faceStars[review.star_value - 1].label}
-          </p>
-
-          {/* Editable Stars */}
-          {editMode ? (
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                Rating
-              </label>
-              <select
-                value={review.star_value}
-                onChange={(e) =>
-                  handleChange("star_value", Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-              >
-                {faceStars.map((s, i) => (
-                  <option key={i} value={i + 1}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <img
-              src={faceStars[review.star_value - 1].img}
-              alt={faceStars[review.star_value - 1].label}
-              className="w-10 h-10 md:w-12 md:h-12"
-            />
-          )}
+          <p className="text-gray-600">{faceStars[Math.max(0, review.star_value - 1)]?.label}</p>
+          <img
+            src={faceStars[Math.max(0, review.star_value - 1)]?.img || star3}
+            alt="rating"
+            className="w-10 h-10 md:w-12 md:h-12"
+          />
+          <div className="flex gap-3 mt-2">
+            <button disabled className="px-4 py-2 bg-green-500 text-white rounded-md opacity-50 cursor-not-allowed">
+              Approve
+            </button>
+            <button disabled className="px-4 py-2 bg-red-500 text-white rounded-md opacity-50 cursor-not-allowed">
+              Reject
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Review Comment */}
       <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-3">Review Comment</h3>
-        {editMode ? (
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Comment</label>
-            <textarea
-              value={review.comment}
-              onChange={(e) => handleChange("comment", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
-          </div>
-        ) : (
-          <p className="text-gray-700 italic">{review.comment}</p>
-        )}
+        <p className="text-gray-700 italic">{review.comment}</p>
+        <div className="flex gap-3 mt-3">
+          <button disabled className="px-4 py-2 bg-green-500 text-white rounded-md opacity-50 cursor-not-allowed">
+            Approve
+          </button>
+          <button disabled className="px-4 py-2 bg-red-500 text-white rounded-md opacity-50 cursor-not-allowed">
+            Reject
+          </button>
+        </div>
       </div>
 
       {/* Q&A Section */}
       <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
         <h3 className="text-lg font-semibold mb-3">Q&A</h3>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {review.qa.map((item, idx) => (
-            <div key={idx} className="border-b border-gray-300 pb-2">
-              {editMode ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Q: {idx + 1}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.question}
-                      onChange={(e) =>
-                        handleQAChange(idx, "question", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      A: {idx + 1}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.answer}
-                      onChange={(e) =>
-                        handleQAChange(idx, "answer", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <p className="font-medium text-gray-800">
-                    Q: {item.question}
-                  </p>
-                  <p className="text-gray-600">A: {item.answer}</p>
-                </>
-              )}
+            <div key={idx} className="p-3 border border-gray-200 rounded-lg shadow-sm">
+              <p className="font-medium text-gray-800">Q: {item.question}</p>
+              <p className="text-gray-600">A: {String(item.answer)}</p>
+              <div className="flex gap-3 mt-2">
+                <button disabled className="px-4 py-1 bg-green-500 text-white rounded-md opacity-50 cursor-not-allowed text-sm">
+                  Approve
+                </button>
+                <button disabled className="px-4 py-1 bg-red-500 text-white rounded-md opacity-50 cursor-not-allowed text-sm">
+                  Reject
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -177,55 +179,22 @@ function DishReview() {
         <h3 className="text-lg font-semibold mb-4">Review Images</h3>
         <div className="flex flex-col gap-6">
           {review.images.map((img, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col md:flex-row items-start gap-4 md:gap-6 p-4 border border-gray-200 rounded-lg shadow-sm"
-            >
-              <img
-                src={img}
-                alt={`review-${idx}`}
-                className="w-full md:w-60 h-48 object-cover rounded-lg shadow-md"
-              />
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  console.log("Image Action:", formData.get("action"));
-                  console.log("Reason:", formData.get("reason"));
-                }}
-                className="flex flex-col gap-3 flex-1 w-full"
-              >
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name={`action-${idx}`}
-                      value="approve"
-                    />
+            <div key={idx} className="flex flex-col md:flex-row items-start gap-4 md:gap-6 p-4 border border-gray-200 rounded-lg shadow-sm">
+              <img src={img.src} alt={`review-${idx}`} className="w-full md:w-60 h-48 object-cover rounded-lg shadow-md" />
+              <div className="flex flex-col gap-3 flex-1 w-full">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium">Status:</span>
+                  <span className="text-sm px-2 py-1 rounded-md border">{img.status}</span>
+                </div>
+                <div className="flex gap-3">
+                  <button disabled className="px-4 py-2 bg-green-500 text-white rounded-md opacity-50 cursor-not-allowed">
                     Approve
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="radio" name={`action-${idx}`} value="reject" />
+                  </button>
+                  <button disabled className="px-4 py-2 bg-red-500 text-white rounded-md opacity-50 cursor-not-allowed">
                     Reject
-                  </label>
+                  </button>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium text-gray-700">
-                    Reason
-                  </label>
-                  <textarea
-                    name="reason"
-                    placeholder="Reason for this action..."
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 h-20 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition cursor-pointer"
-                >
-                  Done
-                </button>
-              </form>
+              </div>
             </div>
           ))}
         </div>

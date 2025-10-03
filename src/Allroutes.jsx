@@ -138,8 +138,10 @@ const Allroutes = () => {
                 element={<RestaurantReviewList />}
               />
               <Route path="/RestaurantReview" element={<RestaurantReview />} />
+              <Route path="/RestaurantReview/:id" element={<RestaurantReview />} />
               <Route path="/DishReviewList" element={<DishReviewList />} />
               <Route path="/DishReview" element={<DishReview />} />
+              <Route path="/DishReview/:id" element={<DishReview />} />
               <Route
                 path="/RestroOwnerDashboard"
                 element={<RestroOwnerDashboard />}

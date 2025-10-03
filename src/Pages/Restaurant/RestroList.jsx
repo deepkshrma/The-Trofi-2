@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { Eye, PlusCircle } from "lucide-react";

@@ -204,7 +204,7 @@ const FAQList = () => {
                                                             onClick={() =>
                                                                 navigate("/CreateFAQ", { state: { faq } })
                                                             }
-                                                            className="flex justify-center items-center cursor-pointer bg-green-500 hover:bg-green-600 text-white w-8 h-8 rounded"
+                                                            className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
                                                         >
                                                             <MdEdit size={16} />
                                                         </button>

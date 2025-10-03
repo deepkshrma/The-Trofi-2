@@ -285,15 +285,15 @@ export default function Dashboard() {
       {/* Top KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6 mt-4">
         <StatCard
-          title="Menus"
+          title="Total Users"
           value="56"
           changeType="up"
-          Icon={FiCoffee}
+          Icon={FiUsers}
           gid="menus"
           brand={BRAND}
         />
         <StatCard
-          title="Reviews"
+          title="Total Reviews"
           value="166"
           changeType="up"
           Icon={FiFileText}
@@ -301,7 +301,7 @@ export default function Dashboard() {
           brand={BRAND}
         />
         <StatCard
-          title="Users"
+          title="Total Admins"
           value="9"
           changeType="down"
           Icon={FiUsers}
@@ -309,10 +309,10 @@ export default function Dashboard() {
           brand={BRAND}
         />
         <StatCard
-          title="Admins"
+          title="Total Restaurants"
           value="12"
           changeType="down"
-          Icon={FiDollarSign}
+          Icon={FiFileText}
           gid="income"
           brand={BRAND}
         />

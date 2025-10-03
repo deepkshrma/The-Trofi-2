@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { TiTick } from "react-icons/ti";
 import { RiDeleteBin5Line } from "react-icons/ri";
+import { BASE_URL ,IMAGE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -42,7 +43,7 @@ function RoleList() {
       }
 
       const res = await axios.get(
-        "http://trofi-backend.apponedemo.top/api/admin/admins-roles",
+        `${BASE_URL}/admin/admins-roles`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -108,7 +109,7 @@ function RoleList() {
       const authData = JSON.parse(localStorage.getItem("broom_auth"));
       const token = authData?.token;
       await axios.delete(
-        `http://trofi-backend.apponedemo.top/api/admin/delete-role/${selectedRoleId}`,
+        `${BASE_URL}/admin/delete-role/${selectedRoleId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Role deleted");
@@ -128,7 +129,7 @@ function RoleList() {
       const token = authData?.token;
       const newStatus = currentStatus === "active" ? "inactive" : "active";
       await axios.patch(
-        `http://trofi-backend.apponedemo.top/api/admin/change-status/${roleId}`,
+        `${BASE_URL}/admin/change-status/${roleId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );

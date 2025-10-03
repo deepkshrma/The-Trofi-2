@@ -59,7 +59,7 @@ const UserDropdown = ({
         ref={dropdownRef}
         className={`relative ${userDropdown ? "block" : "hidden"}`}
       >
-        <div className="absolute right-10 top-12 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px] z-11">
+        <div className="fixed  right-10 top-12 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px] z-11">
           {/* Center fullName and role */}
           {/* <div className="w-full flex flex-col justify-center items-center text-center py-2">
             <span className="block font-medium text-gray-700 text-sm">

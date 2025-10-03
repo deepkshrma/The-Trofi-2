@@ -7,6 +7,7 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import PageTitle from "../../components/PageTitle/PageTitle";
 import Pagination from "../../components/common/Pagination/Pagination";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 
 const PoliciesList = () => {
@@ -205,9 +206,9 @@ const PoliciesList = () => {
                                                             onClick={() =>
                                                                 navigate("/CreatePolicy", { state: { policy: p } })
                                                             }
-                                                            className="flex justify-center items-center cursor-pointer bg-green-500 hover:bg-green-600 text-white w-8 h-8 rounded"
+                                                            className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
                                                         >
-                                                            <FaEdit size={16} />
+                                                            <MdEdit size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => {
