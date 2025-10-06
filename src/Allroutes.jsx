@@ -58,14 +58,22 @@ const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
     JSON.parse(localStorage.getItem("trofi_user"))
   );
+
   return (
     <ContextApi.Provider value={{ authData, setAuthData }}>
       <Router>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
+
+          {/* Protected Routes for admin + superadmin */}
           <Route element={<Layout />}>
-            <Route element={<ProtectedRoute />}>
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["admin", "superadmin"]} />
+              }
+            >
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/RoleList" element={<RoleList />} />
               <Route path="/RoleCreate" element={<RoleCreate />} />
@@ -86,16 +94,12 @@ const Allroutes = () => {
               <Route path="/RestroGoodFor/:id" element={<RestroGoodFor />} />
               <Route path="/RestroCuisine" element={<RestroCuisine />} />
               <Route path="/RestroCuisine/:id" element={<RestroCuisine />} />
-
               <Route
                 path="/RestroAmenityList"
                 element={<RestroAmenityList />}
               />
               <Route path="/RestroTypeList" element={<RestroTypeList />} />
-              <Route
-                path="/RestroCuisineList"
-                element={<RestroCuisineList />}
-              />
+              <Route path="/RestroCuisineList" element={<RestroCuisineList />} />
               <Route
                 path="/RestroGoodForList"
                 element={<RestroGoodForList />}
@@ -108,18 +112,11 @@ const Allroutes = () => {
               <Route path="/AddDishes" element={<AddDishes />} />
               <Route path="/UpdateDishes/:id" element={<UpdateDishes />} />
               <Route path="/AddDishes/:id" element={<AddDishes />} />
-
               <Route path="/RestroDishType" element={<RestroDishType />} />
-              <Route
-                path="/RestroDishTypeList"
-                element={<RestroDishTypeList />}
-              />
+              <Route path="/RestroDishTypeList" element={<RestroDishTypeList />} />
               <Route path="/DishesList" element={<DishesList />} />
               <Route path="/RestroProfile" element={<RestroProfile />} />
-              <Route
-                path="/RestroDishCategory"
-                element={<RestroDishCategory />}
-              />
+              <Route path="/RestroDishCategory" element={<RestroDishCategory />} />
               <Route
                 path="/RestroDishCategoryList"
                 element={<RestroDishCategoryList />}
@@ -138,20 +135,16 @@ const Allroutes = () => {
                 element={<RestaurantReviewList />}
               />
               <Route path="/RestaurantReview" element={<RestaurantReview />} />
-              <Route path="/RestaurantReview/:id" element={<RestaurantReview />} />
+              <Route
+                path="/RestaurantReview/:id"
+                element={<RestaurantReview />}
+              />
               <Route path="/DishReviewList" element={<DishReviewList />} />
               <Route path="/DishReview" element={<DishReview />} />
               <Route path="/DishReview/:id" element={<DishReview />} />
-              <Route
-                path="/RestroOwnerDashboard"
-                element={<RestroOwnerDashboard />}
-              />
               <Route path="/HashtagList" element={<HashtagList />} />
               <Route path="/CreateHashtag" element={<CreateHashtag />} />
-              <Route
-                path="/RoleUpdate/:id"
-                element={<UpdateRole />}
-              />
+              <Route path="/RoleUpdate/:id" element={<UpdateRole />} />
               <Route path="/FAQList" element={<FAQList />} />
               <Route path="/CreateFAQ" element={<CreateFAQ />} />
               <Route path="/FAQInDetail/:id" element={<FAQInDetail />} />
@@ -159,13 +152,28 @@ const Allroutes = () => {
               <Route path="/QueryFAQSee/:id" element={<QueryFAQSee />} />
               <Route path="/Policies/:id" element={<Policies />} />
               <Route path="/PoliciesList" element={<PoliciesList />} />
-              <Route path="/CreatePolicy" element={<CreatePolicy/>} />
+              <Route path="/CreatePolicy" element={<CreatePolicy />} />
               <Route path="/AppFeedback" element={<AppFeedback />} />
               <Route path="/AppFeedback/:id" element={<AppFeedbackSee />} />
-
             </Route>
           </Route>
-           <Route path="*" element={<NotFound />} />
+
+          {/* Protected Routes for restaurant_owner */}
+          <Route element={<Layout />}>
+            <Route
+              element={<ProtectedRoute allowedRoles={["restaurant_owner"]} />}
+            >
+              <Route
+                path="/RestroOwnerDashboard"
+                element={<RestroOwnerDashboard />}
+              />
+              {/* Agar restro_owner ke liye aur pages add karne hai
+                  to unko yaha add karo */}
+            </Route>
+          </Route>
+
+          {/* Fallback 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ContextApi.Provider>
