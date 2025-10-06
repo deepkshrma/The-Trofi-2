@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { Eye, PlusCircle } from "lucide-react";
@@ -46,7 +45,6 @@ function RestroList() {
 
   const navigate = useNavigate();
 
-  // const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
   const authData = JSON.parse(localStorage.getItem("trofi_user"));
   const token = authData?.token;

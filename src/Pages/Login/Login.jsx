@@ -15,50 +15,54 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const res = await axios.post(`${BASE_URL}/admin/admin-login`, {
-        email,
-        password,
-      });
+  try {
+    const res = await axios.post(`${BASE_URL}/admin/admin-login`, {
+      email,
+      password,
+    });
 
-      if (res.data.success) {
-        toast.success(res.data.message || "Login successful");
+    if (res.data.success) {
+      toast.success(res.data.message || "Login successful");
 
-        // Extract role and details
-        const { token } = res.data;
-        const role = res.data.admin?.role || res.data.restaurant?.role;
+      // Extract role and details
+      const { token } = res.data;
+      const role = res.data.admin?.role || res.data.restaurant?.role;
 
-        const userData = {
-          token,
-          role,
-          name: res.data.admin?.name || res.data.restaurant?.name,
-          email: res.data.admin?.email || res.data.restaurant?.email,
-          profile_picture: res.data.restaurant?.profile_picture || null,
-        };
+      const userData = {
+        token,
+        role,
+        name: res.data.admin?.name || res.data.restaurant?.name,
+        email: res.data.admin?.email || res.data.restaurant?.email,
+        profile_picture: res.data.restaurant?.profile_picture || null,
+      };
 
-        localStorage.setItem("trofi_user", JSON.stringify(userData));
+      localStorage.setItem("trofi_user", JSON.stringify(userData));
 
-        // Redirect based on role
+      // ⏳ Give ProtectedRoute time to read localStorage
+      setTimeout(() => {
         if (role === "restaurant_owner") {
           navigate("/RestroOwnerDashboard");
-        } else {
+        } else if (role === "admin" || role === "superadmin") {
           navigate("/Dashboard");
+        } else {
+          navigate("/"); // fallback
         }
-      } else {
-        toast.error(res.data.message || "Login failed");
-      }
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Something went wrong. Try again."
-      );
-    } finally {
-      setLoading(false);
+      }, 200);
+    } else {
+      toast.error(res.data.message || "Login failed");
     }
-  };
+  } catch (err) {
+    toast.error(
+      err.response?.data?.message || "Something went wrong. Try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   return (
@@ -95,13 +99,22 @@ export default function Login() {
                 view feedback while admins ensure transparency.
               </p>
               <div className="flex space-x-4 text-[#F9832B]">
-                <a href="#" className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition">
+                <a
+                  href="#"
+                  className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition"
+                >
                   <FaFacebookF />
                 </a>
-                <a href="#" className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition">
+                <a
+                  href="#"
+                  className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition"
+                >
                   <FaTwitter />
                 </a>
-                <a href="#" className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition">
+                <a
+                  href="#"
+                  className="w-9 h-9 border border-[#F9832B] rounded-full flex items-center justify-center hover:bg-[#F9832B] hover:text-white transition"
+                >
                   <FaLinkedinIn />
                 </a>
               </div>
@@ -119,7 +132,9 @@ export default function Login() {
         <div className="w-full md:w-1/2 bg-[#F9832B] text-white p-10 flex flex-col justify-between">
           <div>
             <h2 className="text-2xl font-bold mb-2 mt-4">Welcome to Trofi</h2>
-            <p className="mb-12 text-sm">Sign in by entering information below</p>
+            <p className="mb-12 text-sm">
+              Sign in by entering information below
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

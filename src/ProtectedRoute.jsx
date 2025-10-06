@@ -1,26 +1,31 @@
-import React, { useEffect } from "react";
-import { useLocation, useNavigate, Outlet } from "react-router-dom";
-import { toast } from "react-toastify";
+import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-/**
- * ProtectedRoute wraps protected pages. Put it in your routes as a parent.
- * It reads trofi_user from localStorage / sessionStorage.
- */
-export default function ProtectedRoute() {
-  const navigate = useNavigate();
-  const location = useLocation();
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("trofi_user") || sessionStorage.getItem("trofi_user");
-    if (!stored) {
-      // show toast and redirect to login
-      toast.error("Please login first");
-      navigate("/login", { replace: true, state: { from: location } });
+    const storedUser = localStorage.getItem("trofi_user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-    // If you want, you can also validate token structure here
-  }, [navigate, location]);
+    setLoading(false);
+  }, []);
 
-  // If user not logged in, effect will navigate away.
-  // When logged in, render nested routes via <Outlet />.
-  return <Outlet />;
-}
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/404" replace />;
+  }
+
+  return element;
+};
+
+export default ProtectedRoute;
