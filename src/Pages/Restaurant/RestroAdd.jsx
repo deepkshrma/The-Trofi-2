@@ -17,7 +17,7 @@ function RestroAdd() {
     name: "",
     email: "",
     password: "",
-    role_id: "68aead7b9db7925a61de75bb",
+    role_id: "",
     address: "",
     country_code: "",
     phone: "",
@@ -55,12 +55,39 @@ function RestroAdd() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // const facilityOptions = ['veg', 'non-veg', 'both'];
-  const roles = [
-    { id: "68ccedce42ef86cca285022a", name: "superadmin" },
-    { id: "68ccedce42ef86cca285022e", name: "admin" },
-    { id: "68ccedce42ef86cca2850231", name: "restaurant_owner" },
-  ];
+
+  useEffect(() => {
+    const fetchRestaurantOwnerRole = async () => {
+      try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        if (!token) return;
+
+        const res = await axios.get(`${BASE_URL}/admin/admins-roles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const roles = res.data?.roles || [];
+        const restaurantOwnerRole = roles.find(
+          (r) => r.name === "restaurant_owner"
+        );
+
+        if (restaurantOwnerRole) {
+          setRestaurantData((prev) => ({
+            ...prev,
+            role_id: restaurantOwnerRole._id,
+          }));
+        } else {
+          toast.error("Restaurant owner role not found!");
+        }
+      } catch (err) {
+        toast.error("Failed to fetch roles for restaurant.");
+        console.error(err);
+      }
+    };
+
+    fetchRestaurantOwnerRole();
+  }, []);
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -101,6 +128,10 @@ function RestroAdd() {
   };
 
   const handleSubmit = async () => {
+    if (!restaurantData.role_id) {
+      toast.error("Role ID not loaded yet. Please wait a moment.");
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("role_id", restaurantData.role_id);
@@ -112,6 +143,7 @@ function RestroAdd() {
       formData.append("country", restaurantData.country);
       formData.append("country_code", restaurantData.country_code);
       formData.append("phone", restaurantData.phone);
+      formData.append("price", restaurantData.price);
       formData.append("birth_year", restaurantData.birthYear);
       formData.append("city", restaurantData.city || "");
       formData.append("state", restaurantData.state || "");
@@ -236,56 +268,13 @@ function RestroAdd() {
           </div>
           <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
-            <Listbox
-              value={restaurantData.role_id}
-              onChange={(value) =>
-                setRestaurantData((prev) => ({ ...prev, role_id: value }))
-              }
-            >
-              {({ open }) => (
-                <div className="relative">
-                  <Listbox.Button
-                    className="w-full cursor-pointer rounded-xl border border-gray-300
-                     bg-white px-4 py-2 text-left focus:outline-none
-                     focus:ring-2 focus:ring-orange-400"
-                  >
-                    <span>
-                      {roles.find((r) => r.id === restaurantData.role_id)
-                        ?.name || "Select role"}
-                    </span>
-                    <ChevronUpDownIcon className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
-                  </Listbox.Button>
+            <input
+              type="text"
+              value="restaurant_owner"
+              disabled
+              className="w-full border border-gray-300 p-2 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
+            />
 
-                  <Listbox.Options
-                    className="absolute z-10 mt-1 w-full rounded-xl bg-white shadow-lg
-                     ring-1 ring-black ring-opacity-5 focus:outline-none"
-                  >
-                    {roles.map((role) => (
-                      <Listbox.Option
-                        key={role.id}
-                        value={role.id}
-                        className={({ active }) =>
-                          `cursor-pointer select-none px-4 py-2 rounded-xl ${
-                            active
-                              ? "bg-orange-100 text-orange-700"
-                              : "text-gray-900"
-                          }`
-                        }
-                      >
-                        {({ selected }) => (
-                          <div className="flex justify-between">
-                            <span>{role.name}</span>
-                            {selected && (
-                              <CheckIcon className="h-5 w-5 text-orange-500" />
-                            )}
-                          </div>
-                        )}
-                      </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-                </div>
-              )}
-            </Listbox>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -293,28 +282,37 @@ function RestroAdd() {
             <label className="block text-gray-600 font-medium mb-2">
               Phone Number
             </label>
-            <PhoneInput
-              country="in"
-              value={restaurantData.phone}
-              onChange={(phone, country) =>
-                setRestaurantData((prev) => ({
-                  ...prev,
-                  phone,
-                  country_code: `+${country.dialCode}`, // <-- capture country code
-                }))
-              }
-              inputClass="!w-full !h-12 !p-2 !pl-14 !rounded-lg !border-gray-300"
-            />
+            <div className="w-full">
+              <PhoneInput
+                country="in"
+                value={restaurantData.phone}
+                onChange={(phone, country) =>
+                  setRestaurantData((prev) => ({
+                    ...prev,
+                    phone,
+                    country_code: `+${country.dialCode}`,
+                  }))
+                }
+                inputClass="!w-full !h-[42px] !text-base !pl-12 !pr-3 !border !border-gray-300 !rounded-lg !shadow-sm !focus:ring !focus:ring-[#F9832B] !focus:border-[#F9832B] !outline-none"
+                buttonClass="!border-gray-300 !rounded-l-lg"
+                containerClass="!w-full"
+              />
+            </div>
           </div>
 
-          {/* <input
-            type="text"
-            name="type"
-            placeholder="Restaurant Type (e.g., Cafe, Bakery)"
-            value={restaurantData.restaurant_type}
-            onChange={handleChange}
-            className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-          /> */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Price Per Person
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={restaurantData.price || ""}
+              onChange={handleChange}
+              placeholder=""
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
@@ -603,11 +601,10 @@ function RestroAdd() {
                     });
                   }}
                   className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition 
-            ${
-              isSelected
-                ? "bg-[#F9832B] text-white"
-                : "bg-gray-100 text-gray-700  hover:bg-gray-200"
-            }`}
+            ${isSelected
+                      ? "bg-[#F9832B] text-white"
+                      : "bg-gray-100 text-gray-700  hover:bg-gray-200"
+                    }`}
                 >
                   {day}
                 </button>
@@ -658,11 +655,10 @@ function RestroAdd() {
                         return { ...prev, [field]: updatedArray };
                       })
                     }
-                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition ${
-                      isSelected
-                        ? "bg-[#F9832B] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`px-4 py-2 rounded-full text-sm font-medium shadow-sm transition ${isSelected
+                      ? "bg-[#F9832B] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
                     {item.name ||
                       item.amenity_name ||

@@ -40,33 +40,33 @@ export default function DishReviewList() {
   // ✅ Fetch dish reviews from API
   useEffect(() => {
     const fetchReviews = async () => {
-  const authData = JSON.parse(localStorage.getItem("trofi_user"));
-  const token = authData?.token;
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
 
-  if (!token) {
-    toast.error("Please login first");
-    navigate("/login");
-    return;
-  }
+      if (!token) {
+        toast.error("Please login first");
+        navigate("/login");
+        return;
+      }
 
-  try {
-    setLoading(true); // Start loading
-    const res = await axios.get(`${BASE_URL}/admin/get-ratings?type=Dish`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      try {
+        setLoading(true); // Start loading
+        const res = await axios.get(`${BASE_URL}/admin/get-ratings?type=Dish`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    if (res.data?.success) {
-      setReviews(res.data?.data?.ratings || []);
-    } else {
-      toast.error(res.data?.message || "Failed to load dish reviews");
-    }
-  } catch (err) {
-    console.error("Error fetching reviews:", err.response?.data || err);
-    toast.error(err.response?.data?.message || "Error fetching reviews");
-  } finally {
-    setLoading(false); // Stop loading
-  }
-};
+        if (res.data?.success) {
+          setReviews(res.data?.data?.ratings || []);
+        } else {
+          toast.error(res.data?.message || "Failed to load dish reviews");
+        }
+      } catch (err) {
+        console.error("Error fetching reviews:", err.response?.data || err);
+        toast.error(err.response?.data?.message || "Error fetching reviews");
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
 
 
     fetchReviews();
@@ -197,7 +197,7 @@ export default function DishReviewList() {
             </button>
           </div>
         </div>
-        
+
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-300 text-left">
@@ -232,16 +232,22 @@ export default function DishReviewList() {
                 </td>
                 <td className="p-3">
                   <span
-                    className={`inline-block w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${rev.status === "accepted"
-                      ? "bg-green-100 text-green-700"
-                      : rev.status === "denied"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
+                    className={`inline-block min-w-[90px] text-center px-3 py-1 rounded-full text-xs font-semibold capitalize
+      ${rev.status === "accepted"
+                        ? "bg-green-100 text-green-700 border border-green-300"
+                        : rev.status === "denied"
+                          ? "bg-red-100 text-red-700 border border-red-300"
+                          : rev.status === "published"
+                            ? "bg-[#FFF4EC] text-[#F9832B] border border-[#F9832B]/40"
+                            : rev.status === "pending"
+                              ? "bg-gray-100 text-gray-700 border border-gray-300"
+                              : "bg-gray-50 text-gray-600 border border-gray-200"
                       }`}
                   >
                     {rev.status}
                   </span>
                 </td>
+
                 <td className="p-3">
                   <div className="cursor-pointer">
                     <FaRegEye

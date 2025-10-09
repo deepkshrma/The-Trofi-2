@@ -53,6 +53,16 @@ import PoliciesList from "./Pages/Policies/PoliciesList";
 import CreatePolicy from "./Pages/Policies/CreatePolicy";
 import AppFeedback from "./Pages/FAQ/AppFeedback";
 import AppFeedbackSee from "./Pages/FAQ/AppFeedbackSee";
+import RestroOwnerProfile from "./Pages/RestroOwner/RestroOwnerProfile";
+import RestaurantProfile from "./Pages/RestroOwner/RestaurantProfile";
+import RestaurantDishes from "./Pages/RestroOwner/RestaurantDishes";
+import RestaurantReviews from "./Pages/RestroOwner/RestaurantReviews";
+import SingleDishReview from "./Pages/RestroOwner/SingleDishReview";
+import NotificationList from "./Pages/Notification/NotificationList";
+import NotificationView from "./Pages/Notification/NotificationView";
+import NotificationPost from "./Pages/Notification/NotificationPost";
+import ReportList from "./Pages/Reports/ReportList";
+import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -155,6 +165,11 @@ const Allroutes = () => {
               <Route path="/CreatePolicy" element={<CreatePolicy />} />
               <Route path="/AppFeedback" element={<AppFeedback />} />
               <Route path="/AppFeedback/:id" element={<AppFeedbackSee />} />
+              <Route path="/NotificationList" element={<NotificationList />} />
+              <Route path="/NotificationView/:id" element={<NotificationView />} />
+              <Route path="/NotificationPost" element={<NotificationPost />} />
+              <Route path="/ReportList" element={<ReportList />} />
+              <Route path="/RestroReportDetails/:id" element={<RestroReportDetails />} />
             </Route>
           </Route>
 
@@ -167,8 +182,11 @@ const Allroutes = () => {
                 path="/RestroOwnerDashboard"
                 element={<RestroOwnerDashboard />}
               />
-              {/* Agar restro_owner ke liye aur pages add karne hai
-                  to unko yaha add karo */}
+              <Route path="/RestroOwnerProfile" element={<RestroOwnerProfile />} />
+              <Route path="/RestaurantProfile" element={<RestaurantProfile />} />
+              <Route path="/RestaurantDishes" element={<RestaurantDishes />} />
+              <Route path="/RestaurantReviews" element={<RestaurantReviews />} />
+              <Route path="/SingleDishReview/:id" element={<SingleDishReview />} />
             </Route>
           </Route>
 

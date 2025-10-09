@@ -15,6 +15,51 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await axios.post(`${BASE_URL}/admin/admin-login`, {
+  //       email,
+  //       password,
+  //     });
+
+  //     if (res.data.success) {
+  //       toast.success(res.data.message || "Login successful");
+
+  //       // Extract role and details
+  //       const { token } = res.data;
+  //       const role = res.data.admin?.role || res.data.restaurant?.role;
+
+  //       const userData = {
+  //         token,
+  //         role,
+  //         name: res.data.admin?.name || res.data.restaurant?.name,
+  //         email: res.data.admin?.email || res.data.restaurant?.email,
+  //         profile_picture: res.data.restaurant?.profile_picture || null,
+  //       };
+
+  //       localStorage.setItem("trofi_user", JSON.stringify(userData));
+
+  //       // Redirect based on role
+  //       if (role === "restaurant_owner") {
+  //         navigate("/RestroOwnerDashboard");
+  //       } else {
+  //         navigate("/Dashboard");
+  //       }
+  //     } else {
+  //       toast.error(res.data.message || "Login failed");
+  //     }
+  //   } catch (err) {
+  //     toast.error(
+  //       err.response?.data?.message || "Something went wrong. Try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -32,13 +77,19 @@ export default function Login() {
         const { token } = res.data;
         const role = res.data.admin?.role || res.data.restaurant?.role;
 
+        // Build userData object
         const userData = {
-          token,
+          token, // ✅ Keep token exactly as returned
           role,
           name: res.data.admin?.name || res.data.restaurant?.name,
           email: res.data.admin?.email || res.data.restaurant?.email,
           profile_picture: res.data.restaurant?.profile_picture || null,
         };
+
+        // ✅ Add restaurant.restroId only if restaurant_owner
+        if (role === "restaurant_owner" && res.data.restaurant?.id) {
+          userData.restaurant = { restroId: res.data.restaurant.id };
+        }
 
         localStorage.setItem("trofi_user", JSON.stringify(userData));
 
@@ -59,6 +110,8 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+
 
 
   return (

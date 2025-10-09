@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
@@ -8,42 +8,62 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 
 function UserProfile() {
   const [user, setUser] = useState(null);
+  const [favSearchRestaurants, setFavSearchRestaurants] = useState("");
+  const [favSearchDishes, setFavSearchDishes] = useState("");
+
+
   const [userAddress, setUserAddress] = useState([]);
   const { id } = useParams();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const authData = JSON.parse(localStorage.getItem("trofi_user"));
-      const token = authData?.token;
-      if (!token) {
-        toast.error("Please login first");
-        return;
-      }
+  // Filter restaurants
+  const filteredRestaurants = useMemo(() => {
+    return user?.favourites?.restaurants?.filter((r) =>
+      r.restaurantId?.restro_name.toLowerCase().includes(favSearchRestaurants.toLowerCase())
+    ) || [];
+  }, [user, favSearchRestaurants]);
 
-      try {
-        const response = await axios.get(
-          `${BASE_URL}/admin/get-all-users?userID=${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  const filteredDishes = useMemo(() => {
+    return user?.favourites?.dishes?.filter((d) =>
+      d.dishId?.dish_name.toLowerCase().includes(favSearchDishes.toLowerCase())
+    ) || [];
+  }, [user, favSearchDishes]);
 
-        if (response.data.success) {
-          setUser(response.data.data);
-          setUserAddress(response.data.userAddress || []);
-        } else {
-          toast.error("Failed to fetch user data");
+
+ useEffect(() => {
+  const fetchUser = async () => {
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${BASE_URL}/admin/get-all-users?userID=${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.error(error);
-        toast.error("Something went wrong while fetching user data");
-      }
-    };
+      );
 
-    fetchUser();
-  }, [id, BASE_URL]);
+      if (response.data.success) {
+        const userData = response.data.data;
+        setUser(userData);
+        setUserAddress(userData.addresses || []); // <-- this is the correct fix
+      } else {
+        toast.error("Failed to fetch user data");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while fetching user data");
+    }
+  };
+
+  fetchUser();
+}, [id]);
+
 
   if (!user) return <p className="p-6">Loading user data...</p>;
 
@@ -52,7 +72,7 @@ function UserProfile() {
   return (
     <div className="main main_page min-h-screen p-6 duration-900 ">
       <BreadcrumbsNav
-        customTrail={[{ label: "Users List", path: "/UserList" }, { label: "Users Profile", path: "/UserProfile" }]}
+        customTrail={[{ label: "Users List", path: "/UserList" }, { label: "User Profile", path: "/UserProfile" }]}
       />
       <PageTitle title="User Profile" />
 
@@ -232,41 +252,254 @@ function UserProfile() {
       {/* Activity Section */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
-          Activity
+          Activity & Ratings
         </h3>
-        <div className="flex flex-col gap-3">
-          <div>
-            <p className="text-sm">Ratings: {user.ratings?.length || 0}</p>
-            {user.ratings?.map((r, idx) => (
-              <p key={idx}>
-                ⭐ {r.stars} at {r.restaurant}
-              </p>
-            ))}
-          </div>
-          <div>
-            <p className="text-sm">Comments: {user.comments?.length || 0}</p>
-            {user.comments?.map((c, idx) => (
-              <p key={idx}>💬 {c.text}</p>
-            ))}
-          </div>
-          <div>
-            <p className="text-sm">Check-ins: {user.checkIns?.length || 0}</p>
-            {user.checkIns?.map((c, idx) => (
-              <p key={idx}>
-                📍 {c.place} on {new Date(c.date).toDateString()}
-              </p>
-            ))}
-          </div>
-          <div>
-            <p className="text-sm">
-              Favourites: {user.favourites?.length || 0}
-            </p>
-            {user.favourites?.map((f, idx) => (
-              <p key={idx}>❤️ Favorited {f.name}</p>
-            ))}
-          </div>
+
+        {/* Ratings */}
+        <div className="mb-4">
+          <p className="text-sm font-medium mb-2">Ratings: {user.ratings?.length || 0}</p>
+          {user.ratings?.length > 0 ? (
+            <div className="grid gap-3">
+              {user.ratings.map((r, idx) => (
+                <div
+                  key={r._id || idx}
+                  className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
+                >
+                  <p className="text-sm font-medium">
+                    ⭐ {r.star_value} - {r.typeId?.restro_name || r.typeId?.dish_name || r.typeId?._id}
+                  </p>
+                  {r.reviewComment && <p className="text-gray-600 text-sm mt-1">{r.reviewComment}</p>}
+                  {r.hashTags?.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Tags: {r.hashTags.map((h) => h.hashTagTitle).join(", ")}
+                    </p>
+                  )}
+                  {r.tell_us?.length > 0 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      {r.tell_us.map((t, i) => (
+                        <p key={i}>
+                          {t.question}: {t.answer ? "Yes" : "No"}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No ratings available</p>
+          )}
+        </div>
+
+        {/* Check-ins */}
+        <div>
+          <p className="text-sm font-medium mb-2">Check-ins:</p>
+          {user.activeCheckIns?.length + user.pastCheckIns?.length > 0 ? (
+            <div className="grid gap-3">
+              {user.activeCheckIns?.map((c, idx) => (
+                <div
+                  key={c._id || idx}
+                  className="border border-gray-200 p-4 rounded-lg bg-green-50 shadow-sm hover:shadow-md transition"
+                >
+                  <p className="text-sm font-medium">
+                    Active Check-in: {c.restaurantId?.restro_name || "N/A"}
+                  </p>
+                  {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
+                </div>
+              ))}
+              {user.pastCheckIns?.map((c, idx) => (
+                <div
+                  key={c._id || idx}
+                  className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
+                >
+                  <p className="text-sm font-medium">
+                    Past Check-in: {c.restaurantId?.restro_name || "N/A"}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Date: {new Date(c.createdAt).toLocaleString()}
+                  </p>
+                  {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500">No check-ins available</p>
+          )}
         </div>
       </div>
+
+      {/* Favourites Section */}
+      <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+        <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
+          Favourites
+        </h3>
+
+        {/* Restaurants Table with Search */}
+        <div className="overflow-x-auto mb-6">
+          <div className="flex items-center justify-between mb-1">
+            <p className="  text-xl font-bold">Restaurants</p>
+            <input
+              type="text"
+              placeholder="Search Restaurants..."
+              value={favSearchRestaurants}
+              onChange={(e) => setFavSearchRestaurants(e.target.value)}
+              className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+          </div>
+
+          <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                <th className="px-6 py-3 font-semibold">Name</th>
+                <th className="px-6 py-3 font-semibold">Address</th>
+                <th className="px-6 py-3 font-semibold">Added At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRestaurants && filteredRestaurants.length > 0 ? (
+                filteredRestaurants.map((f) => (
+                  <tr key={f._id} className="border-t border-gray-200 hover:bg-gray-50 transition">
+                    <td className="px-6 py-3">{f.restaurantId?.restro_name || "—"}</td>
+                    <td className="px-6 py-3">{f.restaurantId?.address || "—"}</td>
+                    <td className="px-6 py-3">{new Date(f.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="px-6 py-3 text-gray-500 text-center">
+                    No restaurants found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Dishes Table with Search */}
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-between mb-1 ">
+            <p className=" text-xl font-bold">Dishes</p>
+            <input
+              type="text"
+              placeholder="Search Dishes..."
+              value={favSearchDishes}
+              onChange={(e) => setFavSearchDishes(e.target.value)}
+              className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+          </div>
+
+          <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                <th className="px-6 py-3 font-semibold">Dish Name</th>
+                <th className="px-6 py-3 font-semibold">Added At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredDishes && filteredDishes.length > 0 ? (
+                filteredDishes.map((f) => (
+                  <tr key={f._id} className="border-t border-gray-200 hover:bg-gray-50 transition">
+                    <td className="px-6 py-3">{f.dishId?.dish_name || "—"}</td>
+                    <td className="px-6 py-3">{new Date(f.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={2} className="px-6 py-3 text-gray-500 text-center">
+                    No dishes found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+
+
+
+      {/* Tier Section */}
+      {user.tier && (
+        <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
+            Tier & Points
+          </h3>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Tier</p>
+              <p className="text-lg font-semibold">{user.tier.tier}</p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Points</p>
+              <p className="text-lg font-semibold">{user.tier.points}</p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Review Count</p>
+              <p className="text-lg font-semibold">{user.tier.reviewCount}</p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Professional Feedback</p>
+              <p className="text-lg font-semibold">{user.tier.professionalFeedbackCount}</p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Rejected Feedback</p>
+              <p className="text-lg font-semibold">{user.tier.rejectedFeedbackCount}</p>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+              <p className="text-sm text-gray-500">Last Active</p>
+              <p className="text-lg font-semibold">
+                {user.tier.lastActiveAt
+                  ? new Date(user.tier.lastActiveAt).toLocaleString()
+                  : "N/A"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Optional Tier History Table */}
+      {user.tierHistory?.length > 0 && (
+        <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
+            Tier History
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                  <th className="px-4 py-3 font-semibold">Old Tier</th>
+                  <th className="px-4 py-3 font-semibold">New Tier</th>
+                  <th className="px-4 py-3 font-semibold">Points</th>
+                  <th className="px-4 py-3 font-semibold">Reason</th>
+                  <th className="px-4 py-3 font-semibold">Changed By</th>
+                  <th className="px-4 py-3 font-semibold">Changed At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user.tierHistory.map((th, idx) => (
+                  <tr key={th._id || idx} className="border-t border-gray-200 hover:bg-gray-50 transition">
+                    <td className="px-4 py-3">{th.oldTier || "—"}</td>
+                    <td className="px-4 py-3">{th.newTier}</td>
+                    <td className="px-4 py-3">{th.points}</td>
+                    <td className="px-4 py-3">{th.reason}</td>
+                    <td className="px-4 py-3">{th.changedBy?.name || "System"}</td>
+                    <td className="px-4 py-3">{new Date(th.createdAt).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Account Details */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">

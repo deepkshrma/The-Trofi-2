@@ -70,16 +70,22 @@ const UserDropdown = ({
 
           {/* <hr className="text-[#E0E0E0]" /> */}
           <ul className="flex flex-col ">
-            {/* Profile */}
+
             <li onClick={handleuserDropdown}>
               <Link
-                to="/AdminProfile"
+                to={
+                  user?.role?.toLowerCase() === "restaurant_owner"
+                    ? "/RestroOwnerProfile"
+                    : "/AdminProfile"
+                }
                 className="flex items-center gap-3 py-2 px-5 text-gray-700 group text-[14px] hover:bg-gray-100"
               >
                 <FaUser size={16} className="text-orange-500" />
                 <span className="whitespace-nowrap">Profile</span>
               </Link>
             </li>
+
+
 
             <hr className="text-[#E0E0E0]" />
 

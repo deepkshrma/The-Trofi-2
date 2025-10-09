@@ -14,11 +14,10 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import AVATAR_PLACEHOLDER from "../../assets/images/guest.png";
 import PLACEHOLDER_IMG from "../../assets/images/logo.jpg";
 
-const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
 function RestroProfile() {
   const { isToggle } = useContext(LayoutContext);
@@ -270,8 +269,25 @@ function RestroProfile() {
               <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
               {restaurant.time || "N/A"}
             </p>
+            {/* <p className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
+              <span className="font-semibold text-gray-800">
+                {restaurant.price ? `₹${restaurant.price}` : "N/A"}
+              </span>
+            </p> */}
           </div>
+
         </div>
+        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+          <h2 className="text-lg font-bold text-gray-800 mb-3">Pricing</h2>
+          <p className="flex items-center gap-2 text-gray-700">
+            <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
+            <span className="font-semibold text-gray-800">
+              {restaurant.price ? `₹${restaurant.price}` : "N/A"}
+            </span>
+          </p>
+        </div>
+
         <div className="bg-white p-5 rounded-xl shadow-md mt-6">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             Status Information

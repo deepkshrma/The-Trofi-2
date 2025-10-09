@@ -8,6 +8,8 @@ import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import PeopleIcon from "@mui/icons-material/People";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import headerlogo from "/trofititle.png";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 /* 🔹 Recursive Sidebar Item */
 const SidebarItem = ({
@@ -603,6 +605,32 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         ],
         border: true,
       },
+       {
+        section: "",
+        items: [
+          {
+            name: "Notification Management",
+            icon: <NotificationsActiveIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Notifications", link: "NotificationList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Report Management",
+            icon: <DescriptionIcon  />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Reports", link: "ReportList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
     ],
 
     admin: [
@@ -622,9 +650,21 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             dropdown: false,
           },
           {
-            name: "Profile",
-            icon: <PeopleIcon className="w-4 h-4" />,
-            link: "/RestroProfile",
+            name: "Restaurant ",
+            icon: <FaStore className="w-4 h-4" />,
+            link: "/RestaurantProfile",
+            dropdown: false,
+          },
+          {
+            name: "Dishes ",
+            icon: <FaConciergeBell className="w-4 h-4" />,
+            link: "/RestaurantDishes",
+            dropdown: false,
+          },
+          {
+            name: "Reviews ",
+            icon: <FaCommentDots className="w-4 h-4" />,
+            link: "/RestaurantReviews",
             dropdown: false,
           },
         ],

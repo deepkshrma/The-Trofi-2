@@ -103,7 +103,7 @@ export default function RestaurantReviewList() {
             label: "Restaurant Review List",
             path: "/RestaurantReviewList",
           }
-        
+
         ]}
       />
       <PageTitle title={"Restaurant Reviews List"} />
@@ -229,16 +229,22 @@ export default function RestaurantReviewList() {
                 </td>
                 <td className="p-3">
                   <span
-                    className={`inline-block w-24 text-center px-2 py-1 rounded-full text-xs font-semibold ${rev.status === "accepted"
-                      ? "bg-green-100 text-green-700"
-                      : rev.status === "denied"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
+                    className={`inline-block min-w-[90px] text-center px-3 py-1 rounded-full text-xs font-semibold capitalize 
+      ${rev.status === "accepted"
+                        ? "bg-green-100 text-green-700 border border-green-300"
+                        : rev.status === "denied"
+                          ? "bg-red-100 text-red-700 border border-red-300"
+                          : rev.status === "published"
+                            ? "bg-[#FFF4EC] text-[#F9832B] border border-[#F9832B]/40"
+                            : rev.status === "pending"
+                              ? "bg-gray-100 text-gray-700 border border-gray-300"
+                              : "bg-gray-50 text-gray-600 border border-gray-200"
                       }`}
                   >
                     {rev.status}
                   </span>
                 </td>
+
                 <td className="p-3">
                   <div className="cursor-pointer">
                     <FaRegEye
