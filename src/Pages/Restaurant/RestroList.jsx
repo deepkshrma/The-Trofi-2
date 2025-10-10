@@ -4,7 +4,7 @@ import { Eye, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import axios from "axios";
-import { BASE_URL ,IMAGE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
@@ -16,12 +16,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FiFilter } from "react-icons/fi";
 import { FaTriangleExclamation } from "react-icons/fa6";
+
 import {
   FaUtensils,
-  FaStoreAlt,
+  FaLeaf,
+  FaDrumstickBite,
+  FaShieldAlt,
   FaConciergeBell,
-  FaStoreSlash,
-  FaBan,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 
@@ -32,20 +33,54 @@ function RestroList() {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10, // default page size
+    pageSize: 10,
     totalRecords: 0,
   });
+  const [kpi, setKpi] = useState({
+    total: 0,
+    veg: 0,
+    nonVeg: 0,
+    both: 0,
+    hygiene: 0,
+    general: 0,
+  });
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
-    // setSelectedAdmin(null);
+
   };
 
-  const confirmDelete = async () => {};
+  const confirmDelete = async () => { };
 
   const navigate = useNavigate();
 
-  // const IMAGE_URL = "http://trofi-backend.apponedemo.top";
+  const truncateDescription = (text, wordLimit = 75) => {
+    if (!text) return "";
+
+    // Convert to string just in case
+    let plainText = String(text);
+
+    // Remove HTML tags
+    plainText = plainText.replace(/<\/?[^>]+(>|$)/g, "");
+
+    // Replace all whitespace (spaces, non-breaking, newlines, tabs) with single space
+    plainText = plainText.replace(/\s+/g, " ").trim();
+
+    // Split words by space
+    const words = plainText.split(" ");
+
+    if (words.length > wordLimit) {
+      return words.slice(0, wordLimit).join(" ") + "...";
+    }
+
+    return plainText;
+  };
+
+
+
+
+
 
   const authData = JSON.parse(localStorage.getItem("trofi_user"));
   const token = authData?.token;
@@ -55,20 +90,18 @@ function RestroList() {
   }
 
   // Fetch restaurants with pagination
-  const fetchRestaurants = async (page = 1) => {
+  const fetchRestaurants = async (page = 1, searchTerm = "") => {
     try {
       setLoading(true);
 
       const response = await axios.get(
-        `${BASE_URL}/restro/get-restaurant-list?page=${page}&limit=${pagination.pageSize}`,
+        `${BASE_URL}/restro/get-restaurant-list?page=${page}&limit=${pagination.pageSize}&search=${searchTerm}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      const { data, pagination: backendPagination } = response.data;
+      const { data, pagination: backendPagination, kpi: backendKpi } = response.data;
 
       setRestaurants(data);
       setPagination((prev) => ({
@@ -77,13 +110,34 @@ function RestroList() {
         totalPages: backendPagination.totalPages,
         totalRecords: backendPagination.total,
       }));
+
+      // Update KPI counts
+      const foodCounts = { veg: 0, nonVeg: 0, both: 0 };
+      backendKpi.foodTypeCounts.forEach((item) => {
+        if (item._id === "veg") foodCounts.veg = item.count;
+        else if (item._id === "non-veg") foodCounts.nonVeg = item.count;
+        else if (item._id === "both") foodCounts.both = item.count;
+      });
+
+
+      const hygieneCounts = { hygiene: 0, general: 0 };
+      backendKpi.hygieneCounts.forEach((item) => {
+        hygieneCounts[item._id] = item.count;
+      });
+
+      setKpi({
+        total: backendPagination.total,
+        ...foodCounts,
+        ...hygieneCounts,
+      });
     } catch (error) {
       console.error("Error fetching restaurants:", error);
-      toast.error("Error fetching restaurants:", error);
+      toast.error("Error fetching restaurants");
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchRestaurants(1);
@@ -138,57 +192,62 @@ function RestroList() {
         </div>
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
-            <div>
-              <h4 className="text-[14px]">Total restaurants</h4>
-              <p className="text-[22px] font-semibold">{restaurants.length}</p>
-            </div>
-            <div className="">
-              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaUtensils size={35} className="text-blue-900" />
-              </div>
-            </div>
-          </div>
-          <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
-            <div>
-              <h4 className="text-[14px]">Active restaurants</h4>
-              <p className="text-[22px] font-semibold">
-                {restaurants.filter((u) => u.status === "active").length}
-              </p>
-            </div>
-            <div className="">
-              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaStoreAlt size={35} className="text-green-500" />
-              </div>
-            </div>
-          </div>
-          <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
-            <div>
-              <h4 className="text-[14px]">Inactive restaurants</h4>
-              <p className="text-[22px] font-semibold">
-                {restaurants.filter((u) => u.status === "inactive").length}
-              </p>
-            </div>
-            <div className="">
-              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaStoreSlash size={35} className="text-yellow-500" />
-              </div>
-            </div>
-          </div>
-          <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
-            <div>
-              <h4 className="text-[14px]">Suspended restaurants</h4>
-              <p className="text-[22px] font-semibold">
-                {restaurants.filter((u) => u.status === "suspended").length}
-              </p>
-            </div>
-            <div className="">
-              <div className="w-15 h-15 bg-white/60  rounded-3xl flex justify-center  items-center">
-                <FaBan size={35} className="text-red-500" />
-              </div>
-            </div>
-          </div>
-        </div>
+
+  {/* Total Restaurants */}
+  <div className="bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+    <div>
+      <h4 className="text-[14px]">Total Restaurants</h4>
+      <p className="text-[22px] font-semibold">{kpi.total}</p>
+    </div>
+    <div>
+      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+        <FaUtensils size={35} className="text-white" />
+      </div>
+    </div>
+  </div>
+
+  {/* Veg Restaurants */}
+  <div className="bg-[#4BAA31] p-3 rounded-xl text-white h-[100px] flex justify-between">
+    <div>
+      <h4 className="text-[14px]">Veg Restaurants</h4>
+      <p className="text-[22px] font-semibold">{kpi.veg}</p>
+    </div>
+    <div>
+      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+        <FaLeaf size={35} className="text-white" />
+      </div>
+    </div>
+  </div>
+
+  {/* Non-Veg Restaurants */}
+  <div className="bg-[#D35400] p-3 rounded-xl text-white h-[100px] flex justify-between">
+    <div>
+      <h4 className="text-[14px]">Non-Veg Restaurants</h4>
+      <p className="text-[22px] font-semibold">{kpi.nonVeg}</p>
+    </div>
+    <div>
+      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+        <FaDrumstickBite size={35} className="text-white" />
+      </div>
+    </div>
+  </div>
+
+  {/* Hygiene Restaurants */}
+  <div className="p-3 rounded-xl text-white h-[100px] flex justify-between bg-gradient-to-r from-[#4BAA31] to-[#1C8300]">
+    <div>
+      <h4 className="text-[14px]">Hygiene Restaurants</h4>
+      <p className="text-[22px] font-semibold">{kpi.hygiene}</p>
+    </div>
+    <div>
+      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+        <FaShieldAlt size={35} className="text-white" />
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
 
         {/* Table */}
         <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
@@ -198,9 +257,13 @@ function RestroList() {
               type="text"
               placeholder="Search by name..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                fetchRestaurants(1, e.target.value); // call backend on search
+              }}
               className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
             />
+
 
             {/* 📂 Right-side controls */}
             <div className="flex items-center gap-3">
@@ -227,32 +290,46 @@ function RestroList() {
             </div>
           </div>
 
-          {loading ? (
-            <div className="text-center p-6 text-gray-500">Loading...</div>
-          ) : (
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-200 text-left text-gray-700">
-                  <th className="p-3 border-b border-gray-300">S.No.</th>
-                  <th className="p-3 border-b border-gray-300">Logo</th>
-                  <th className="p-3 border-b border-gray-300">Name</th>
-                  <th className="p-3 border-b border-gray-300">Type</th>
-                  <th className="p-3 border-b border-gray-300">Description</th>
-                  <th className="p-3 border-b border-gray-300 text-center">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRestaurants.length > 0 ? (
-                  filteredRestaurants.map((restro, index) => (
-                    <tr
-                      key={restro._id}
-                      className="hover:bg-gray-50 transition text-gray-700"
-                    >
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-200 text-left text-gray-700">
+                <th className="p-3 border-b border-gray-300">S.No.</th>
+                <th className="p-3 border-b border-gray-300">Logo</th>
+                <th className="p-3 border-b border-gray-300">Name</th>
+                <th className="p-3 border-b border-gray-300">Type</th>
+                <th className="p-3 border-b border-gray-300">Description</th>
+                <th className="p-3 border-b border-gray-300 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading
+                ? [...Array(pagination.pageSize)].map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-8 rounded"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-10 w-10 rounded-full"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-32 rounded"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-16 rounded"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-full rounded"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-24 rounded mx-auto"></div>
+                    </td>
+                  </tr>
+                ))
+                : filteredRestaurants.length > 0
+                  ? filteredRestaurants.map((restro, index) => (
+                    <tr key={restro._id} className="hover:bg-gray-50 transition text-gray-700">
                       <td className="p-3 border-b border-gray-200">
-                        {(pagination.currentPage - 1) * pagination.pageSize +
-                          (index + 1)}
+                        {(pagination.currentPage - 1) * pagination.pageSize + (index + 1)}
                       </td>
                       <td className="p-3 border-b border-gray-200">
                         <img
@@ -268,55 +345,44 @@ function RestroList() {
                       <td className="p-3 border-b border-gray-200 font-medium">
                         {restro.restro_name}
                       </td>
+                      <td className="p-3 border-b border-gray-200">{restro.food_type}</td>
                       <td className="p-3 border-b border-gray-200">
-                        {restro.food_type}
+                        {truncateDescription(restro.description)}
                       </td>
-                      <td className="p-3 border-b border-gray-200">
-                        {restro.description}
-                      </td>
+
+
+
                       <td className="p-3 border-b border-gray-200">
                         <div className="flex justify-center items-center">
                           <div className="flex gap-3">
                             <button
                               className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
-                              onClick={() =>
-                                navigate(`/RestroProfile/${restro._id}`)
-                              }
+                              onClick={() => navigate(`/RestroProfile/${restro._id}`)}
                             >
                               <Eye size={16} />
                             </button>
                             <button
                               className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
-                              onClick={() =>
-                                navigate(`/UpdateRestaurant/${restro._id}`)
-                              }
+                              onClick={() => navigate(`/UpdateRestaurant/${restro._id}`)}
                             >
                               <MdEdit size={16} />
                             </button>
-                            {/* <button
-                              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
-                              onClick={() => setShowDeleteModal(true)}
-                            >
-                              <MdDelete size={16} />
-                            </button> */}
                           </div>
                         </div>
                       </td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="6"
-                      className="text-center p-6 text-gray-500 italic"
-                    >
-                      No restaurants found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
+                  : (
+                    <tr>
+                      <td colSpan="6" className="text-center p-6 text-gray-500 italic">
+                        No restaurants found.
+                      </td>
+                    </tr>
+                  )}
+            </tbody>
+          </table>
+
+
 
           {/* ✅ Fixed Pagination */}
           <Pagination

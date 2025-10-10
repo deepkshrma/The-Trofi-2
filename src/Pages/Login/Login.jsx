@@ -79,12 +79,13 @@ export default function Login() {
 
         // Build userData object
         const userData = {
-          token, // ✅ Keep token exactly as returned
+          token,
           role,
           name: res.data.admin?.name || res.data.restaurant?.name,
           email: res.data.admin?.email || res.data.restaurant?.email,
-          profile_picture: res.data.restaurant?.profile_picture || null,
+          profile_picture: res.data.admin?.profile_picture || res.data.restaurant?.profile_picture || null,
         };
+
 
         // ✅ Add restaurant.restroId only if restaurant_owner
         if (role === "restaurant_owner" && res.data.restaurant?.id) {

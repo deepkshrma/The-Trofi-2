@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
+import { PlusCircle, Upload, MapPin, Utensils, Info } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { BASE_URL } from "../../config/Config.js";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
@@ -43,6 +43,7 @@ function UpdateRestaurant() {
     good_for: [],
     cuisines: [],
     amenities: [],
+    is_best_seller: false,
   });
 
   // dropdown options
@@ -61,6 +62,7 @@ function UpdateRestaurant() {
 
   const [deletedMenus, setDeletedMenus] = useState([]);
   const [deletedGallery, setDeletedGallery] = useState([]);
+
 
 
 
@@ -212,6 +214,7 @@ function UpdateRestaurant() {
           description: data.description || "",
           longDescription: data.long_description || "",
           hygieneStatus: data.hygiene_status || "general",
+          is_best_seller: data.is_best_seller || false,
           openingTime: parseTimeToInput(rawOpen),
           closingTime: parseTimeToInput(rawClose),
           openDays: parseDaysToFullNames(data.days),
@@ -224,15 +227,17 @@ function UpdateRestaurant() {
         }));
 
         setExistingMenus(
-          (data.restaurant_menu_images || []).map(
-            (img) => `${BASE_URL.replace("/api", "")}/${img}`
-          )
+          (data.restaurant_menu_images || []).map((img) => ({
+            url: `${BASE_URL.replace("/api", "")}/${img}`, // for displaying
+            path: img, // relative path to send to backend
+          }))
         );
 
         setExistingGallery(
-          (data.restaurant_images || []).map(
-            (img) => `${BASE_URL.replace("/api", "")}/${img}`
-          )
+          (data.restaurant_images || []).map((img) => ({
+            url: `${BASE_URL.replace("/api", "")}/${img}`, // for displaying
+            path: img, // relative path to send to backend
+          }))
         );
 
 
@@ -277,6 +282,7 @@ function UpdateRestaurant() {
       formData.append("latitude", restaurantData.latitude || "");
       formData.append("longitude", restaurantData.longitude || "");
       formData.append("food_type", restaurantData.food_type || "both");
+      formData.append("is_best_seller", restaurantData.is_best_seller);
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
@@ -284,6 +290,9 @@ function UpdateRestaurant() {
         "restaurant_type",
         JSON.stringify(restaurantData.restaurant_type)
       );
+      formData.append("deleted_menus", JSON.stringify(deletedMenus));
+      formData.append("deleted_gallery", JSON.stringify(deletedGallery));
+
       formData.append("good_for", JSON.stringify(restaurantData.good_for));
       formData.append("cuisines", JSON.stringify(restaurantData.cuisines));
       formData.append("amenities", JSON.stringify(restaurantData.amenities));
@@ -298,7 +307,6 @@ function UpdateRestaurant() {
         );
       }
       if (restaurantData.openDays.length > 0) {
-        // backend may expect abbreviations — transform back if needed
         formData.append("days", restaurantData.openDays.join(", "));
       }
 
@@ -356,33 +364,6 @@ function UpdateRestaurant() {
         >
           <Utensils size={20} /> Basic Information
         </h2>
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={restaurantData.email || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={restaurantData.password || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           {" "}
@@ -511,14 +492,14 @@ function UpdateRestaurant() {
 
             <div className="flex gap-4 flex-wrap mt-4">
               {/* ✅ Existing Menu Images */}
-              {existingMenus.map((url, idx) => (
+              {existingMenus.map((item, idx) => (
                 <div
                   key={`menu-existing-${idx}`}
                   className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
                 >
-                  {url.endsWith(".pdf") ? (
+                  {item.url.endsWith(".pdf") ? (
                     <a
-                      href={url}
+                      href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block text-xs text-blue-600 underline"
@@ -527,22 +508,24 @@ function UpdateRestaurant() {
                     </a>
                   ) : (
                     <img
-                      src={url}
+                      src={item.url}
                       alt={`menu-existing-${idx}`}
                       className="w-20 h-20 object-cover rounded-md border mx-auto"
                     />
                   )}
                   <button
                     type="button"
-                    onClick={() =>
-                      setExistingMenus((prev) => prev.filter((_, i) => i !== idx))
-                    }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full cursor-pointer w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    onClick={() => {
+                      setDeletedMenus((prev) => [...prev, item.path]); // send relative path
+                      setExistingMenus((prev) => prev.filter((_, i) => i !== idx));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
                 </div>
               ))}
+
 
               {/* ✅ Newly Uploaded Menus */}
               {menuFiles.map((file, idx) => (
@@ -606,27 +589,22 @@ function UpdateRestaurant() {
             {/* ✅ Show existing + newly uploaded gallery images */}
             <div className="flex gap-4 flex-wrap mt-4">
               {/* Existing gallery images */}
-              {existingGallery.map((url, idx) => (
-                <div
-                  key={`gallery-existing-${idx}`}
-                  className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
-                >
-                  <img
-                    src={url}
-                    alt={`existing-gallery-${idx}`}
-                    className="w-20 h-20 object-cover rounded-md border mx-auto"
-                  />
+              {existingGallery.map((item, idx) => (
+                <div key={`gallery-existing-${idx}`} className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2">
+                  <img src={item.url} alt={`existing-gallery-${idx}`} className="w-20 h-20 object-cover rounded-md border mx-auto" />
                   <button
                     type="button"
-                    onClick={() =>
-                      setExistingGallery((prev) => prev.filter((_, i) => i !== idx))
-                    }
+                    onClick={() => {
+                      setDeletedGallery((prev) => [...prev, item.path]);
+                      setExistingGallery((prev) => prev.filter((_, i) => i !== idx));
+                    }}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
                 </div>
               ))}
+
 
               {/* Newly uploaded gallery images */}
               {gallery.map((file, idx) => (
@@ -806,12 +784,57 @@ function UpdateRestaurant() {
           </div>
         </div>
       </div>
+
+
+      {/* ================== Best Seller Section ================== */}
+      <div className="mt-6 mb-4 bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          🏆 Best Seller
+        </h2>
+
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-gray-700 font-medium">
+            <input
+              type="radio"
+              name="is_best_seller"
+              value="true"
+              checked={restaurantData.is_best_seller === true}
+              onChange={() =>
+                setRestaurantData((prev) => ({ ...prev, is_best_seller: true }))
+              }
+              className="w-5 h-5 accent-[#F9832B] cursor-pointer"
+            />
+            Yes
+          </label>
+
+          <label className="flex items-center gap-2 text-gray-700 font-medium">
+            <input
+              type="radio"
+              name="is_best_seller"
+              value="false"
+              checked={restaurantData.is_best_seller === false}
+              onChange={() =>
+                setRestaurantData((prev) => ({ ...prev, is_best_seller: false }))
+              }
+              className="w-5 h-5 accent-[#F9832B] cursor-pointer"
+            />
+            No
+          </label>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-3">
+          Select <span className="text-[#F9832B] font-medium">Yes</span> if this
+          restaurant should appear as a featured or popular restaurant.
+        </p>
+      </div>
+
+
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
           style={{ color: "#F9832B" }}
         >
-          <PlusCircle size={20} /> Additional Details
+          <Info size={20} /> Additional Details
         </h2>
 
         {/* Helper function for rendering selection buttons */}

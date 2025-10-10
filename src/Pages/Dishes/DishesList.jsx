@@ -146,7 +146,7 @@ function DishesList() {
           </div>
           <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">No Available Dishes</h4>
+              <h4 className="text-[14px]">Unavailable Dishes</h4>
               <p className="text-[22px] font-semibold">
                 {dishes.filter((u) => u.status === "inactive").length}
               </p>
@@ -159,7 +159,7 @@ function DishesList() {
           </div>
           <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
             <div>
-              <h4 className="text-[14px]">Dishes</h4>
+              <h4 className="text-[14px]">Discount Dishes</h4>
               <p className="text-[22px] font-semibold">
                 {dishes.filter((u) => u.status === "suspended").length}
               </p>

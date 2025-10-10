@@ -5,6 +5,7 @@ import headerlogo from "/trofititle.png";
 import NotificationBell from "./NotificationBell";
 import UserDropdown from "../common/UserDropdown/UserDropdown";
 import { FaArrowRight } from "react-icons/fa";
+import { IMAGE_URL } from "../../config/Config";
 
 function Header({ setIs_Toggle, isToggle }) {
   const [userDropdown, setUserDropdown] = useState(false);
@@ -80,9 +81,9 @@ function Header({ setIs_Toggle, isToggle }) {
           className={`flex justify-end ${isToggle ? "hidden lg:flex" : "flex"}`}
         >
           <div className="flex items-center space-x-3 px-3 py-1 rounded-[8px] cursor-pointer">
-            <NotificationBell />
+            {/* <NotificationBell /> */}
             <div>
-              {/* 👇 dynamic name / email fallback */}
+            
               <p className="text-[14px] font-Montserrat font-[500]">
                 {user?.name || "Guest"}
               </p>
@@ -91,12 +92,13 @@ function Header({ setIs_Toggle, isToggle }) {
               </p>
             </div>
             <div className="rounded-full bg-[#D8D8D8] overflow-hidden">
-              <img
-                src={profilePhoto}
-                className="w-11 h-11 object-cover"
-                onClick={handleUserDropdown}
-                alt="profile_pic"
-              />
+             <img
+  src={user?.profile_picture ? `${IMAGE_URL}/${user.profile_picture}` : profilePhoto}
+  className="w-11 h-11 object-cover"
+  onClick={handleUserDropdown}
+  alt="profile_pic"
+/>
+
             </div>
           </div>
         </div>

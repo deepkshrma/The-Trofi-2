@@ -20,6 +20,7 @@ import { FaUserXmark, FaUserShield } from "react-icons/fa6";
 import { IoFilterSharp } from "react-icons/io5";
 
 function UserList() {
+  const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -36,6 +37,7 @@ function UserList() {
   const navigate = useNavigate();
 
   const fetchUsers = async (page = 1) => {
+    setLoading(true);
     try {
       const authData = JSON.parse(localStorage.getItem("trofi_user"));
       const token = authData?.token;
@@ -60,8 +62,10 @@ function UserList() {
         });
       }
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error(error);
       toast.error("Failed to fetch users");
+    } finally {
+      setLoading(false); // ✅ stop loader
     }
   };
 
@@ -109,6 +113,16 @@ function UserList() {
     );
     closeDeleteModal();
   };
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">Loading users...</p>
+        </div>
+      </div>
+    );
 
   return (
     <div className="main main_page font-Montserrat space-y-4 duration-900">
@@ -225,11 +239,9 @@ function UserList() {
                   (head, i) => (
                     <th
                       key={head}
-                      className={`text-[14px] ${
-                        head === "Action" || head === "Status" ? "px-4" : "px-8"
-                      } ${
-                        i >= 3 ? "text-center" : "text-left"
-                      } py-3 whitespace-nowrap`}
+                      className={`text-[14px] ${head === "Action" || head === "Status" ? "px-4" : "px-8"
+                        } ${i >= 3 ? "text-center" : "text-left"
+                        } py-3 whitespace-nowrap`}
                     >
                       {head}
                     </th>
@@ -238,94 +250,83 @@ function UserList() {
               </tr>
             </thead>
             <tbody>
-              {users
-                .filter(
-                  (item) =>
-                    (statusFilter === "all" ||
-                      item.account_status === statusFilter) &&
-                    `${item.name} ${item.email} ${item.fullPhone}`
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                )
-                .map((item, index) => (
-                  <tr key={item._id} className="border-b border-gray-200">
-                    <td className="text-[14px] px-8 py-3 text-left">
-                      {(pagination.currentPage - 1) * 10 + index + 1}
-                    </td>
-
-                    <td className="text-[14px] px-8 py-3 text-left min-w-[180px]">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={
-                            item.profile_picture
-                              ? `${IMAGE_URL}/${item.profile_picture}`
-                              : guest
-                          }
-                          alt={item.name || "Guest"}
-                          className="w-10 h-10 rounded-full object-cover bg-amber-200"
-                        />
-
-                        <div className="whitespace-nowrap font-semibold">
-                          {item.name}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="text-[14px] px-8 py-3 text-left min-w-[250px]">
-                      <div>
-                        <div className="font-semibold">
-                          {item.device_type || "N/A"}
-                        </div>
-                        <div className="text-gray-500">{item.fullPhone}</div>
-                        <div className="text-gray-500">{item.email}</div>
-                      </div>
-                    </td>
-
-                    <td className="text-[14px] px-4 py-2">
-                      <div
-                        onClick={() => {
-                          setSelectedCustomer(item);
-                          setShowStatusModal(true);
-                        }}
-                        className={`cursor-pointer px-2 py-1 w-full flex justify-center items-center ${
-                          item.account_status === "active"
-                            ? "bg-green-200 text-green-500"
-                            : item.account_status === "suspended"
-                            ? "bg-yellow-200 text-yellow-500"
-                            : "bg-red-200 text-red-500"
-                        } font-semibold rounded-full hover:opacity-90 transition`}
-                        title="Click to change status"
-                      >
-                        {item.account_status}
-                      </div>
-                    </td>
-
-                    <td className="text-[14px] px-8 py-3 text-center">
-                      <div className="flex justify-center items-center gap-3">
-                        <button
-                          className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
-                          onClick={() => navigate(`/UserProfile/${item._id}`)}
-                        >
-                          <FiEye size={16} />
-                        </button>
-                        {/* <button
-                          className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600 whitespace-nowrap"
-                          onClick={() => openDeleteModal(item._id)}
-                        >
-                          <RiDeleteBinLine size={16} />
-                        </button> */}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              {users.length === 0 && (
+              {users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-gray-500">
-                    No users found.
+                  <td colSpan={5}>
+                    <div className="flex flex-col items-center justify-center p-6">
+                      <div className="bg-white shadow-md border border-gray-200 rounded-xl p-6 w-full md:w-1/2 text-center">
+                        <p className="text-gray-500 italic">No users found.</p>
+                      </div>
+                    </div>
                   </td>
                 </tr>
+              ) : (
+                users
+                  .filter(
+                    (item) =>
+                      (statusFilter === "all" || item.account_status === statusFilter) &&
+                      `${item.name} ${item.email} ${item.fullPhone}`
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())
+                  )
+                  .map((item, index) => (
+                    <tr key={item._id} className="border-b border-gray-200">
+                      <td className="text-[14px] px-8 py-3 text-left">
+                        {(pagination.currentPage - 1) * 10 + index + 1}
+                      </td>
+
+                      <td className="text-[14px] px-8 py-3 text-left min-w-[180px]">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={item.profile_picture ? `${IMAGE_URL}/${item.profile_picture}` : guest}
+                            alt={item.name || "Guest"}
+                            className="w-10 h-10 rounded-full object-cover bg-amber-200"
+                          />
+                          <div className="whitespace-nowrap font-semibold">{item.name}</div>
+                        </div>
+                      </td>
+
+                      <td className="text-[14px] px-8 py-3 text-left min-w-[250px]">
+                        <div>
+                          <div className="font-semibold">{item.device_type || "N/A"}</div>
+                          <div className="text-gray-500">{item.fullPhone}</div>
+                          <div className="text-gray-500">{item.email}</div>
+                        </div>
+                      </td>
+
+                      <td className="text-[14px] px-4 py-2">
+                        <div
+                          onClick={() => {
+                            setSelectedCustomer(item);
+                            setShowStatusModal(true);
+                          }}
+                          className={`cursor-pointer px-2 py-1 w-full flex justify-center items-center ${item.account_status === "active"
+                            ? "bg-green-200 text-green-500"
+                            : item.account_status === "suspended"
+                              ? "bg-yellow-200 text-yellow-500"
+                              : "bg-red-200 text-red-500"
+                            } font-semibold rounded-full hover:opacity-90 transition`}
+                          title="Click to change status"
+                        >
+                          {item.account_status}
+                        </div>
+                      </td>
+
+                      <td className="text-[14px] px-8 py-3 text-center">
+                        <div className="flex justify-center items-center gap-3">
+                          <button
+                            className="flex justify-center w-8 h-8 items-center gap-1 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 whitespace-nowrap"
+                            onClick={() => navigate(`/UserProfile/${item._id}`)}
+                          >
+                            <FiEye size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
+
           </table>
 
           {/* Pagination */}

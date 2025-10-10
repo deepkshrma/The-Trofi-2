@@ -13,6 +13,7 @@ import {
   FiChevronDown,
   FiEye,
 } from "react-icons/fi";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import {
   LineChart,
   Line,
@@ -29,7 +30,11 @@ import {
 } from "recharts";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 
-const FilterPills = ({ active, onChange, labels = ["Monthly", "Weekly", "Today"] }) => (
+const FilterPills = ({
+  active,
+  onChange,
+  labels = ["Yearly", "Monthly", "Weekly"], // 👈 new default
+}) => (
   <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
     {labels.map((label) => (
       <button
@@ -46,6 +51,7 @@ const FilterPills = ({ active, onChange, labels = ["Monthly", "Weekly", "Today"]
     ))}
   </div>
 );
+
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl shadow-md p-4 animate-pulse">
@@ -255,6 +261,26 @@ export default function Dashboard() {
     );
   }
 
+  const formatTick = (value, filterType) => {
+    if (!value) return "";
+
+    // handle pure year strings like "2025"
+    if (/^\d{4}$/.test(value)) return value;
+
+    const parts = value.split("-").map(Number);
+    const [year, month, day] = parts;
+    const date = new Date(year, month - 1, day || 1);
+
+    if (isNaN(date)) return value;
+
+    if (filterType.toLowerCase() === "weekly")
+      return date.toLocaleDateString("en-US", { weekday: "short" });
+    else if (filterType.toLowerCase() === "monthly")
+      return date.getDate();
+    else if (filterType.toLowerCase() === "yearly")
+      return date.toLocaleDateString("en-US", { month: "short" });
+    else return "";
+  };
 
   return (
     <div className="p-6 main main_page min-h-screen duration-800 ease-in-out">
@@ -294,7 +320,7 @@ export default function Dashboard() {
           <StatCard
             title="Total Admins"
             value={dashboardData.kpis.totalAdmins}
-            Icon={FiUsers}
+            Icon={AdminPanelSettingsIcon}
             brand={BRAND}
           />
         </div>
@@ -319,7 +345,7 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold">Restaurant Count</h3>
-            <FilterPills active={revenueFilter} onChange={setRevenueFilter} labels={["Monthly", "Weekly"]} />
+            <FilterPills active={revenueFilter} onChange={setRevenueFilter} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={graphData.restaurantSeries}>
@@ -332,21 +358,9 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => {
-                  if (!value) return "";
-
-                  const [year, month, day] = value.split("-").map(Number);
-                  const date = new Date(year, month - 1, day); // Local date, not UTC
-
-                  if (revenueFilter.toLowerCase() === "weekly") {
-                    return date.toLocaleDateString("en-US", { weekday: "short" }); // Sun, Mon, ...
-                  } else if (revenueFilter.toLowerCase() === "yearly") {
-                    return date.toLocaleDateString("en-US", { month: "short" }); // Jan, Feb, ...
-                  } else {
-                    return date.getDate(); // 1, 2, 3...
-                  }
-                }}
+                tickFormatter={(value) => formatTick(value, revenueFilter)}
               />
+
 
 
               <YAxis allowDecimals={false} />
@@ -360,32 +374,16 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold">Users Count</h3>
-            <FilterPills active={customerFilter} onChange={setCustomerFilter} labels={["Monthly", "Weekly"]} />
+            <FilterPills active={customerFilter} onChange={setCustomerFilter} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={graphData.userSeries}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => {
-                  if (!value) return "";
-
-                  // Split YYYY-MM-DD safely (avoid timezone shift issues)
-                  const parts = value.split("-");
-                  const year = parseInt(parts[0]);
-                  const month = parseInt(parts[1]);
-                  const day = parts[2] ? parseInt(parts[2]) : 1;
-                  const date = new Date(year, month - 1, day); // local date
-
-                  if (customerFilter.toLowerCase() === "weekly") {
-                    return date.toLocaleDateString("en-US", { weekday: "short" }); // Sun, Mon, Tue
-                  } else if (customerFilter.toLowerCase() === "yearly") {
-                    return date.toLocaleDateString("en-US", { month: "short" }); // Jan, Feb, Mar
-                  } else {
-                    return date.getDate(); // 1, 2, 3...
-                  }
-                }}
+                tickFormatter={(value) => formatTick(value, customerFilter)}
               />
+
 
 
               <YAxis allowDecimals={false} />
@@ -400,7 +398,7 @@ export default function Dashboard() {
       {/* Bottom Section */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         {/* Recent Reviews */}
-        <div className="bg-white p-6 rounded-2xl shadow-md">
+        <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col">
           <div className="flex items-center justify-between gap-4 flex-wrap mb-3">
             <h3 className="text-xl font-semibold">Recent Reviews</h3>
             <FilterPills
@@ -410,7 +408,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <ul className="divide-y">
+          <ul className="divide-y flex-1">
             {sortedReviews.length > 0 ? (
               sortedReviews.map((r) => {
                 const ratingInfo = STAR_RATINGS[Number(r.rating) - 1];
@@ -463,12 +461,25 @@ export default function Dashboard() {
               </li>
             )}
           </ul>
+
+          {/* View More Button */}
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => navigate("/RestaurantReviewList")}
+              className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition transform hover:scale-105 font-semibold cursor-pointer"
+            >
+              View More
+              <FiChevronDown className="animate-bounce" />
+            </button>
+          </div>
+
         </div>
 
+
         {/* Recent Restaurants */}
-        <div className="bg-white p-6 rounded-2xl shadow-md">
+        <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col">
           <h3 className="text-xl font-semibold mb-2">Recent Restaurants</h3>
-          <ul className="divide-y">
+          <ul className="divide-y flex-1">
             {dashboardData.recentRestaurants.map((rest) => (
               <li
                 key={rest.id}
@@ -496,7 +507,20 @@ export default function Dashboard() {
               </li>
             ))}
           </ul>
+
+          {/* View More Button */}
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={() => navigate("/RestroList")}
+              className="flex items-center gap-2 text-gray-600 hover:text-orange-600 transition transform hover:scale-105 font-semibold cursor-pointer"
+            >
+              View More
+              <FiChevronDown className="animate-bounce" />
+            </button>
+          </div>
+
         </div>
+
       </div>
     </div>
   );

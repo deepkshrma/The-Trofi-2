@@ -10,6 +10,9 @@ function UserProfile() {
   const [user, setUser] = useState(null);
   const [favSearchRestaurants, setFavSearchRestaurants] = useState("");
   const [favSearchDishes, setFavSearchDishes] = useState("");
+  const [checkinSearch, setCheckinSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
 
 
   const [userAddress, setUserAddress] = useState([]);
@@ -29,43 +32,70 @@ function UserProfile() {
   }, [user, favSearchDishes]);
 
 
- useEffect(() => {
-  const fetchUser = async () => {
-    const authData = JSON.parse(localStorage.getItem("trofi_user"));
-    const token = authData?.token;
-    if (!token) {
-      toast.error("Please login first");
-      return;
+
+  useEffect(() => {
+    if (favSearchDishes !== "") {
+      setIsLoadingDishes(true);
+
+      const timer = setTimeout(() => {
+        setIsLoadingDishes(false);
+      }, 300);
+
+      return () => clearTimeout(timer);
     }
+  }, [favSearchDishes]);
 
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/admin/get-all-users?userID=${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
 
-      if (response.data.success) {
-        const userData = response.data.data;
-        setUser(userData);
-        setUserAddress(userData.addresses || []); // <-- this is the correct fix
-      } else {
-        toast.error("Failed to fetch user data");
+  useEffect(() => {
+    const fetchUser = async () => {
+      setLoading(true); // start loader
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong while fetching user data");
-    }
-  };
 
-  fetchUser();
-}, [id]);
+      try {
+        const response = await axios.get(
+          `${BASE_URL}/admin/get-all-users?userID=${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.success) {
+          const userData = response.data.data;
+          setUser(userData);
+          setUserAddress(userData.addresses || []);
+        } else {
+          toast.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong while fetching user data");
+      } finally {
+        setLoading(false); // stop loader
+      }
+    };
+
+    fetchUser();
+  }, [id]);
 
 
-  if (!user) return <p className="p-6">Loading user data...</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">Loading user details...</p>
+        </div>
+      </div>
+    );
+
+
+
 
   const initials = user.name ? user.name.charAt(0).toUpperCase() : "U";
 
@@ -249,84 +279,233 @@ function UserProfile() {
       </div>
 
 
-      {/* Activity Section */}
+      {/* Activity & Ratings */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
         <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
           Activity & Ratings
         </h3>
 
-        {/* Ratings */}
-        <div className="mb-4">
-          <p className="text-sm font-medium mb-2">Ratings: {user.ratings?.length || 0}</p>
-          {user.ratings?.length > 0 ? (
-            <div className="grid gap-3">
-              {user.ratings.map((r, idx) => (
-                <div
-                  key={r._id || idx}
-                  className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
-                >
-                  <p className="text-sm font-medium">
-                    ⭐ {r.star_value} - {r.typeId?.restro_name || r.typeId?.dish_name || r.typeId?._id}
-                  </p>
-                  {r.reviewComment && <p className="text-gray-600 text-sm mt-1">{r.reviewComment}</p>}
-                  {r.hashTags?.length > 0 && (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Tags: {r.hashTags.map((h) => h.hashTagTitle).join(", ")}
-                    </p>
-                  )}
-                  {r.tell_us?.length > 0 && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {r.tell_us.map((t, i) => (
-                        <p key={i}>
-                          {t.question}: {t.answer ? "Yes" : "No"}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500">No ratings available</p>
-          )}
-        </div>
+        {/* --- Check-ins --- */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xl font-bold">Check-ins</p>
+            <input
+              type="text"
+              placeholder="Search Check-ins by restaurant..."
+              value={checkinSearch}
+              onChange={(e) => setCheckinSearch(e.target.value)}
+              className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+            />
+          </div>
 
-        {/* Check-ins */}
-        <div>
-          <p className="text-sm font-medium mb-2">Check-ins:</p>
-          {user.activeCheckIns?.length + user.pastCheckIns?.length > 0 ? (
+          {((user.activeCheckIns?.length || 0) + (user.pastCheckIns?.length || 0)) > 0 ? (
             <div className="grid gap-3">
-              {user.activeCheckIns?.map((c, idx) => (
-                <div
-                  key={c._id || idx}
-                  className="border border-gray-200 p-4 rounded-lg bg-green-50 shadow-sm hover:shadow-md transition"
-                >
-                  <p className="text-sm font-medium">
-                    Active Check-in: {c.restaurantId?.restro_name || "N/A"}
-                  </p>
-                  {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
-                </div>
-              ))}
-              {user.pastCheckIns?.map((c, idx) => (
-                <div
-                  key={c._id || idx}
-                  className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
-                >
-                  <p className="text-sm font-medium">
-                    Past Check-in: {c.restaurantId?.restro_name || "N/A"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Date: {new Date(c.createdAt).toLocaleString()}
-                  </p>
-                  {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
-                </div>
-              ))}
+              {/* Active Check-ins */}
+              {user.activeCheckIns
+                ?.filter((c) =>
+                  c.restaurantId?.restro_name
+                    ?.toLowerCase()
+                    .includes(checkinSearch.toLowerCase())
+                )
+                ?.map((c) => (
+                  <div
+                    key={c._id}
+                    className="border border-gray-200 p-4 rounded-lg bg-green-50 shadow-sm hover:shadow-md transition"
+                  >
+                    <p className="text-sm font-medium">
+                      Active Check-in: {c.restaurantId?.restro_name || "N/A"}
+                    </p>
+                    {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {c.createdAt ? new Date(c.createdAt).toLocaleString() : "—"}
+                    </p>
+                  </div>
+                ))}
+
+              {/* Past Check-ins */}
+              {user.pastCheckIns
+                ?.filter((c) =>
+                  c.restaurantId?.restro_name
+                    ?.toLowerCase()
+                    .includes(checkinSearch.toLowerCase())
+                )
+                ?.map((c) => (
+                  <div
+                    key={c._id}
+                    className="border border-gray-200 p-4 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition"
+                  >
+                    <p className="text-sm font-medium">
+                      Past Check-in: {c.restaurantId?.restro_name || "N/A"}
+                    </p>
+                    {c.notes && <p className="text-gray-600 text-sm mt-1">Notes: {c.notes}</p>}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Date: {c.createdAt ? new Date(c.createdAt).toLocaleString() : "—"}
+                    </p>
+                  </div>
+                ))}
             </div>
           ) : (
             <p className="text-gray-500">No check-ins available</p>
           )}
         </div>
+
+        {/* --- Ratings (Restaurant + Dish) --- */}
+        <div className="mb-6">
+          {/* Restaurant Ratings */}
+          <div className="overflow-x-auto mb-6">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xl font-bold">Restaurant Ratings</p>
+              <input
+                type="text"
+                placeholder="Search Restaurants..."
+                value={favSearchRestaurants}
+                onChange={(e) => setFavSearchRestaurants(e.target.value)}
+                className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+              />
+            </div>
+
+            <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                  <th className="px-6 py-3 font-semibold">Restaurant</th>
+                  <th className="px-6 py-3 font-semibold">Rating</th>
+                  <th className="px-6 py-3 font-semibold">Comment</th>
+                  <th className="px-6 py-3 font-semibold">Tags</th>
+                  <th className="px-6 py-3 font-semibold">Status</th>
+                  <th className="px-6 py-3 font-semibold">Rating Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user?.ratings
+                  ?.filter((r) => r.type === "Restaurant")
+                  ?.filter((r) =>
+                    r.typeId?.restro_name
+                      ?.toLowerCase()
+                      .includes(favSearchRestaurants.toLowerCase())
+                  ).length > 0 ? (
+                  user?.ratings
+                    ?.filter((r) => r.type === "Restaurant")
+                    ?.filter((r) =>
+                      r.typeId?.restro_name
+                        ?.toLowerCase()
+                        .includes(favSearchRestaurants.toLowerCase())
+                    )
+                    .map((r) => (
+                      <tr
+                        key={r._id}
+                        className="border-t border-gray-200 hover:bg-gray-50 transition"
+                      >
+                        <td className="px-6 py-3">{r.typeId?.restro_name || "—"}</td>
+                        <td className="px-6 py-3">⭐ {r.star_value} ({r.rating_label})</td>
+                        <td className="px-6 py-3">{r.reviewComment || "—"}</td>
+                        <td className="px-6 py-3 text-xs">
+                          {r.hashTags?.map((h) => h.hashTagTitle).join(", ") || "—"}
+                        </td>
+                        <td className="px-6 py-3">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${r.status === "published"
+                              ? "bg-green-100 text-green-700"
+                              : r.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
+                              }`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3">{new Date(r.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-3 text-gray-500 text-center">
+                      No restaurant ratings found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Dish Ratings */}
+          <div className="overflow-x-auto">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xl font-bold">Dish Ratings</p>
+              <input
+                type="text"
+                placeholder="Search Dishes..."
+                value={favSearchDishes}
+                onChange={(e) => setFavSearchDishes(e.target.value)}
+                className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
+              />
+            </div>
+
+            <table className="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+              <thead>
+                <tr className="bg-[#F9832B]/10 text-[#F9832B] text-left">
+                  <th className="px-6 py-3 font-semibold">Dish</th>
+                  <th className="px-6 py-3 font-semibold">Rating</th>
+                  <th className="px-6 py-3 font-semibold">Comment</th>
+                  <th className="px-6 py-3 font-semibold">Tags</th>
+                  <th className="px-6 py-3 font-semibold">Status</th>
+                  <th className="px-6 py-3 font-semibold">Rating Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user?.ratings
+                  ?.filter((r) => r.type === "Dish")
+                  ?.filter((r) =>
+                    r.typeId?.dish_name
+                      ?.toLowerCase()
+                      .includes(favSearchDishes.toLowerCase())
+                  ).length > 0 ? (
+                  user?.ratings
+                    ?.filter((r) => r.type === "Dish")
+                    ?.filter((r) =>
+                      r.typeId?.dish_name
+                        ?.toLowerCase()
+                        .includes(favSearchDishes.toLowerCase())
+                    )
+                    .map((r) => (
+                      <tr
+                        key={r._id}
+                        className="border-t border-gray-200 hover:bg-gray-50 transition"
+                      >
+                        <td className="px-6 py-3">{r.typeId?.dish_name || "—"}</td>
+                        <td className="px-6 py-3">⭐ {r.star_value} ({r.rating_label})</td>
+                        <td className="px-6 py-3">{r.reviewComment || "—"}</td>
+                        <td className="px-6 py-3 text-xs">
+                          {r.hashTags?.map((h) => h.hashTagTitle).join(", ") || "—"}
+                        </td>
+                        <td className="px-6 py-3">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${r.status === "published"
+                              ? "bg-green-100 text-green-700"
+                              : r.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-700"
+                              }`}
+                          >
+                            {r.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3">{new Date(r.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-3 text-gray-500 text-center">
+                      No dish ratings found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+
+
 
       {/* Favourites Section */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">

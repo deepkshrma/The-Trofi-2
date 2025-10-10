@@ -64,13 +64,16 @@ function RestaurantReviews() {
 
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
-      <BreadcrumbsNav
-        customTrail={[{ label: "Restaurant Reviews", path: "/restaurant-reviews" }]}
-      />
+      <BreadcrumbsNav customTrail={[{ label: "Restaurant Reviews", path: "/restaurant-reviews" }]} />
       <PageTitle title="Restaurant Reviews" />
 
       {loading ? (
-        <div className="text-center p-6 text-gray-500 italic">Loading...</div>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+            <p className="mt-4 text-gray-700 font-bold text-lg">Loading restaurant reviews...</p>
+          </div>
+        </div>
       ) : reviews.length === 0 ? (
         <div className="text-center p-6 text-gray-500 italic">No reviews found.</div>
       ) : (
@@ -125,8 +128,8 @@ function RestaurantReviews() {
                       <p className="text-gray-700">{review.reviewComment}</p>
                     </div>
                   )}
-                  
-                    {/* Admin Notes */}
+
+                  {/* Admin Notes */}
                   {review.notes && (
                     <div className="bg-gray-100 p-3 rounded-lg border border-gray-200">
                       <h4 className="font-medium text-gray-700 mb-1">Admin Notes:</h4>
@@ -195,7 +198,7 @@ function RestaurantReviews() {
                     </div>
                   )}
 
-                
+
                 </div>
               </div>
             );

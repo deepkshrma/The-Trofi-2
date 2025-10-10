@@ -17,6 +17,9 @@ import axios from "axios";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import AVATAR_PLACEHOLDER from "../../assets/images/guest.png";
 import PLACEHOLDER_IMG from "../../assets/images/logo.jpg";
+import { XCircle } from "lucide-react";
+import { Trophy } from "lucide-react";
+
 
 
 function RestroProfile() {
@@ -130,8 +133,18 @@ function RestroProfile() {
     !Number.isNaN(lat) && !Number.isNaN(lng) && lat !== 0 && lng !== 0;
 
   if (loading) {
-    return <div className="p-6 text-gray-600">Loading...</div>;
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">
+            Loading restaurant details...
+          </p>
+        </div>
+      </div>
+    );
   }
+
 
   if (!restaurant) {
     return <div className="p-6 text-red-500">Restaurant not found</div>;
@@ -278,15 +291,38 @@ function RestroProfile() {
           </div>
 
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">Pricing</h2>
-          <p className="flex items-center gap-2 text-gray-700">
-            <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
-            <span className="font-semibold text-gray-800">
-              {restaurant.price ? `₹${restaurant.price}` : "N/A"}
-            </span>
-          </p>
+        <div className="grid sm:grid-cols-2 gap-6 mt-6">
+          {/* Pricing Section */}
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Pricing</h2>
+            <p className="flex items-center gap-2 text-gray-700">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
+              <span className="font-semibold text-gray-800">
+                {restaurant.price ? `₹${restaurant.price}` : "N/A"}
+              </span>
+            </p>
+          </div>
+
+          {/* Best Seller Section */}
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Best Seller</h2>
+            <p className="flex items-center gap-2 text-gray-700">
+              {restaurant.is_best_seller ? (
+                <>
+                  <Trophy className="w-5 h-5 text-[#F9832B]" />{" "}
+                  <span className="font-semibold text-green-600">Yes</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-5 h-5 text-gray-400" />{" "}
+                  <span className="font-semibold text-red-500">No</span>
+                </>
+              )}
+            </p>
+          </div>
         </div>
+
+
 
         <div className="bg-white p-5 rounded-xl shadow-md mt-6">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
@@ -305,8 +341,13 @@ function RestroProfile() {
               <Clock className="w-5 h-5 text-[#F9832B]" /> Working Days:{" "}
               {restaurant.days || "N/A"}
             </p>
+            <p className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Birth Year:{" "}
+              {restaurant.birth_year ? restaurant.birth_year : "N/A"}
+            </p>
           </div>
         </div>
+
 
         {/* Amenities */}
         <div>

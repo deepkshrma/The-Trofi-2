@@ -92,7 +92,19 @@ function RestaurantProfile() {
     return null;
   };
 
-  if (loading) return <div className="p-6 text-gray-600">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">
+            Loading restaurant details...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!restaurant) return <div className="p-6 text-red-500">Restaurant not found</div>;
 
   const lat = Number(restaurant.latitude ?? 0);

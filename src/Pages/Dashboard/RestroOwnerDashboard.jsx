@@ -19,15 +19,18 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import { FiStar, FiCoffee, FiShoppingCart, FiFileText } from "react-icons/fi";
+import { FaConciergeBell } from "react-icons/fa";
 
 // ---------- Reusable UI ----------
-const FilterPills = ({ active, onChange, labels = ["Monthly", "Weekly", "Today"] }) => (
+const FilterPills = ({ active, onChange, labels = ["Yearly", "Monthly", "Weekly"] }) => (
   <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
     {labels.map((label) => (
       <button
         key={label}
         onClick={() => onChange(label)}
-        className={`px-3 py-1 text-sm rounded-full transition cursor-pointer ${active === label ? "bg-gray-800 text-white" : "text-gray-600 hover:text-gray-900"
+        className={`px-3 py-1 text-sm rounded-full transition cursor-pointer ${active === label
+          ? "bg-gray-800 text-white"
+          : "text-gray-600 hover:text-gray-900"
           }`}
         type="button"
       >
@@ -36,6 +39,7 @@ const FilterPills = ({ active, onChange, labels = ["Monthly", "Weekly", "Today"]
     ))}
   </div>
 );
+
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl shadow-md p-4 animate-pulse">
@@ -171,14 +175,32 @@ export default function RestroOwnerDashboard() {
 
   const formatTick = (value, filterType) => {
     if (!value) return "";
-    const [year, month, day] = value.split("-").map(Number);
+
+    // 🧠 Handle different date formats safely
+    if (filterType.toLowerCase() === "yearly") {
+      // If backend sends only a year (e.g., "2025")
+      if (/^\d{4}$/.test(value)) return value;
+    }
+
+    // Parse normally for monthly/weekly
+    const parts = value.split("-").map(Number);
+    if (parts.length < 3) return value; // fallback if format is not full date
+
+    const [year, month, day] = parts;
     const date = new Date(year, month - 1, day);
+
+    if (isNaN(date)) return value; // prevent invalid date output
+
     if (filterType.toLowerCase() === "weekly")
       return date.toLocaleDateString("en-US", { weekday: "short" });
-    else if (filterType.toLowerCase() === "today")
-      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    else return date.getDate();
+    else if (filterType.toLowerCase() === "monthly")
+      return date.getDate();
+    else if (filterType.toLowerCase() === "yearly")
+      return date.toLocaleDateString("en-US", { month: "short" });
+    else return "";
   };
+
+
 
   // Skeleton
   if (!dashboardData)
@@ -217,7 +239,7 @@ export default function RestroOwnerDashboard() {
         <StatCard
           title="Total Dishes"
           value={dashboardData.kpis.totalDishes ?? 0}
-          Icon={FiShoppingCart}
+          Icon={FaConciergeBell}
           brand={BRAND}
           onClick={() => navigate("/RestaurantDishes")}
         />
@@ -301,7 +323,7 @@ export default function RestroOwnerDashboard() {
               <button
                 key={t}
                 onClick={() => setTopDishesSort(t)}
-                className={`px-3 py-1 rounded-md text-sm transition ${topDishesSort === t
+                className={`px-3 py-1 rounded-md cursor-pointer text-sm transition ${topDishesSort === t
                   ? "bg-orange-500 text-white shadow-sm"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
