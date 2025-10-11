@@ -58,9 +58,8 @@ const SidebarItem = ({
             {item.name}
           </div>
           <FaChevronDown
-            className={`w-3 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </div>
       ) : (
@@ -441,6 +440,19 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         section: "",
         items: [
           {
+            name: "Master Tools",
+            icon: <FaStore className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
             name: "User Management",
             icon: <PeopleIcon />,
             link: "#",
@@ -454,137 +466,12 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         section: "",
         items: [
           {
-            name: "Restaurant Management",
-            icon: <FaCog />,
-            link: "#",
-            dropdown: true,
-            subItems: [
-              {
-                name: "Restaurant Amenity",
-                link: "RestroAmenityList",
-                dropdown: false,
-                indent: true,
-              },
-              {
-                name: "Restaurant Type",
-                link: "RestroTypeList",
-                dropdown: false,
-                indent: true,
-              },
-              {
-                name: "Restaurant Good For",
-                link: "RestroGoodForList",
-                dropdown: false,
-                indent: true,
-              },
-              {
-                name: "Restaurant Cuisine",
-                link: "RestroCuisineList",
-                dropdown: false,
-                indent: true,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        section: "",
-        items: [
-          {
-            name: "Dish Management",
-            icon: <FaConciergeBell />,
-            link: "#",
-            dropdown: true,
-            subItems: [
-              {
-                name: "Dish Type",
-                link: "RestroDishTypeList",
-                dropdown: false,
-                indent: true,
-              },
-              {
-                name: "Dish Category",
-                link: "RestroDishCategoryList",
-                dropdown: false,
-                indent: true,
-              },
-              {
-                name: "Dish Sub Category",
-                link: "RestroDishSubCategoryList",
-                dropdown: false,
-                indent: true,
-              },
-            ],
-          },
-        ],
-        border: true,
-      },
-      {
-        section: "",
-        items: [
-          {
-            name: "Restaurant",
-            icon: <FaStore />,
-            link: "#",
-            dropdown: true,
-            subItems: [
-              { name: "Restaurant's", link: "RestroList", dropdown: false },
-            ],
-          },
-        ],
-        border: true,
-      },
-      {
-        section: "",
-        items: [
-          {
-            name: "Dish",
-            icon: <RestaurantIcon />,
-            link: "#",
-            dropdown: true,
-            subItems: [{ name: "Dishes", link: "DishesList", dropdown: false }],
-          },
-        ],
-        border: true,
-      },
-      {
-        section: "",
-        items: [
-          {
-            name: "Feedback Management",
-            icon: <FaCommentDots />,
-            link: "#",
-            dropdown: true,
-            subItems: [
-              {
-                name: "Restaurants Review",
-                link: "RestaurantReviewList",
-                dropdown: false,
-              },
-              {
-                name: "Dishes Review",
-                link: "DishReviewList",
-                dropdown: false,
-              },
-              {
-                name: "Manage HashTag's",
-                link: "HashtagList",
-                dropdown: false,
-              },
-            ],
-          },
-        ],
-        border: true,
-      },
-      {
-        section: "",
-        items: [
-          {
             name: "CMS Management",
             icon: <GroupWorkIcon />,
             link: "#",
             dropdown: true,
             subItems: [
+              { name: "Reports", link: "ReportList", dropdown: false },
               {
                 name: "Query & Feedback",
                 link: "#",
@@ -605,32 +492,112 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         ],
         border: true,
       },
-       {
-        section: "",
-        items: [
-          {
-            name: "Notification Management",
-            icon: <NotificationsActiveIcon />,
-            link: "#",
-            dropdown: true,
-            subItems: [{ name: "Notifications", link: "NotificationList", dropdown: false }],
-          },
-        ],
-        border: true,
-      },
+
       {
         section: "",
         items: [
           {
-            name: "Report Management",
-            icon: <DescriptionIcon  />,
+            name: "Restaurant",
+            icon: <FaStore className="w-5 h-5" />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Reports", link: "ReportList", dropdown: false }],
+            subItems: [
+
+              {
+                name: "Restaurant Management",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Amenities", link: "RestroAmenityList", dropdown: false },
+                  {
+                    name: "Type",
+                    link: "RestroTypeList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Good For",
+                    link: "RestroGoodForList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Cuisine",
+                    link: "RestroCuisineList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Restaurant's List", link: "RestroList", dropdown: false },
+
+            ],
           },
         ],
         border: true,
       },
+
+
+      {
+        section: "",
+        items: [
+          {
+            name: "Dishes",
+            icon: <RestaurantIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+
+              {
+                name: "Dish Management",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Category", link: "RestroDishCategoryList", dropdown: false },
+                  {
+                    name: "Sub Category",
+                    link: "RestroDishSubCategoryList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Dishes List", link: "DishesList", dropdown: false },
+
+            ],
+          },
+        ],
+        border: true,
+      },
+
+      {
+        section: "",
+        items: [
+          {
+            name: "Feedback & Notification",
+            icon: <FaCommentDots className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+              {
+                name: "Feedback",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Restaurants Review", link: "RestaurantReviewList", dropdown: false },
+                  {
+                    name: "Dishes Review",
+                    link: "DishReviewList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Notification", link: "NotificationList", dropdown: false },
+
+            ],
+          },
+        ],
+        border: true,
+      },
+
+
+
     ],
 
     admin: [

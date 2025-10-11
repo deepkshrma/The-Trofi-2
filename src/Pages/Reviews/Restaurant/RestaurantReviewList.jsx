@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import { STAR_RATINGS } from "../../../config/hashtagconfig";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
-import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import Pagination from "../../../components/common/Pagination/Pagination";
 
 import {
   FaStar,
@@ -25,50 +25,71 @@ import { BASE_URL } from "../../../config/Config";
 export default function RestaurantReviewList() {
   const [reviews, setReviews] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0,
+    pageSize: 10,
+  });
+  const [kpi, setKpi] = useState({
+    total: 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+    published: 0,
+  });
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
-
-  // ✅ Fetch reviews from API
-  useEffect(() => {
-    const fetchReviews = async () => {
+  // ✅ Fetch Reviews from backend (with pagination, filters, search)
+  const fetchReviews = async (
+    page = 1,
+    search = "",
+    status = statusFilter
+  ) => {
+    try {
+      setLoading(true);
       const authData = JSON.parse(localStorage.getItem("trofi_user"));
       const token = authData?.token;
-
       if (!token) {
         toast.error("Please login first");
-        navigate("/login"); // redirect to login if no token
+        navigate("/login");
         return;
       }
-      try {
-        const res = await axios.get(
-          `${BASE_URL}/admin/get-ratings?type=Restaurant`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
 
-        if (res.data?.success) {
-          setReviews(res.data.data?.ratings || []);
-        } else {
-          toast.error(res.data?.message || "Failed to load reviews");
+      const res = await axios.get(
+        `${BASE_URL}/admin/get-ratings?type=Restaurant&page=${page}&limit=${pagination.pageSize}&search=${search}&status=${status}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Error while fetching reviews");
+      );
+
+      if (res.data?.success) {
+        const { ratings, page, limit, totalCount, kpi } = res.data.data;
+        setReviews(ratings || []);
+        setPagination({
+          currentPage: page,
+          totalPages: Math.ceil(totalCount / limit),
+          totalRecords: totalCount,
+          pageSize: limit,
+        });
+        setKpi(kpi || {});
+      } else {
+        toast.error(res.data?.message || "Failed to fetch reviews");
       }
-    };
+    } catch (err) {
+      console.error(err);
+      toast.error("Error fetching reviews");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchReviews();
+  useEffect(() => {
+    fetchReviews(1);
   }, []);
-
-  // ✅ Filter reviews based on search
-  const filteredReviews = reviews.filter(
-    (rev) =>
-      rev.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      rev.typeId?.restro_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   // ✅ Export Excel
   const handleExport = () => {
@@ -98,90 +119,90 @@ export default function RestaurantReviewList() {
     <div className="main main_page p-6 duration-900">
       {/* ✅ Breadcrumbs */}
       <BreadcrumbsNav
-        customTrail={[
-          {
-            label: "Restaurant Review List",
-            path: "/RestaurantReviewList",
-          }
-
-        ]}
+        customTrail={[{ label: "Restaurant Review List", path: "/RestaurantReviewList" }]}
       />
       <PageTitle title={"Restaurant Reviews List"} />
 
       {/* ✅ KPI Cards */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className=" bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+        <div className="bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between items-center">
           <div>
             <h4 className="text-[14px]">Total Reviews</h4>
-            <p className="text-[22px] font-semibold">{reviews.length}</p>
+            <p className="text-[22px] font-semibold">{kpi.total}</p>
           </div>
-          <div>
-            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
-              <FaStar size={35} className="text-blue-900" />
-            </div>
+          <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
+            <FaStar size={35} className="text-blue-900" />
           </div>
         </div>
-        <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between">
+
+        <div className="p-3 bg-green-500 rounded-xl text-white h-[100px] flex justify-between items-center">
           <div>
-            <h4 className="text-[14px]">Accepted Reviews</h4>
-            <p className="text-[22px] font-semibold">
-              {reviews.filter((u) => u.status === "accepted").length}
-            </p>
+            <h4 className="text-[14px]">Approved Reviews</h4>
+            <p className="text-[22px] font-semibold">{kpi.approved}</p>
           </div>
-          <div>
-            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
-              <FaCheckCircle size={35} className="text-green-500" />
-            </div>
+          <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
+            <FaCheckCircle size={35} className="text-green-500" />
           </div>
         </div>
-        <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between">
+
+        <div className="p-3 bg-yellow-500 rounded-xl text-white h-[100px] flex justify-between items-center">
           <div>
             <h4 className="text-[14px]">Pending Reviews</h4>
-            <p className="text-[22px] font-semibold">
-              {reviews.filter((u) => u.status === "pending").length}
-            </p>
+            <p className="text-[22px] font-semibold">{kpi.pending}</p>
           </div>
-          <div>
-            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
-              <FaHourglassHalf size={35} className="text-yellow-500" />
-            </div>
+          <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
+            <FaHourglassHalf size={35} className="text-yellow-500" />
           </div>
         </div>
-        <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between">
+
+        <div className="p-3 bg-red-500 rounded-xl text-white h-[100px] flex justify-between items-center">
           <div>
-            <h4 className="text-[14px]">Denied Reviews</h4>
-            <p className="text-[22px] font-semibold">
-              {reviews.filter((u) => u.status === "denied").length}
-            </p>
+            <h4 className="text-[14px]">Rejected Reviews</h4>
+            <p className="text-[22px] font-semibold">{kpi.rejected}</p>
           </div>
-          <div>
-            <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
-              <FaTimesCircle size={35} className="text-red-500" />
-            </div>
+          <div className="w-15 h-15 bg-white/60 rounded-3xl flex justify-center items-center">
+            <FaTimesCircle size={35} className="text-red-500" />
           </div>
         </div>
       </div>
 
-      {/* ✅ Table */}
+      {/* ✅ Table Section */}
       <div className="mt-2 bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
-        {/* Search + Controls */}
-        <div className="flex justify-between items-center m-3">
+        {/* Search + Filter + Export */}
+        <div className="flex flex-wrap justify-between gap-3 items-center m-3">
+          {/* Search */}
           <input
             type="text"
             placeholder="Search by user/restaurant..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              fetchReviews(1, e.target.value, statusFilter);
+            }}
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
 
-          <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
-              onClick={() => toast.info("Filter feature coming soon")}
-            >
-              <FiFilter size={20} /> Filter
-            </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Filter */}
+            <div className="flex items-center border border-gray-300 rounded-lg px-2 bg-white">
+              <FiFilter size={18} className="text-gray-500" />
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  fetchReviews(1, searchTerm, e.target.value);
+                }}
+                className="outline-none p-2 bg-transparent text-gray-700 text-sm cursor-pointer"
+              >
+                <option value="">All Status</option>
+                <option value="approved">Approved</option>
+                <option value="pending">Pending</option>
+                <option value="rejected">Rejected</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
 
+            {/* Export */}
             <button
               className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
               onClick={handleExport}
@@ -191,76 +212,84 @@ export default function RestaurantReviewList() {
           </div>
         </div>
 
-        <table className="w-full border-collapse">
+        {/* Table */}
+        <table className="w-full border-collapse text-sm md:text-base">
           <thead>
             <tr className="bg-gray-300 text-left">
               <th className="p-3 whitespace-nowrap">S.No</th>
               <th className="p-3 whitespace-nowrap">User Name</th>
-              <th className="p-3 whitespace-nowrap">Restro Name</th>
+              <th className="p-3 whitespace-nowrap">Restaurant Name</th>
               <th className="p-3 whitespace-nowrap">Rating Label</th>
               <th className="p-3 whitespace-nowrap">Rating</th>
               <th className="p-3 whitespace-nowrap">Status</th>
-              <th className="p-3 whitespace-nowrap">Action</th>
+              <th className="p-3 whitespace-nowrap text-center">Action</th>
             </tr>
           </thead>
-          <tbody>
-            {filteredReviews.map((rev, idx) => (
-              <tr
-                key={rev._id}
-                className="border-b border-gray-300 hover:bg-gray-50 transition-colors"
-              >
-                <td className="p-3 whitespace-nowrap">{idx + 1}</td>
-                <td className="p-3 whitespace-nowrap">
-                  {rev.userId?.name || "Anonymous"}
-                </td>
-                <td className="p-3 whitespace-nowrap">
-                  {rev.typeId?.restro_name || "-"}
-                </td>
-                <td className="p-3 whitespace-nowrap">
-                  {STAR_RATINGS[rev.star_value - 1]?.label ||
-                    rev.rating_label}
-                </td>
-                <td className="p-3">
-                  <img
-                    src={STAR_RATINGS[rev.star_value - 1]?.img}
-                    alt={STAR_RATINGS[rev.star_value - 1]?.label || "star"}
-                    className="w-10 h-10 md:w-12 md:h-12"
-                  />
-                </td>
-                <td className="p-3">
-                  <span
-                    className={`inline-block min-w-[90px] text-center px-3 py-1 rounded-full text-xs font-semibold capitalize 
-      ${rev.status === "accepted"
-                        ? "bg-green-100 text-green-700 border border-green-300"
-                        : rev.status === "denied"
-                          ? "bg-red-100 text-red-700 border border-red-300"
-                          : rev.status === "published"
-                            ? "bg-[#FFF4EC] text-[#F9832B] border border-[#F9832B]/40"
-                            : rev.status === "pending"
-                              ? "bg-gray-100 text-gray-700 border border-gray-300"
-                              : "bg-gray-50 text-gray-600 border border-gray-200"
-                      }`}
-                  >
-                    {rev.status}
-                  </span>
-                </td>
 
-                <td className="p-3">
-                  <div className="cursor-pointer">
-                    <FaRegEye
-                      size={20}
-                      onClick={() =>
-                        navigate(`/RestaurantReview/${rev._id}`, {
-                          state: rev,
-                        })
-                      }
-                    />
-                  </div>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="7" className="text-center p-4 text-gray-500">
+                  Loading...
                 </td>
               </tr>
-            ))}
+            ) : reviews.length > 0 ? (
+              reviews.map((rev, idx) => (
+                <tr
+                  key={rev._id}
+                  className="border-b border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="p-3 whitespace-nowrap">
+                    {(pagination.currentPage - 1) * pagination.pageSize + (idx + 1)}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {rev.userId?.name || "Anonymous"}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {rev.typeId?.restro_name || "-"}
+                  </td>
+                  <td className="p-3 whitespace-nowrap">
+                    {STAR_RATINGS[rev.star_value - 1]?.label || rev.rating_label}
+                  </td>
+                  <td className="p-3">
+                    <img
+                      src={STAR_RATINGS[rev.star_value - 1]?.img}
+                      alt={STAR_RATINGS[rev.star_value - 1]?.label || "star"}
+                      className="w-10 h-10 md:w-12 md:h-12"
+                    />
+                  </td>
+                  <td className="p-3">
+                    <span
+                      className={`inline-block min-w-[90px] text-center px-3 py-1 rounded-full text-xs font-semibold capitalize 
+                      ${
+                        rev.status === "approved"
+                          ? "bg-green-100 text-green-700 border border-green-300"
+                          : rev.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
+                          : rev.status === "rejected"
+                          ? "bg-red-100 text-red-700 border border-red-300"
+                          : rev.status === "published"
+                          ? "bg-blue-100 text-blue-700 border border-blue-300"
+                          : "bg-gray-100 text-gray-700 border border-gray-300"
+                      }`}
+                    >
+                      {rev.status}
+                    </span>
+                  </td>
 
-            {filteredReviews.length === 0 && (
+                  <td className="p-3 text-center">
+                    <button
+                      onClick={() =>
+                        navigate(`/RestaurantReview/${rev._id}`, { state: rev })
+                      }
+                      className="cursor-pointer text-gray-700 hover:text-[#F9832B]"
+                    >
+                      <FaRegEye size={20} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
               <tr>
                 <td colSpan="7" className="text-center p-4 text-gray-500">
                   No reviews found.
@@ -269,6 +298,16 @@ export default function RestaurantReviewList() {
             )}
           </tbody>
         </table>
+
+        {/* ✅ Pagination */}
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalItems={pagination.totalRecords}
+          itemsPerPage={pagination.pageSize}
+          totalPages={pagination.totalPages}
+          onPageChange={(page) => fetchReviews(page, searchTerm, statusFilter)}
+          type="backend"
+        />
       </div>
     </div>
   );

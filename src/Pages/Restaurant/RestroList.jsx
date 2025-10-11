@@ -193,59 +193,59 @@ function RestroList() {
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
-  {/* Total Restaurants */}
-  <div className="bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
-    <div>
-      <h4 className="text-[14px]">Total Restaurants</h4>
-      <p className="text-[22px] font-semibold">{kpi.total}</p>
-    </div>
-    <div>
-      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
-        <FaUtensils size={35} className="text-white" />
-      </div>
-    </div>
-  </div>
+          {/* Total Restaurants */}
+          <div className="bg-blue-900 p-3 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Total Restaurants</h4>
+              <p className="text-[22px] font-semibold">{kpi.total}</p>
+            </div>
+            <div>
+              <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+                <FaUtensils size={35} className="text-white" />
+              </div>
+            </div>
+          </div>
 
-  {/* Veg Restaurants */}
-  <div className="bg-[#4BAA31] p-3 rounded-xl text-white h-[100px] flex justify-between">
-    <div>
-      <h4 className="text-[14px]">Veg Restaurants</h4>
-      <p className="text-[22px] font-semibold">{kpi.veg}</p>
-    </div>
-    <div>
-      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
-        <FaLeaf size={35} className="text-white" />
-      </div>
-    </div>
-  </div>
+          {/* Veg Restaurants */}
+          <div className="bg-[#4BAA31] p-3 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Veg Restaurants</h4>
+              <p className="text-[22px] font-semibold">{kpi.veg}</p>
+            </div>
+            <div>
+              <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+                <FaLeaf size={35} className="text-white" />
+              </div>
+            </div>
+          </div>
 
-  {/* Non-Veg Restaurants */}
-  <div className="bg-[#D35400] p-3 rounded-xl text-white h-[100px] flex justify-between">
-    <div>
-      <h4 className="text-[14px]">Non-Veg Restaurants</h4>
-      <p className="text-[22px] font-semibold">{kpi.nonVeg}</p>
-    </div>
-    <div>
-      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
-        <FaDrumstickBite size={35} className="text-white" />
-      </div>
-    </div>
-  </div>
+          {/* Non-Veg Restaurants */}
+          <div className="bg-[#D35400] p-3 rounded-xl text-white h-[100px] flex justify-between">
+            <div>
+              <h4 className="text-[14px]">Non-Veg Restaurants</h4>
+              <p className="text-[22px] font-semibold">{kpi.nonVeg}</p>
+            </div>
+            <div>
+              <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+                <FaDrumstickBite size={35} className="text-white" />
+              </div>
+            </div>
+          </div>
 
-  {/* Hygiene Restaurants */}
-  <div className="p-3 rounded-xl text-white h-[100px] flex justify-between bg-gradient-to-r from-[#4BAA31] to-[#1C8300]">
-    <div>
-      <h4 className="text-[14px]">Hygiene Restaurants</h4>
-      <p className="text-[22px] font-semibold">{kpi.hygiene}</p>
-    </div>
-    <div>
-      <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
-        <FaShieldAlt size={35} className="text-white" />
-      </div>
-    </div>
-  </div>
+          {/* Hygiene Restaurants */}
+          <div className="p-3 rounded-xl text-white h-[100px] flex justify-between bg-gradient-to-r from-[#4BAA31] to-[#1C8300]">
+            <div>
+              <h4 className="text-[14px]">Hygiene Restaurants</h4>
+              <p className="text-[22px] font-semibold">{kpi.hygiene}</p>
+            </div>
+            <div>
+              <div className="w-15 h-15 bg-white/20 rounded-3xl flex justify-center items-center">
+                <FaShieldAlt size={35} className="text-white" />
+              </div>
+            </div>
+          </div>
 
-</div>
+        </div>
 
 
 
@@ -255,7 +255,7 @@ function RestroList() {
             {/* 🔍 Search input */}
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="Search by Restaurant Name"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);

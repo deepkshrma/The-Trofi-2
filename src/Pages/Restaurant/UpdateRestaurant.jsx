@@ -10,6 +10,7 @@ import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBr
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -347,14 +348,12 @@ function UpdateRestaurant() {
 
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
-      {/* <Breadcrumbs
+      <BreadcrumbsNav
         customTrail={[
-          {
-            label: "Update Restaurant",
-            path: `/UpdateRestaurant/:${restaurantData.role_id}`,
-          },
+          { label: "Restaurant List", path: "/RestroList" },
+          { label: "Update Restaurant", path: `/UpdateRestaurant/${restaurantData.id}` },
         ]}
-      /> */}
+      />
       <PageTitle title={"Update Restaurant"} />
       {/*  Basic Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200 mt-5">
