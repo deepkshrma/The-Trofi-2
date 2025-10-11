@@ -1,62 +1,61 @@
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
-import { useState, useEffect } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import React, { useState, useEffect } from "react";
+import Map, { Marker } from "react-map-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import MapboxGL from "mapbox-gl";
 
-// Fix default marker issue with Vite + Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+// Set your Mapbox access token
+MapboxGL.accessToken =
+  "pk.eyJ1IjoiYWoxODE4MTgiLCJhIjoiY21mb3owOXRiMGJ1MTJrc2Z4dHVpdGNneSJ9.MhXMnGKgPp_NuRrksweolw";
 
-// Component to update map view
-function Recenter({ position }) {
-  const map = useMap();
-  useEffect(() => {
-    if (position) {
-      map.setView(position, 14); // zoom to location
-      setTimeout(() => map.invalidateSize(), 1000);
-    }
-  }, [position, map]);
-  return null;
-}
+export default function LocationPicker({ address, onLocationSelect }) {
+  // Default position (Delhi)
+  const [position, setPosition] = useState({ lat: 28.6139, lng: 77.209 });
 
-export default function LocationPicker({ address }) {
-  const [position, setPosition] = useState([28.6139, 77.209]); 
-
+  // Fetch coordinates when address changes
   useEffect(() => {
     if (address) {
       fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
           address
-        )}`
+        )}.json?access_token=${MapboxGL.accessToken}`
       )
         .then((res) => res.json())
         .then((data) => {
-          if (data.length > 0) {
-            const { lat, lon } = data[0];
-            setPosition([parseFloat(lat), parseFloat(lon)]);
+          if (data.features && data.features.length > 0) {
+            const [lng, lat] = data.features[0].center;
+            setPosition({ lat, lng });
+            if (onLocationSelect) onLocationSelect({ lat, lng });
           }
         })
         .catch((err) => console.error("Geocoding error:", err));
     }
   }, [address]);
 
+  // Update parent on marker drag
+  const handleDragEnd = (evt) => {
+    const { lngLat } = evt;
+    setPosition({ lat: lngLat.lat, lng: lngLat.lng });
+    if (onLocationSelect) onLocationSelect({ lat: lngLat.lat, lng: lngLat.lng });
+  };
+
   return (
-    <MapContainer
-      center={position}
-      zoom={13}
-      style={{ height: "300px", width: "100%" }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution="&copy; OpenStreetMap contributors"
-      />
-      <Marker position={position} />
-      <Recenter position={position} />
-    </MapContainer>
+    <div style={{ height: "300px", width: "100%" }}>
+      <Map
+        initialViewState={{
+          longitude: position.lng,
+          latitude: position.lat,
+          zoom: 13,
+        }}
+        mapStyle="mapbox://styles/mapbox/streets-v11"
+        mapboxAccessToken={MapboxGL.accessToken}
+      >
+        <Marker
+          longitude={position.lng}
+          latitude={position.lat}
+          draggable
+          onDragEnd={handleDragEnd}
+        />
+      </Map>
+    </div>
   );
 }

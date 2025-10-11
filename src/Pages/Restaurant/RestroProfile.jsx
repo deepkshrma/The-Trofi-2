@@ -10,8 +10,7 @@ import profileImg from "../../assets/images/profileImg.jpg";
 import profileImg1 from "../../assets/images/profileImg1.jpg";
 import profileImg2 from "../../assets/images/profileImg2.jpg";
 import bannerLogo from "../../assets/images/bannerLogo.png";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
