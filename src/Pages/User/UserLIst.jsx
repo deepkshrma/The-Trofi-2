@@ -547,11 +547,6 @@ function UserList() {
                   <option value="suspended">Suspended</option>
                   <option value="banned">Banned</option>
                   <option value="spam">Spam</option>
-                  {availableStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </option>
-                  ))}
                 </select>
 
               </div>

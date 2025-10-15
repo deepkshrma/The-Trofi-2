@@ -424,19 +424,6 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         ],
         border: true,
       },
-      // {
-      //   section: "",
-      //   items: [
-      //     {
-      //       name: "Role Management",
-      //       icon: <GroupWorkIcon />,
-      //       link: "#",
-      //       dropdown: true,
-      //       subItems: [{ name: "Roles", link: "RoleList", dropdown: false }],
-      //     },
-      //   ],
-      //   border: true,
-      // },
       {
         section: "",
         items: [
@@ -539,39 +526,6 @@ function Sidebar({ setIs_Toggle, isToggle }) {
         ],
         border: true,
       },
-
-
-      // {
-      //   section: "",
-      //   items: [
-      //     {
-      //       name: "Dishes",
-      //       icon: <RestaurantIcon />,
-      //       link: "#",
-      //       dropdown: true,
-      //       subItems: [
-
-      //         {
-      //           name: "Dish Management",
-      //           link: "#",
-      //           dropdown: true,
-      //           subItems: [
-      //             { name: "Category", link: "RestroDishCategoryList", dropdown: false },
-      //             {
-      //               name: "Sub Category",
-      //               link: "RestroDishSubCategoryList",
-      //               dropdown: false,
-      //             },
-      //           ],
-      //         },
-             
-
-      //       ],
-      //     },
-      //   ],
-      //   border: true,
-      // },
-
       {
         section: "",
         items: [

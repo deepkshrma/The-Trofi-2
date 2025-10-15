@@ -65,6 +65,15 @@ function UpdateRestaurant() {
   const [deletedGallery, setDeletedGallery] = useState([]);
 
 
+  // Add with your other useState hooks
+  const [showDishTypeModal, setShowDishTypeModal] = useState(false);
+  const [pendingDishType, setPendingDishType] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false); // optional spinner state
+
+
+
+
+
 
 
   const [loading, setLoading] = useState(true);
@@ -265,6 +274,49 @@ function UpdateRestaurant() {
       setRestaurantData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
+  // Add this handler near your other functions inside the component
+  const handleConfirmDishTypeRemove = async (dishType) => {
+    try {
+      setConfirmLoading(true);
+
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      // API call to disable dishes that belong to dishType._id
+      // Ensure your backend endpoint matches this path; change if needed.
+      const res = await axios.put(
+        `${BASE_URL}/admin/disable-dishes-by-type/${dishType._id}`,
+        { restaurantId: id }, // <-- send current restaurant id
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+
+      if (res?.data?.success) {
+        toast.success(`${dishType.name || "Dish Type"} removed. Related dishes disabled.`);
+
+        // Remove the dishType id from restaurantData.dish_type
+        setRestaurantData((prev) => ({
+          ...prev,
+          dish_type: prev.dish_type.filter((id) => id !== dishType._id),
+        }));
+      } else {
+        toast.error(res?.data?.message || "Failed to disable related dishes.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while disabling dishes.");
+    } finally {
+      setConfirmLoading(false);
+      setShowDishTypeModal(false);
+      setPendingDishType(null);
+    }
+  };
+
 
   const handleSubmit = async () => {
     try {
@@ -693,7 +745,7 @@ function UpdateRestaurant() {
               htmlFor="birthYear"
               className="block mb-1 font-medium text-gray-600"
             >
-              Select Birth Year
+              Established Year
             </label>
             <select
               name="birthYear"
@@ -841,53 +893,129 @@ function UpdateRestaurant() {
           { label: "Dish Type", field: "dish_type", options: dishTypes },
           { label: "Cuisines", field: "cuisines", options: cuisines },
           { label: "Good For", field: "good_for", options: goodFors },
-          {
-            label: "Restaurant Type",
-            field: "restaurant_type",
-            options: restroTypes,
-          },
+          { label: "Restaurant Type", field: "restaurant_type", options: restroTypes },
           { label: "Amenities", field: "amenities", options: amenities },
         ].map(({ label, field, options }) => (
-          <div
-            key={field}
-            className="mb-6 shadow-xl p-3 rounded-lg bg-gray-100"
-          >
-            <label className="block mb-2 text-lg font-bold text-gray-700">
-              {label}
-            </label>
+          <div key={field} className="mb-6 shadow-xl p-3 rounded-lg bg-gray-100">
+            <label className="block mb-2 text-lg font-bold text-gray-700">{label}</label>
             <div className="flex gap-3 flex-wrap">
               {options.map((item) => {
-                const isSelected = restaurantData[field].includes(item._id);
+                const isSelected = Array.isArray(restaurantData[field]) && restaurantData[field].includes(item._id);
+
+                // Label text fallback (same as your original)
+                const displayName =
+                  item.name ||
+                  item.amenity_name ||
+                  item.cuisine_name ||
+                  item.good_for_name ||
+                  item.restaurant_type_name ||
+                  "Unnamed";
+
                 return (
                   <button
                     key={item._id}
                     type="button"
-                    onClick={() =>
-                      setRestaurantData((prev) => {
-                        const updatedArray = isSelected
-                          ? prev[field].filter((id) => id !== item._id)
-                          : [...prev[field], item._id];
-                        return { ...prev, [field]: updatedArray };
-                      })
-                    }
+                    onClick={() => {
+                      // Special behavior ONLY for Dish Type unselect -> show modal
+                      if (label === "Dish Type") {
+                        if (isSelected) {
+                          // user is attempting to remove a selected dish type -> ask for confirmation
+                          setPendingDishType(item);
+                          setShowDishTypeModal(true);
+                        } else {
+                          // normal select
+                          setRestaurantData((prev) => ({
+                            ...prev,
+                            [field]: [...(prev[field] || []), item._id],
+                          }));
+                        }
+                      } else {
+                        // Keep other fields exactly as before (toggle behavior)
+                        setRestaurantData((prev) => {
+                          const updatedArray = isSelected
+                            ? (prev[field] || []).filter((id) => id !== item._id)
+                            : [...(prev[field] || []), item._id];
+                          return { ...prev, [field]: updatedArray };
+                        });
+                      }
+                    }}
                     className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer shadow-sm transition ${isSelected
                       ? "bg-[#F9832B] text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                   >
-                    {item.name ||
-                      item.amenity_name ||
-                      item.cuisine_name ||
-                      item.good_for_name ||
-                      item.restaurant_type_name ||
-                      "Unnamed"}
+                    {displayName}
                   </button>
                 );
               })}
             </div>
           </div>
         ))}
+
+        {/* Dish Type confirmation modal (only displayed when attempting to remove a selected Dish Type) */}
+        {showDishTypeModal && pendingDishType && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* backdrop */}
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => {
+                if (!confirmLoading) {
+                  setShowDishTypeModal(false);
+                  setPendingDishType(null);
+                }
+              }}
+            />
+
+            {/* modal card */}
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 z-10">
+              {/* Close */}
+              <button
+                onClick={() => {
+                  if (!confirmLoading) {
+                    setShowDishTypeModal(false);
+                    setPendingDishType(null);
+                  }
+                }}
+                className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-lg"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Remove Dish Type</h3>
+              <p className="text-gray-600 text-sm mb-6">
+                If you remove{" "}
+                <span className="font-semibold text-gray-800">{pendingDishType.name || "this dish type"}</span>, all related dishes will be{" "}
+                <span className="text-red-500 font-semibold">disabled</span>. Do you want to continue?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    if (!confirmLoading) {
+                      setShowDishTypeModal(false);
+                      setPendingDishType(null);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
+                  disabled={confirmLoading}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => handleConfirmDishTypeRemove(pendingDishType)}
+                  className={`px-4 py-2 rounded-lg text-white cursor-pointer ${confirmLoading ? "bg-[#e67600] opacity-80" : "bg-[#F9832B] hover:bg-[#e67600]"}`}
+                  disabled={confirmLoading}
+                >
+                  {confirmLoading ? "Processing..." : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
 
       {/* Location Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
@@ -973,7 +1101,52 @@ function UpdateRestaurant() {
       >
         Update Restaurant
       </button>
+
+      {/* {showDishTypeModal && selectedDishType && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+            >
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">
+                Remove Dish Type
+              </h2>
+              <p className="text-gray-600 text-sm mb-6">
+                If you remove <span className="font-semibold">{selectedDishType.name}</span>,
+                all related dishes will be <span className="text-red-500 font-semibold">disabled</span>.
+                Do you really want to continue?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowDishTypeModal(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => handleConfirmDisable(selectedDishType._id)}
+                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )} */}
+
     </div>
+
   );
 }
 

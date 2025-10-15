@@ -148,7 +148,7 @@ function DishesList() {
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
       <BreadcrumbsNav
-        customTrail={[ { label: "Restaurant List", path: "/RestroList" },{ label: "Dishes List", path: "/DishesList/:restaurantId" }]}
+        customTrail={[{ label: "Restaurant List", path: "/RestroList" }, { label: "Dishes List", path: "/DishesList/:restaurantId" }]}
       />
 
       {/* Header */}
@@ -254,6 +254,7 @@ function DishesList() {
               <th className="p-3 border-b border-gray-300">Dish Name</th>
               <th className="p-3 border-b border-gray-300">Restaurant</th>
               <th className="p-3 border-b border-gray-300">Description</th>
+              <th className="p-3 border-b border-gray-300">Available</th>
               <th className="p-3 border-b border-gray-300">Price (₹)</th>
               <th className="p-3 border-b border-gray-300">Action</th>
             </tr>
@@ -289,6 +290,15 @@ function DishesList() {
                   <td className="p-3 border-b border-gray-200 font-medium">{dish.dish_name}</td>
                   <td className="p-3 border-b border-gray-200">{dish.restaurantId?.restro_name || "N/A"}</td>
                   <td className="p-3 border-b border-gray-200">{dish.description}</td>
+                  <td className="p-3 border-b border-gray-200">
+                    <span
+                      className={`px-2 py-1 rounded-full text-white text-sm font-medium ${dish.isAvailable ? "bg-green-500" : "bg-red-500"
+                        }`}
+                    >
+                      {dish.isAvailable ? "Yes" : "No"}
+                    </span>
+                  </td>
+
                   <td className="p-3 border-b border-gray-200">₹{dish.price}</td>
                   <td className="p-3 border-b border-gray-200">
                     <button

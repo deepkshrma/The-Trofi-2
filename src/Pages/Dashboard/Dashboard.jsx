@@ -8,7 +8,7 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import {
   FiUsers,
   FiFileText,
-  FiDollarSign,
+  FiStar,
   FiCoffee,
   FiChevronDown,
   FiEye,
@@ -78,6 +78,7 @@ const SkeletonListItem = () => (
 );
 
 
+
 const StatCard = React.memo(function StatCard({
   title,
   value,
@@ -127,7 +128,7 @@ export default function Dashboard() {
   const [reviewsSort, setReviewsSort] = useState("Newest");
 
   const [selectedCheckinRange, setSelectedCheckinRange] = useState("today");
-  const [selectedRatingType, setSelectedRatingType] = useState("overall");
+  const [selectedRatingType, setSelectedRatingType] = useState("restaurant");
   const [selectedActiveType, setSelectedActiveType] = useState("daily");
   const [selectedReviewType, setSelectedReviewType] = useState("overall");
 
@@ -138,6 +139,12 @@ export default function Dashboard() {
 
   const [restaurantFilter, setRestaurantFilter] = useState("Monthly"); // for restaurant graph
   const [userFilter, setUserFilter] = useState("Monthly"); // for user graph
+
+  // Users graph filter
+  const [userGraphFilter, setUserGraphFilter] = useState("Monthly");
+
+  // Rating graph filter
+  const [ratingGraphFilter, setRatingGraphFilter] = useState("Monthly");
 
   const [triangleChartData, setTriangleChartData] = useState([]);
   const [triangleLoading, setTriangleLoading] = useState(false);
@@ -247,7 +254,7 @@ export default function Dashboard() {
         if (!token) return;
 
         const res = await axios.get(
-          `${BASE_URL}/admin/dashboard-graphs?filter=${customerFilter.toLowerCase()}`,
+          `${BASE_URL}/admin/dashboard-graphs?filter=${userGraphFilter.toLowerCase()}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -268,7 +275,7 @@ export default function Dashboard() {
     };
 
     fetchUserGraph();
-  }, [customerFilter]);
+  }, [userGraphFilter]);
 
   const [ratingLoading, setRatingLoading] = useState(false);
 
@@ -280,7 +287,12 @@ export default function Dashboard() {
         const token = authData?.token;
         if (!token) return;
 
-        const endpoint = `${BASE_URL}/admin/stats?filterType=${ratingType}`;
+        // Pass correct query param 'type' as backend expects
+        const endpoint =
+          ratingType === "all"
+            ? `${BASE_URL}/admin/stats`
+            : `${BASE_URL}/admin/stats?type=${ratingType === "restaurant" ? "Restaurant" : "Dish"}`;
+
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -303,44 +315,46 @@ export default function Dashboard() {
   }, [ratingType]);
 
   useEffect(() => {
-  const fetchComprehensiveStats = async () => {
-    try {
-      setTriangleLoading(true);
-      const authData = JSON.parse(localStorage.getItem("trofi_user"));
-      const token = authData?.token;
-      if (!token) return;
+    const fetchRatingGraph = async () => {
+      try {
+        setTriangleLoading(true);
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        if (!token) return;
 
-      const res = await axios.get(`${BASE_URL}/admin/comprehensive-stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        const res = await axios.get(
+          `${BASE_URL}/admin/rating-graph-data?filter=${ratingGraphFilter.toLowerCase()}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      if (res.data.success) {
-        // Choose the data based on your requirement
-        // e.g., use 'overall' for triangle chart
-        const chartSource = res.data.data.overall?.pieChartData || [];
-
-        // Map to { name, uv } format expected by BarChart
-        const mappedData = chartSource.map((item) => ({
-          name: item.name,
-          uv: item.value,
-        }));
-
-        setTriangleChartData(mappedData);
-      } else {
-        toast.error(res.data.message || "Failed to fetch chart data");
+        if (res.data.success && res.data.data.length > 0) {
+          const mappedData = res.data.data.map(item => ({
+            name: item.name,
+            date: item.date,
+            rating_5: item.rating_5 || 0,
+            rating_4: item.rating_4 || 0,
+            rating_3: item.rating_3 || 0,
+            rating_2: item.rating_2 || 0,
+            rating_1: item.rating_1 || 0,
+            total: item.total || 0,
+          }));
+          setTriangleChartData(mappedData);
+        } else {
+          setTriangleChartData([]);
+          toast.info("No rating graph data available");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Error fetching rating graph data");
         setTriangleChartData([]);
+      } finally {
+        setTriangleLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error fetching chart data");
-      setTriangleChartData([]);
-    } finally {
-      setTriangleLoading(false);
-    }
-  };
+    };
 
-  fetchComprehensiveStats();
-}, []);
+    fetchRatingGraph();
+  }, [ratingGraphFilter]); // ✅ dependency added
+
 
 
 
@@ -565,7 +579,6 @@ export default function Dashboard() {
                   <span>Average Ratings</span>
                   <div className="flex flex-wrap gap-2 mt-1">
                     {[
-                      { key: "overall", label: "All" },
                       { key: "dish", label: "Dish" },
                       { key: "restaurant", label: "Restaurant" },
                     ].map(({ key, label }) => (
@@ -583,7 +596,7 @@ export default function Dashboard() {
                 </div>
               }
               value={dashboardData.kpis.avgRatings[selectedRatingType]}
-              Icon={FiDollarSign}
+              Icon={FiStar}  // <-- changed icon here
               brand={BRAND}
             />
           </div>
@@ -630,8 +643,8 @@ export default function Dashboard() {
       {/* Middle Graphs Section (old design restored) */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Restaurant Graph */}
-        <div className="bg-white p-6 rounded-2xl shadow-md">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-6">
+          <div className="flex items-center justify-between mb-0 mt-3 ml-0 mr-2">
             <h3 className="text-xl font-semibold">Restaurant Count</h3>
             <FilterPills active={revenueFilter} onChange={setRevenueFilter} />
           </div>
@@ -648,9 +661,6 @@ export default function Dashboard() {
                 dataKey="date"
                 tickFormatter={(value) => formatTick(value, revenueFilter)}
               />
-
-
-
               <YAxis allowDecimals={false} />
               <Tooltip />
               <Area type="monotone" dataKey="count" stroke="#F97316" fillOpacity={1} fill="url(#colorRestro)" />
@@ -658,16 +668,16 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-
+        {/* pie chart */}
         <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between  mb-4">
             <h3 className="text-xl font-semibold">Rating Statistics</h3>
             <div className="flex gap-2">
               {["all", "restaurant", "dish"].map((type) => (
                 <button
                   key={type}
                   onClick={() => setRatingType(type)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition ${ratingType === type
+                  className={`px-3 py-1 rounded-full text-sm cursor-pointer font-medium transition ${ratingType === type
                     ? "bg-orange-500 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
@@ -686,13 +696,17 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={pieData}
+                    data={pieData.filter((item) => item.value > 0)}
                     cx="50%"
                     cy="50%"
                     outerRadius={100}
                     dataKey="value"
-                    label={({ percent }) => (percent > 0 ? `${(percent * 100).toFixed(0)}%` : "")}
+                    labelLine={false}
+                    label={({ percent }) =>
+                      percent > 0 ? `${(percent * 100).toFixed(0)}%` : ""
+                    }
                   >
+
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
@@ -727,10 +741,11 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* bar chart */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold">Rating</h3>
-            <FilterPills active={customerFilter} onChange={setCustomerFilter} />
+            <FilterPills active={ratingGraphFilter} onChange={setRatingGraphFilter} />
           </div>
 
           {triangleLoading ? (
@@ -739,14 +754,67 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={triangleChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="uv" shape={<TriangleBar />} label={{ position: 'top' }}>
-                  {triangleChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={triangleColors[index % triangleColors.length]} />
-                  ))}
-                </Bar>
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(value) => {
+                    const date = new Date(value);
+                    if (ratingGraphFilter.toLowerCase() === "weekly")
+                      return date.toLocaleDateString("en-US", { weekday: "short" });
+                    else if (ratingGraphFilter.toLowerCase() === "monthly")
+                      return date.getDate();
+                    else if (ratingGraphFilter.toLowerCase() === "yearly")
+                      return date.toLocaleDateString("en-US", { month: "short" });
+                    else
+                      return value;
+                  }}
+                />
+
+                <YAxis allowDecimals={false} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-3 shadow-md rounded-lg border text-sm">
+                          {payload.map((entry, index) => {
+                            const ratingNum = Number(entry.dataKey.split("_")[1]); // extract rating number (1-5)
+                            const ratingInfo = STAR_RATINGS[ratingNum - 1]; // get star image
+                            return (
+                              <div key={index} className="flex items-center gap-2 mb-1">
+                                {ratingInfo?.img ? (
+                                  <img
+                                    src={ratingInfo.img}
+                                    alt={ratingInfo.label}
+                                    className="w-5 h-5"
+                                  />
+                                ) : (
+                                  <span className="text-gray-500">⭐</span>
+                                )}
+                                <span className="font-medium text-gray-700">:- {entry.value}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+
+                {["rating_5", "rating_4", "rating_3", "rating_2", "rating_1"].map((key, index) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    name={key.replace("_", " ").toUpperCase()}
+                    shape={<TriangleBar />}
+                  >
+                    {triangleChartData.map((entry, i) => (
+                      <Cell
+                        key={`cell-${i}`}
+                        fill={triangleColors[index % triangleColors.length]}
+                      />
+                    ))}
+                  </Bar>
+                ))}
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -754,26 +822,20 @@ export default function Dashboard() {
           )}
         </div>
 
-
-
-
-
-
-
-
         {/* User Graph */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-semibold">Users Count</h3>
-            <FilterPills active={customerFilter} onChange={setCustomerFilter} />
+            <FilterPills active={userGraphFilter} onChange={setUserGraphFilter} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={graphData.userSeries}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => formatTick(value, customerFilter)}
+                tickFormatter={(value) => formatTick(value, userGraphFilter)}
               />
+
 
 
 

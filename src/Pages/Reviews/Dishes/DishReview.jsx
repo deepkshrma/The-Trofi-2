@@ -219,7 +219,7 @@ function DishReview() {
             )}`}
             onClick={() => handleSectionToggle("rating")}
           >
-            {review.views.is_rating_view ? "Accepted" : "Rejected"}
+            {review.views.is_rating_view ? "Active" : "Inactive"}
           </div>
         </div>
 
@@ -258,7 +258,7 @@ function DishReview() {
             )}`}
             onClick={() => handleSectionToggle("comment")}
           >
-            {review.views.is_comment_view ? "Accepted" : "Rejected"}
+            {review.views.is_comment_view ? "Active" : "Inactive"}
           </div>
         </div>
         <p className="text-gray-700 italic">{review.comment || "No comment available"}</p>
@@ -275,7 +275,7 @@ function DishReview() {
               )}`}
               onClick={() => handleSectionToggle("hashtag")}
             >
-              {review.views.is_hashtag_view ? "Accepted" : "Rejected"}
+              {review.views.is_hashtag_view ? "Active" : "Inactive"}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -299,7 +299,7 @@ function DishReview() {
               )}`}
               onClick={() => handleSectionToggle("tellus")}
             >
-              {review.views.is_tellus_view ? "Accepted" : "Rejected"}
+              {review.views.is_tellus_view ? "Active" : "Inactive"}
             </div>
           </div>
 
@@ -332,7 +332,7 @@ function DishReview() {
                     handleImageDecision(img._id, img.status === "approved" ? "reject" : "accept")
                   }
                 >
-                  {img.status === "approved" ? "Accepted" : "Rejected"}
+                  {img.status === "approved" ? "Active" : "Inactive"}
                 </div>
               </div>
             ))}

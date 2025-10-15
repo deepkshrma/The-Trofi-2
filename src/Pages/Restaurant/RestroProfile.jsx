@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Star, Phone, MapPin, Clock, Utensils } from "lucide-react";
+import { Star, Phone, MapPin, Clock, Utensils, ChevronLeft } from "lucide-react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { LayoutContext } from "../../Layout/Layout";
@@ -19,6 +19,9 @@ import AVATAR_PLACEHOLDER from "../../assets/images/guest.png";
 import PLACEHOLDER_IMG from "../../assets/images/logo.jpg";
 import { XCircle } from "lucide-react";
 import { Trophy } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 
 
@@ -28,6 +31,8 @@ function RestroProfile() {
   const [loading, setLoading] = useState(true);
 
   const banners = [banner1, banner2, banner3];
+  const navigate = useNavigate();
+
 
   const [restaurant, setRestaurant] = useState([]);
 
@@ -203,8 +208,19 @@ function RestroProfile() {
       className={`w-[100%] pt-[1.5rem] pb-[1rem] ${isToggle ? "pl-[19.3rem]" : ""
         } duration-900 min-h-screen `}
     >
+
       {/* Banner Carousel */}
       <div className="relative w-full h-100">
+
+        {/* Floating Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-5 left-5 z-5 flex items-center cursor-pointer gap-2 px-3 py-2 bg-white/80 backdrop-blur-md text-gray-800 rounded-full shadow-md border border-white hover:bg-[#F9832B] hover:text-white transition-all duration-300 transform hover:-translate-x-1 hover:scale-105 active:scale-95"
+        >
+          <ChevronLeft  className="w-5 h-5" />
+          {/* <span className="font-medium hidden sm:block">Back</span> */}
+        </button>
+
         <Carousel
           autoPlay
           infiniteLoop
@@ -240,6 +256,7 @@ function RestroProfile() {
           )}
         </Carousel>
 
+
         {/* Logo, Name & Rating */}
         <div className="absolute bottom-4 left-6 flex items-center gap-4 z-[1]">
           <img
@@ -260,6 +277,8 @@ function RestroProfile() {
           </div>
         </div>
       </div>
+
+
 
       {/* Restaurant Details */}
       <div className="p-6 space-y-6">
@@ -389,7 +408,7 @@ function RestroProfile() {
               {restaurant.days || "N/A"}
             </p>
             <p className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#F9832B]" /> Birth Year:{" "}
+              <Star className="w-5 h-5 text-[#F9832B]" /> Established Year:{" "}
               {restaurant.birth_year ? restaurant.birth_year : "N/A"}
             </p>
           </div>

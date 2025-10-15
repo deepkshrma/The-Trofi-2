@@ -63,6 +63,7 @@ import NotificationView from "./Pages/Notification/NotificationView";
 import NotificationPost from "./Pages/Notification/NotificationPost";
 import ReportList from "./Pages/Reports/ReportList";
 import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
+import PermissionAssign from "./Pages/Permission/PermissionAssign";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -87,6 +88,7 @@ const Allroutes = () => {
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/RoleList" element={<RoleList />} />
               <Route path="/RoleCreate" element={<RoleCreate />} />
+              <Route path="/PermissionAssign" element={<PermissionAssign />} />
               <Route path="/AdminProfile" element={<AdminProfile />} />
               <Route path="/CreateAdmin" element={<CreateAdmin />} />
               <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />

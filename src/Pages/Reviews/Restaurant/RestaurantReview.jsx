@@ -136,7 +136,7 @@ function RestaurantReview() {
         return;
       }
 
-      const payload = { images: [{ _id: imageId, is_view: decision === "accept" }] };
+      const payload = { imageUpdates: [{ id: imageId, is_view: decision === "accept" }] };
 
       await axios.patch(`${BASE_URL}/admin/update-rating-status/${review.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -236,7 +236,7 @@ function RestaurantReview() {
             )}`}
             onClick={() => handleSectionToggle("rating")}
           >
-            {review.views.is_rating_view ? "Accepted" : "Rejected"}
+            {review.views.is_rating_view ? "Active" : "Inactive"}
           </div>
         </div>
 
@@ -277,7 +277,7 @@ function RestaurantReview() {
             )}`}
             onClick={() => handleSectionToggle("comment")}
           >
-            {review.views.is_comment_view ? "Accepted" : "Rejected"}
+            {review.views.is_comment_view ? "Active" : "Inactive"}
           </div>
         </div>
         <p className="text-gray-700 italic">{review.comment || "No comment available"}</p>
@@ -294,7 +294,7 @@ function RestaurantReview() {
               )}`}
               onClick={() => handleSectionToggle("hashtag")}
             >
-              {review.views.is_hashtag_view ? "Accepted" : "Rejected"}
+              {review.views.is_hashtag_view ? "Active" : "Inactive"}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -321,7 +321,7 @@ function RestaurantReview() {
               )}`}
               onClick={() => handleSectionToggle("tellus")}
             >
-              {review.views.is_tellus_view ? "Accepted" : "Rejected"}
+              {review.views.is_tellus_view ? "Active" : "Inactive"}
             </div>
           </div>
 
@@ -367,7 +367,7 @@ function RestaurantReview() {
                     )
                   }
                 >
-                  {img.status === "approved" ? "Accepted" : "Rejected"}
+                  {img.status === "approved" ? "Active" : "Inactive"}
                 </div>
               </div>
             ))}
