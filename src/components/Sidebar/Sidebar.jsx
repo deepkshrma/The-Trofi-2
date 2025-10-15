@@ -10,6 +10,7 @@ import RestaurantIcon from "@mui/icons-material/Restaurant";
 import headerlogo from "/trofititle.png";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import DescriptionIcon from "@mui/icons-material/Description";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 /* 🔹 Recursive Sidebar Item */
 const SidebarItem = ({
@@ -418,33 +419,38 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             icon: <AdminPanelSettingsIcon />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Admins", link: "AdminList", dropdown: false }],
+            subItems: [{ name: "Admins", link: "AdminList", dropdown: false },{ name: "Roles", link: "RoleList", dropdown: false }],
           },
         ],
         border: true,
       },
-      {
-        section: "",
-        items: [
-          {
-            name: "Role Management",
-            icon: <GroupWorkIcon />,
-            link: "#",
-            dropdown: true,
-            subItems: [{ name: "Roles", link: "RoleList", dropdown: false }],
-          },
-        ],
-        border: true,
-      },
+      // {
+      //   section: "",
+      //   items: [
+      //     {
+      //       name: "Role Management",
+      //       icon: <GroupWorkIcon />,
+      //       link: "#",
+      //       dropdown: true,
+      //       subItems: [{ name: "Roles", link: "RoleList", dropdown: false }],
+      //     },
+      //   ],
+      //   border: true,
+      // },
       {
         section: "",
         items: [
           {
             name: "Master Tools",
-            icon: <FaStore className="w-5 h-5" />,
+            icon: <SettingsIcon  className="w-5 h-5" />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }],
+            subItems: [{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false },{ name: "Manage Dish Category", link: "RestroDishCategoryList", dropdown: false },
+                  {
+                    name: "Manage Dish Sub Category",
+                    link: "RestroDishSubCategoryList",
+                    dropdown: false,
+                  },],
           },
         ],
         border: true,
@@ -535,36 +541,36 @@ function Sidebar({ setIs_Toggle, isToggle }) {
       },
 
 
-      {
-        section: "",
-        items: [
-          {
-            name: "Dishes",
-            icon: <RestaurantIcon />,
-            link: "#",
-            dropdown: true,
-            subItems: [
+      // {
+      //   section: "",
+      //   items: [
+      //     {
+      //       name: "Dishes",
+      //       icon: <RestaurantIcon />,
+      //       link: "#",
+      //       dropdown: true,
+      //       subItems: [
 
-              {
-                name: "Dish Management",
-                link: "#",
-                dropdown: true,
-                subItems: [
-                  { name: "Category", link: "RestroDishCategoryList", dropdown: false },
-                  {
-                    name: "Sub Category",
-                    link: "RestroDishSubCategoryList",
-                    dropdown: false,
-                  },
-                ],
-              },
-              { name: "Dishes List", link: "DishesList", dropdown: false },
+      //         {
+      //           name: "Dish Management",
+      //           link: "#",
+      //           dropdown: true,
+      //           subItems: [
+      //             { name: "Category", link: "RestroDishCategoryList", dropdown: false },
+      //             {
+      //               name: "Sub Category",
+      //               link: "RestroDishSubCategoryList",
+      //               dropdown: false,
+      //             },
+      //           ],
+      //         },
+             
 
-            ],
-          },
-        ],
-        border: true,
-      },
+      //       ],
+      //     },
+      //   ],
+      //   border: true,
+      // },
 
       {
         section: "",
@@ -618,19 +624,19 @@ function Sidebar({ setIs_Toggle, isToggle }) {
           },
           {
             name: "Restaurant ",
-            icon: <FaStore className="w-4 h-4" />,
+            icon: <FaStore className="w-5 h-5" />,
             link: "/RestaurantProfile",
             dropdown: false,
           },
           {
             name: "Dishes ",
-            icon: <FaConciergeBell className="w-4 h-4" />,
+            icon: <FaConciergeBell className="w-5 h-5" />,
             link: "/RestaurantDishes",
             dropdown: false,
           },
           {
             name: "Reviews ",
-            icon: <FaCommentDots className="w-4 h-4" />,
+            icon: <FaCommentDots className="w-5 h-5" />,
             link: "/RestaurantReviews",
             dropdown: false,
           },

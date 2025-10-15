@@ -103,7 +103,7 @@ export default function NotificationList() {
     <div className="main main_page p-6 min-h-screen duration-900 bg-gray-50">
       <BreadcrumbsNav
         customTrail={[
-          { label: "Notification Management", path: "/NotificationList" },
+
           { label: "Notification List", path: "/NotificationList" },
         ]}
       />
@@ -151,30 +151,43 @@ export default function NotificationList() {
 
         {/* Filter Dropdown */}
         {showFilter && (
-          <div className="flex flex-col md:flex-row gap-2 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 items-center mx-3">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border p-2 rounded-lg"
-              placeholder="Start Date"
-            />
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border p-2 rounded-lg"
-              placeholder="End Date"
-            />
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-              className="border p-2 rounded-lg"
-              placeholder="Specific Date"
-            />
+          <div className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200 items-center mx-3">
+            {/* Start Date */}
+            <div className="flex flex-col">
+              <label className="text-gray-600 text-sm mb-0">Start Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-[#F9832B] outline-none"
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="flex flex-col">
+              <label className="text-gray-600 text-sm mb-0">End Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-[#F9832B] outline-none"
+              />
+            </div>
+
+            {/* Specific Date */}
+            <div className="flex flex-col">
+              <label className="text-gray-600 text-sm mb-0">Specific Date</label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-[#F9832B] outline-none"
+              />
+            </div>
+
+            {/* Apply Button */}
             <button
-              className="bg-[#F9832B] text-white cursor-pointer px-4 py-2 rounded-lg"
+              className="bg-[#F9832B] text-white mt-4 cursor-pointer px-4 py-2 rounded-lg hover:bg-[#e67600]"
               onClick={() => {
                 fetchNotifications(1);
                 setShowFilter(false);
@@ -182,8 +195,10 @@ export default function NotificationList() {
             >
               Apply
             </button>
+
+            {/* Clear Button */}
             <button
-              className="bg-gray-200 text-gray-700 px-4 py-2 cursor-pointer rounded-lg"
+              className="bg-gray-200 text-gray-700 px-4 py-2 mt-4 cursor-pointer rounded-lg hover:bg-gray-300"
               onClick={() => {
                 setStartDate("");
                 setEndDate("");
@@ -196,6 +211,7 @@ export default function NotificationList() {
             </button>
           </div>
         )}
+
 
         {/* Table */}
         {loading ? (

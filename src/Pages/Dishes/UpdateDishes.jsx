@@ -11,6 +11,8 @@ function UpdateDishes() {
   const { id } = useParams(); // dish ID from URL
   const navigate = useNavigate();
 
+  const [restaurantId, setRestaurantId] = useState(null);
+
   // Form states
   const [dishData, setDishData] = useState(null);
 
@@ -42,35 +44,23 @@ function UpdateDishes() {
     },
   };
 
-  // Fetch initial dropdowns and dish data
+  // -------------------------
+  // Fetch restaurants and dish data
+  // -------------------------
   useEffect(() => {
-    // Fetch restaurants
-    axios
-      .get(`${BASE_URL}/restro/get-restaurant-list`, config)
-      .then((res) => setRestaurants(res.data?.data || []))
-      .catch((err) => console.error(err));
+    const fetchData = async () => {
+      try {
+        // 1️⃣ Fetch restaurants
+        const resRest = await axios.get(`${BASE_URL}/restro/get-restaurant-dropdown`, config);
+        const restaurantsData = resRest.data?.data || [];
+        setRestaurants(restaurantsData);
 
-    // Fetch categories, subcategories, types, cuisines
-    axios
-      .get(`${BASE_URL}/restro/get-dish-category`)
-      .then((res) => setDishCategories(res.data?.data || []));
-    axios
-      .get(`${BASE_URL}/restro/get-dish-sub-category`)
-      .then((res) => setDishSubCategories(res.data?.data || []));
-    axios
-      .get(`${BASE_URL}/restro/get-dish-type`)
-      .then((res) => setDishTypes(res.data?.data || []));
-    axios
-      .get(`${BASE_URL}/restro/get-cusine`)
-      .then((res) => setCuisines(res.data?.data || []));
-
-    // Fetch the dish by ID
-    axios
-      .get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`)
-      .then((res) => {
-        if (res.data.success) {
-          const d = res.data.data;
+        // 2️⃣ Fetch the dish
+        const resDish = await axios.get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`);
+        if (resDish.data.success) {
+          const d = resDish.data.data;
           setDishData(d);
+          setRestaurantId(d.restaurantId?._id);
           setSelectedRestaurant({
             value: d.restaurantId._id,
             label: d.restaurantId.restro_name,
@@ -83,10 +73,6 @@ function UpdateDishes() {
             value: d.dish_sub_category._id,
             label: d.dish_sub_category.sub_categ_name,
           });
-          setSelectedDishType({
-            value: d.dish_type._id,
-            label: d.dish_type.name,
-          });
           setSelectedCuisine({
             value: d.cuisines._id,
             label: d.cuisines.name,
@@ -97,17 +83,49 @@ function UpdateDishes() {
               icon: ing.icon ? { url: `${IMAGE_URL}/${ing.icon}` } : null,
             }))
           );
-          setImages(
-            d.dish_images.map((img) => ({ url: `${IMAGE_URL}/${img}` }))
-          );
+          setImages(d.dish_images.map((img) => ({ url: `${IMAGE_URL}/${img}` })));
         }
-      })
-      .catch((err) => console.error(err));
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id]);
+
+  // -------------------------
+  // Set dish types after both dishData and restaurants are loaded
+  // -------------------------
+  useEffect(() => {
+    if (dishData && restaurants.length > 0) {
+      const selectedRestro = restaurants.find(
+        (r) => r._id === dishData.restaurantId._id
+      );
+      if (selectedRestro) {
+        const types = selectedRestro.dish_types.map((dt) => ({
+          value: dt._id,
+          label: dt.name,
+        }));
+        setDishTypes(types);
+
+        setSelectedDishType({
+          value: dishData.dish_type._id,
+          label: dishData.dish_type.name,
+        });
+      }
+    }
+  }, [dishData, restaurants]);
+
+
 
   const filteredSubCategories = dishSubCategories.filter(
     (sc) => sc.parentCategoryId === selectedDishCategory?.value
   );
+
+
 
   const addIngredient = () => {
     if (ingredient.trim() !== "") {
@@ -152,7 +170,7 @@ function UpdateDishes() {
       .patch(`${BASE_URL}/dishes/update-dish/${id}`, formData, config)
       .then(() => {
         toast.success("Dish updated successfully!");
-        navigate("/DishesList");
+        navigate(`/DishesList/${restaurantId}`);
       })
       .catch((err) => {
         console.error(err);
@@ -166,8 +184,12 @@ function UpdateDishes() {
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
         customTrail={[
-          { label: "Dishes List", path: "/DishesList" },
-          { label: "Update Dish", path: `/UpdateDishes/${id}` },
+          { label: "Restaurant List", path: "/RestroList" },
+          {
+            label: "Dishes List",
+            path: restaurantId ? `/DishesList/${restaurantId}` : "#",
+          },
+          { label: "Update Dish", path: `/UpdateDishes/:id` },
         ]}
       />
       <div className="bg-white shadow-lg rounded-2xl p-10">
@@ -226,6 +248,7 @@ function UpdateDishes() {
                 label: r.restro_name,
               }))}
               value={selectedRestaurant}
+              isDisabled
               onChange={setSelectedRestaurant}
               placeholder="Select Restaurant"
               className="w-full"
@@ -269,14 +292,16 @@ function UpdateDishes() {
           <div>
             <label className="block text-gray-600 font-medium mb-2">Type</label>
             <Select
-              options={dishTypes.map((dt) => ({
-                value: dt._id,
-                label: dt.name,
-              }))}
+              options={dishTypes}
               value={selectedDishType}
               onChange={setSelectedDishType}
               placeholder="Select Type"
+              styles={{
+                menu: (provided) => ({ ...provided, zIndex: 9999 }),
+                singleValue: (provided) => ({ ...provided, color: "#000" }),
+              }}
             />
+
           </div>
 
           <div>
@@ -302,51 +327,51 @@ function UpdateDishes() {
 
             {/* Add ingredient form */}
             <div className="flex flex-wrap items-center gap-3">
-  {/* Ingredient Name Input */}
-  <input
-    type="text"
-    value={ingredient}
-    onChange={(e) => setIngredient(e.target.value)}
-    className="flex-1 border border-gray-200 rounded-lg focus:outline-none px-4 py-1 mb-2"
-    placeholder="Enter ingredient name"
-  />
+              {/* Ingredient Name Input */}
+              <input
+                type="text"
+                value={ingredient}
+                onChange={(e) => setIngredient(e.target.value)}
+                className="flex-1 border border-gray-200 rounded-lg focus:outline-none px-4 py-1 mb-2"
+                placeholder="Enter ingredient name"
+              />
 
-  {/* Hidden File Input */}
-  <input
-    id="ingredientIcon"
-    type="file"
-    accept="image/*"
-    onChange={(e) => setIngredientIcon(e.target.files[0])}
-    className="hidden"
-  />
+              {/* Hidden File Input */}
+              <input
+                id="ingredientIcon"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setIngredientIcon(e.target.files[0])}
+                className="hidden"
+              />
 
-  {/* Choose Icon Button */}
-  <button
-    type="button"
-    onClick={() => document.getElementById("ingredientIcon").click()}
-    className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
-  >
-    Choose Icon
-  </button>
+              {/* Choose Icon Button */}
+              <button
+                type="button"
+                onClick={() => document.getElementById("ingredientIcon").click()}
+                className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
+              >
+                Choose Icon
+              </button>
 
-  {/* Preview Icon */}
-  {ingredientIcon && (
-    <img
-      src={URL.createObjectURL(ingredientIcon)}
-      alt="Preview"
-      className="w-8 h-8 rounded-full object-cover border"
-    />
-  )}
+              {/* Preview Icon */}
+              {ingredientIcon && (
+                <img
+                  src={URL.createObjectURL(ingredientIcon)}
+                  alt="Preview"
+                  className="w-8 h-8 rounded-full object-cover border"
+                />
+              )}
 
-  {/* Add Button */}
-  <button
-    type="button"
-    onClick={addIngredient}
-    className="px-4 py-2 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition"
-  >
-    Add
-  </button>
-</div>
+              {/* Add Button */}
+              <button
+                type="button"
+                onClick={addIngredient}
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600 transition"
+              >
+                Add
+              </button>
+            </div>
 
 
             {/* Ingredient chips */}

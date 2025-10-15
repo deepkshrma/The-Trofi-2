@@ -31,6 +31,19 @@ function RestroProfile() {
 
   const [restaurant, setRestaurant] = useState([]);
 
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const openImageModal = (imgUrl) => {
+    setSelectedImage(imgUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setIsImageModalOpen(false);
+  };
+
   const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
   if (!token) return toast.error("Please login first");
 
@@ -212,8 +225,10 @@ function RestroProfile() {
                   <img
                     src={src}
                     alt={`Banner-${i}`}
-                    className="w-full h-100 object-cover"
+                    className="w-full h-100 object-cover cursor-pointer"
+                    onClick={() => openImageModal(src)}
                   />
+
                   <div className="absolute inset-0 bg-black/20 bg-opacity-30 z-0"></div>
                 </div>
               );
@@ -230,9 +245,11 @@ function RestroProfile() {
           <img
             src={getImageUrl(restaurant.logo)}
             alt="Logo"
-            className="w-20 h-20 rounded-full shadow-md border-4 border-white"
+            className="w-20 h-20 rounded-full shadow-md border-4 border-white cursor-pointer"
+            onClick={() => openImageModal(getImageUrl(restaurant.logo))}
             onError={(e) => (e.currentTarget.src = AVATAR_PLACEHOLDER)}
           />
+
           <div className="text-white">
             <h1 className="text-2xl font-bold">
               {restaurant.restro_name || restaurant.name}
@@ -291,6 +308,36 @@ function RestroProfile() {
           </div>
 
         </div>
+
+        {/* ⭐ Average Rating Section */}
+        <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <Star className="w-5 h-5 text-[#F9832B]" />
+            Average Rating
+          </h2>
+
+          <div className="flex items-center gap-3">
+            <div className="relative flex items-center justify-center w-14 h-14 rounded-full bg-[#F9832B]/10">
+              <Star className="w-6 h-6 text-[#F9832B] animate-pulse" />
+              <span className="absolute text-lg font-semibold text-[#F9832B]">
+                {/* {restaurant.avgRating ? restaurant.avgRating.toFixed(1) : "N/A"} */}
+              </span>
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-gray-800 text-sm font-medium">
+                Based on user reviews
+              </p>
+              <p className="text-sm text-gray-500">
+                {restaurant.avgRating
+                  ? `${restaurant.avgRating} / 5 Reviews`
+                  : "No reviews yet"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+
         <div className="grid sm:grid-cols-2 gap-6 mt-6">
           {/* Pricing Section */}
           <div className="bg-white p-5 rounded-xl shadow-md">
@@ -347,6 +394,44 @@ function RestroProfile() {
             </p>
           </div>
         </div>
+
+
+        {/* Menu Section */}
+        {Array.isArray(menuImagesRaw) && menuImagesRaw.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {menuImagesRaw.map((menu, i) => {
+                const menuImg =
+                  typeof menu === "string"
+                    ? menu
+                    : menu.image || menu.url || menu.path || menu.src || "";
+                const src = getImageUrl(menuImg);
+                return (
+                  <div
+                    key={i}
+                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
+                  >
+                    <img
+                      src={src}
+                      alt={`Menu-${i}`}
+                      className="w-full h-40 object-cover rounded-lg cursor-pointer"
+                      onClick={() => openImageModal(src)}
+                    />
+                    <div className="mt-3">
+                      {/* If menu items have name/price fields, you may show them here */}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* <div className="flex justify-end text-blue-500 mt-5">
+              <Link to="" className="link">
+                View all
+              </Link>
+            </div> */}
+          </div>
+        )}
 
 
         {/* Amenities */}
@@ -489,46 +574,12 @@ function RestroProfile() {
             </div>
           )}
 
-        {/* Menu Section */}
-        {Array.isArray(menuImagesRaw) && menuImagesRaw.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {menuImagesRaw.map((menu, i) => {
-                const menuImg =
-                  typeof menu === "string"
-                    ? menu
-                    : menu.image || menu.url || menu.path || menu.src || "";
-                const src = getImageUrl(menuImg);
-                return (
-                  <div
-                    key={i}
-                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
-                  >
-                    <img
-                      src={src}
-                      alt={`Menu-${i}`}
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
-                    <div className="mt-3">
-                      {/* If menu items have name/price fields, you may show them here */}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* <div className="flex justify-end text-blue-500 mt-5">
-              <Link to="" className="link">
-                View all
-              </Link>
-            </div> */}
-          </div>
-        )}
+
 
         {/* Map Section */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Location</h2>
-          <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+          <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
             {hasLocation ? (
               <MapContainer
                 center={[lat, lng]}
@@ -562,13 +613,42 @@ function RestroProfile() {
                 ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
                 : "N/A"}
             </p>
-            <p className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#F9832B]" /> Avg Rating:{" "}
-              {restaurant.avgRating || "N/A"} / 5
-            </p>
+
           </div>
         </div>
       </div>
+
+
+      {isImageModalOpen && selectedImage && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+          {/* Background Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={closeImageModal}
+          ></div>
+
+          {/* Modal Box */}
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-3xl w-[90%] sm:w-auto p-4 z-10 flex flex-col items-center">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={selectedImage}
+              alt="Restaurant Preview"
+              className="max-h-[80vh] w-100 object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+
+
     </div>
   );
 }

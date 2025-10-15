@@ -31,7 +31,8 @@ const NotificationView = () => {
         });
 
         if (res.data.success) {
-          setNotification(res.data.data);
+          setNotification(res.data.data[0]);
+
         } else {
           toast.error(res.data.message || "Failed to fetch notification");
         }

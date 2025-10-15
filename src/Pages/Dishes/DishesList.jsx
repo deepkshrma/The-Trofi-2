@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { CiExport } from "react-icons/ci";
@@ -11,6 +11,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 import { MdEdit } from "react-icons/md";
 import Select from "react-select";
+
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import {
   FaUtensils,
@@ -18,7 +19,7 @@ import {
   FaHourglassHalf,
   FaTrashAlt,
 } from "react-icons/fa";
-import guest from "../../assets/images/guest.png";
+import guest from "../../assets/images/dishh.png";
 
 function DishesList() {
   const navigate = useNavigate();
@@ -27,7 +28,8 @@ function DishesList() {
   const [dishes, setDishes] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [search, setSearch] = useState("");
-  const [restaurantId, setRestaurantId] = useState("");
+  const { restaurantId } = useParams();
+
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -42,37 +44,55 @@ function DishesList() {
     deletedDishes: 0,
   });
 
-  // -------- Fetch Dishes --------
-  const fetchDishes = async (page = 1) => {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setIsImageModalOpen(false);
+  };
+  // // -------- Fetch Dishes --------
+
+  // Fetch dishes for table (search + pagination)
+  const fetchDishesForTable = async (page = 1) => {
     try {
-
       setLoading(true);
-      const { data } = await axios.get(
-        `${BASE_URL}/dishes/get-all-dishes-admin`,
-
-        {
-
-          params: {
-            page,
-            limit: pagination.pageSize,
-            search,
-            restaurantId,
-          },
-        }
-      );
-
+      const { data } = await axios.get(`${BASE_URL}/dishes/get-all-dishes-admin`, {
+        params: {
+          page,
+          limit: pagination.pageSize,
+          search,
+          restaurantId,
+        },
+      });
       setDishes(data.data.items);
+
       setPagination((prev) => ({
         ...prev,
         currentPage: page,
         totalPages: data.data.totalPages,
         totalRecords: data.data.totalItems,
       }));
+    } catch (err) {
+      console.error("Failed to fetch dishes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      // KPI update based on filtered data
+  // Fetch KPI (only when restaurant changes)
+  const fetchKpi = async () => {
+    try {
+      const { data } = await axios.get(`${BASE_URL}/dishes/get-all-dishes-admin`, {
+        params: { restaurantId, page: 1, limit: 1000 }, // fetch all for KPI
+      });
       if (data.data.kpi) setKpi(data.data.kpi);
       else {
-        // fallback: calculate from current dishes
         setKpi({
           totalDishes: data.data.items.length,
           availableDishes: data.data.items.filter(d => d.isAvailable).length,
@@ -81,43 +101,25 @@ function DishesList() {
         });
       }
     } catch (err) {
-      console.error("Failed to fetch dishes:", err);
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch KPI:", err);
     }
   };
 
-  // -------- Fetch Restaurants for filter --------
-  const fetchRestaurants = async () => {
-    const authData = JSON.parse(localStorage.getItem("trofi_user"));
-    const token = authData?.token;
-    if (!token) {
-      toast.error("Please login first");
-      navigate("/Login");
-      return;
-    }
+  // -------------------- Effects --------------------
 
-    try {
-      const { data } = await axios.get(`${BASE_URL}/restro/get-restaurant-list-admin`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (data.success) setRestaurants(data.data);
-    } catch (err) {
-      console.error("Failed to fetch restaurants:", err);
-    }
-  };
-
-  // -------- Initial load --------
+  // Fetch KPI once when restaurantId changes
   useEffect(() => {
-    fetchRestaurants();
-    fetchDishes(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (restaurantId) {
+      fetchKpi();
+      fetchDishesForTable(1); // also fetch first page of table
+    }
+  }, [restaurantId]);
 
-  // -------- Fetch on search/filter change --------
+  // Fetch table whenever search changes (do NOT update KPI)
   useEffect(() => {
-    fetchDishes(1);
-  }, [search, restaurantId]);
+    fetchDishesForTable(1);
+  }, [search]);
+
 
   // -------- Export --------
   const handleExport = () => {
@@ -146,7 +148,7 @@ function DishesList() {
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Dishes List", path: "/DishesList" }]}
+        customTrail={[ { label: "Restaurant List", path: "/RestroList" },{ label: "Dishes List", path: "/DishesList/:restaurantId" }]}
       />
 
       {/* Header */}
@@ -155,10 +157,11 @@ function DishesList() {
         <button
           className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
           style={{ backgroundColor: "#F9832B" }}
-          onClick={() => navigate("/AddDishes")}
+          onClick={() => navigate(`/AddDishes/${restaurantId}`)} // pass restaurantId in URL
         >
           <PlusCircle size={18} /> Add Dish
         </button>
+
       </div>
 
       {/* KPI Cards */}
@@ -221,47 +224,15 @@ function DishesList() {
             type="text"
             placeholder="Search by dish name..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)} // search effect is handled in useEffect
             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
           />
+
 
           {/* Right side: Restaurant dropdown + Export button */}
           <div className="flex items-center gap-3">
 
-            {/* Searchable restaurant dropdown */}
-            <Select
-              options={restaurants.map(r => ({ value: r._id, label: r.restro_name }))}
-              value={
-                restaurants.find(r => r._id === restaurantId)
-                  ? { value: restaurantId, label: restaurants.find(r => r._id === restaurantId).restro_name }
-                  : null
-              }
-              onChange={(selected) => setRestaurantId(selected ? selected.value : "")}
-              placeholder="All Restaurants"
-              isClearable
-              className="w-64"
-              styles={{
-                control: (provided, state) => ({
-                  ...provided,
-                  borderColor: state.isFocused ? "#F9832B" : "#D1D5DB", // gray-300 default
-                  boxShadow: state.isFocused ? "0 0 0 2px rgba(249, 131, 43, 0.3)" : "none",
-                  "&:hover": { borderColor: state.isFocused ? "#F9832B" : "#D1D5DB" },
-                  minHeight: "40px",
-                }),
-                placeholder: (provided) => ({
-                  ...provided,
-                  color: "#6B7280", // gray-500
-                }),
-                dropdownIndicator: (provided) => ({
-                  ...provided,
-                  color: "#6B7280",
-                }),
-                clearIndicator: (provided) => ({
-                  ...provided,
-                  color: "#6B7280",
-                }),
-              }}
-            />
+
 
 
             {/* Export button */}
@@ -304,12 +275,16 @@ function DishesList() {
                     {(pagination.currentPage - 1) * pagination.pageSize + (index + 1)}
                   </td>
                   <td className="p-3 border-b border-gray-200">
-                    <img
-                      src={`${IMAGE_URL}/${dish.dish_images?.[0] || ""}`}
-                      alt={dish.dish_name}
-                      className="w-12 h-12 rounded-md object-cover"
-                      onError={(e) => (e.target.src = guest)}
-                    />
+                    <td className="p-3 border-b border-gray-200">
+                      <img
+                        src={`${IMAGE_URL}/${dish.dish_images?.[0] || "dish"}`}
+                        alt={dish.dish_name}
+                        className="w-12 h-12 rounded-md object-cover cursor-pointer"
+                        onClick={() => openImageModal(`${IMAGE_URL}/${dish.dish_images?.[0] || ""}`)}
+                        onError={(e) => (e.target.src = guest)}
+                      />
+                    </td>
+
                   </td>
                   <td className="p-3 border-b border-gray-200 font-medium">{dish.dish_name}</td>
                   <td className="p-3 border-b border-gray-200">{dish.restaurantId?.restro_name || "N/A"}</td>
@@ -340,10 +315,40 @@ function DishesList() {
           currentPage={pagination.currentPage}
           totalItems={pagination.totalRecords}
           itemsPerPage={pagination.pageSize}
-          onPageChange={fetchDishes}
+          onPageChange={fetchDishesForTable} // ✅ correct function
           totalPages={pagination.totalPages}
           type="backend"
         />
+
+
+        {isImageModalOpen && selectedImage && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            {/* Blurred Background */}
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={closeImageModal}
+            ></div>
+
+            {/* Modal Content */}
+            <div className="relative bg-white rounded-xl shadow-lg max-w-md w-11/12 p-4 z-10">
+              {/* Close Button */}
+              <button
+                onClick={closeImageModal}
+                className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+              >
+                ✕
+              </button>
+
+              {/* Image */}
+              <img
+                src={selectedImage}
+                alt="Dish"
+                className="w-full h-auto object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

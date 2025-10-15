@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import guest from "../../assets/images/guest.png"
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -14,9 +15,10 @@ function UserProfile() {
   const [loading, setLoading] = useState(true);
 
 
-
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [userAddress, setUserAddress] = useState([]);
   const { id } = useParams();
+  const tierTableRef = useRef(null);
 
   // Filter restaurants
   const filteredRestaurants = useMemo(() => {
@@ -31,6 +33,13 @@ function UserProfile() {
     ) || [];
   }, [user, favSearchDishes]);
 
+
+  const scrollToTierTable = () => {
+    tierTableRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const openImageModal = () => setIsImageModalOpen(true);
+  const closeImageModal = () => setIsImageModalOpen(false);
 
 
   useEffect(() => {
@@ -106,22 +115,37 @@ function UserProfile() {
       />
       <PageTitle title="User Profile" />
 
-      {/* Profile Header */}
-      <div className="bg-white rounded-xl shadow-md p-6 mt-5 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <div className="w-28 h-28 rounded-full border-4 border-[#F9832B] shadow-md flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 overflow-hidden">
+      {/* Profile + Tier Summary */}
+      <div className="bg-white rounded-xl shadow-md p-6 mt-5 flex flex-col lg:flex-row gap-6 items-center lg:items-start animate-fadeIn">
+        {/* Left: Profile */}
+        <div className="flex flex-col lg:flex-row place-items-center mt-8 lg:items-start gap-10 w-full lg:w-1/2 lg:pr-6">
+          {/* Profile Image */}
+          <div
+            className="w-50 h-50 rounded-full border-4 border-[#F9832B] shadow-md flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 overflow-hidden transition-transform duration-300 hover:scale-105 relative cursor-pointer"
+            onClick={openImageModal}
+          >
             {user.profile_picture ? (
               <img
-                src={`${IMAGE_URL}/${user.profile_picture || ""}`}
+                src={user.profile_picture ? `${IMAGE_URL}/${user.profile_picture}` : guest}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
+
             ) : (
               initials
             )}
+            {/* Hover overlay */}
+            {user.profile_picture && (
+              <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center text-white text-sm font-medium transition-opacity">
+                Click to see profile
+              </div>
+            )}
           </div>
-          <div>
-            <h2 className="text-2xl font-semibold flex items-center gap-2">
+
+
+          {/* Profile Info */}
+          <div className="text-center mt-8 lg:text-left">
+            <h2 className="text-2xl font-semibold flex flex-wrap items-center gap-2 justify-center lg:justify-start">
               {user.name}
               {user.isSpam && (
                 <span className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded">
@@ -138,12 +162,14 @@ function UserProfile() {
             <p className="text-gray-500">
               {user.country_code} {user.phone}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mt-1">
               Status:{" "}
               <span
-                className={`font-medium ${user.account_status === "active"
-                  ? "text-green-600"
-                  : "text-red-600"
+                className={`font-medium px-2 py-1 rounded ${user.account_status === "active"
+                  ? "bg-green-100 text-green-600"
+                  : user.account_status === "suspended"
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-red-100 text-red-600"
                   }`}
               >
                 {user.account_status}
@@ -151,7 +177,58 @@ function UserProfile() {
             </p>
           </div>
         </div>
+
+
+        {/* Right: Tier Summary */}
+        {user.tier && (
+          <div className="w-full lg:w-1/2 bg-gray-50 rounded-xl p-6 flex flex-col gap-4 text-gray-800 shadow-md">
+            <h3 className="text-xl font-semibold mb-4">Tier Summary</h3>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              {["Tier", "Points", "Last Active"].map((title, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 bg-white rounded-lg shadow-sm hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+                >
+                  <p className="text-sm text-gray-800">{title}</p>
+                  <p className="text-lg font-semibold">
+                    {title === "Tier"
+                      ? user.tier.tier
+                      : title === "Points"
+                        ? user.tier.points
+                        : user.tier.lastActiveAt
+                          ? new Date(user.tier.lastActiveAt).toLocaleString()
+                          : "N/A"}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={scrollToTierTable}
+              className="mt-4 px-6 py-2 bg-gradient-to-r from-[#F9832B] to-[#F9A33B] text-white font-semibold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              View Full Tier Details
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Add animation */}
+      <style>
+        {`
+  .animate-fadeIn {
+    animation: fadeIn 0.8s ease-in-out;
+  }
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+`}
+      </style>
+
+
+
+
+
 
       {/* Addresses */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
@@ -594,43 +671,34 @@ function UserProfile() {
         </div>
       </div>
 
-
-
-
-
       {/* Tier Section */}
+      {/* Tier Table */}
       {user.tier && (
-        <div className="bg-white rounded-xl shadow-md p-6 mt-6">
+        <div ref={tierTableRef} className="bg-white rounded-xl shadow-md p-6 mt-6">
           <h3 className="text-lg font-semibold mb-4" style={{ color: "#F9832B" }}>
             Tier & Points
           </h3>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Tier</p>
               <p className="text-lg font-semibold">{user.tier.tier}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Points</p>
               <p className="text-lg font-semibold">{user.tier.points}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Review Count</p>
               <p className="text-lg font-semibold">{user.tier.reviewCount}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Professional Feedback</p>
               <p className="text-lg font-semibold">{user.tier.professionalFeedbackCount}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Rejected Feedback</p>
               <p className="text-lg font-semibold">{user.tier.rejectedFeedbackCount}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
               <p className="text-sm text-gray-500">Last Active</p>
               <p className="text-lg font-semibold">
@@ -677,8 +745,6 @@ function UserProfile() {
           </div>
         </div>
       )}
-
-
 
       {/* Account Details */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-6">
@@ -777,7 +843,38 @@ function UserProfile() {
         )}
       </div>
 
+      {isImageModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Blurred Background */}
+          <div
+            className="absolute inset-0 bg-opacity-50 bg-opacity-50 backdrop-blur-sm"
+            onClick={closeImageModal} // Clicking on background closes modal
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-xl shadow-lg max-w-md w-11/12 p-4 z-10">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={`${IMAGE_URL}/${user.profile_picture}`}
+              alt="Profile"
+              className="w-100 h-100  object-contain"
+            />
+          </div>
+        </div>
+      )}
+
+
+
     </div>
+
   );
 }
 

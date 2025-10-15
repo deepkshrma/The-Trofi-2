@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import PageTittle from "../../components/PageTitle/PageTitle";
 import Select from "react-select";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
@@ -28,67 +28,96 @@ function AddDishes() {
   const [cuisines, setCuisines] = useState([]);
   const [selectedCuisine, setSelectedCuisine] = useState(null);
 
+  const { restaurantId } = useParams();
   const navigate = useNavigate();
 
+  // ✅ Fetch all dropdown data
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
-    if (!token) return toast.error("Please login first");
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
+    const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-      .get(`${BASE_URL}/restro/get-restaurant-list`, config)
+      .get(`${BASE_URL}/restro/get-restaurant-dropdown`, config)
       .then((res) => {
-        console.log("Restaurant API Response:", res.data);
-        setRestaurants(res.data?.data || []); // Adjust based on actual data shape
-      })
-      .catch((err) => console.error(err));
+        const allRestaurants = res.data?.data || [];
+        setRestaurants(allRestaurants);
 
-    axios
-      .get(`${BASE_URL}/restro/get-dish-category`)
-      .then((res) => setDishCategories(res.data?.data || []))
-      .catch((err) => console.error(err));
+        if (restaurantId) {
+          const selected = allRestaurants.find((r) => r._id === restaurantId);
+          if (selected) {
+            setSelectedRestaurant({
+              value: selected._id,
+              label: selected.restro_name,
+            });
 
-    axios
-      .get(`${BASE_URL}/restro/get-dish-sub-category`)
-      .then((res) => setDishSubCategories(res.data?.data || []))
-      .catch((err) => console.error(err));
-
-    axios
-      .get(`${BASE_URL}/restro/get-dish-type`)
-      .then((res) => setDishTypes(res.data?.data || []))
-      .catch((err) => console.error(err));
-
-    axios
-      .get(`${BASE_URL}/restro/get-cusine`)
-      .then((res) => setCuisines(res.data?.data || []))
-      .catch((err) => console.error(err));
-
-    axios
-      .get(`${BASE_URL}/dishes/get-dishes-categories`)
-      .then((res) => {
-        if (res.data.success) {
-          setDishCategories(res.data.data.categories || []);
-          setDishSubCategories(res.data.data.subCategories || []);
+            // ✅ Set dish types for this restaurant
+            setDishTypes(
+              selected.dish_types.map((dt) => ({
+                value: dt._id,
+                label: dt.name,
+              }))
+            );
+          } else {
+            toast.error("Restaurant not found");
+          }
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Error fetching restaurants:", err);
+        toast.error("Failed to fetch restaurants");
+      });
+
+    // Categories
+    axios
+      .get(`${BASE_URL}/restro/get-dish-category`, config)
+      .then((res) => setDishCategories(res.data?.data || []))
+      .catch((err) => console.error("Error fetching categories:", err));
+
+    // Subcategories
+    axios
+      .get(`${BASE_URL}/restro/get-dish-sub-category`, config)
+      .then((res) => setDishSubCategories(res.data?.data || []))
+      .catch((err) => console.error("Error fetching sub-categories:", err));
+
+
+
+    // Cuisines
+    axios
+      .get(`${BASE_URL}/restro/get-cusine`, config)
+      .then((res) => setCuisines(res.data?.data || []))
+      .catch((err) => console.error("Error fetching cuisines:", err));
   }, []);
 
+
+
+  // ✅ Prefill restaurant once list is loaded
+  useEffect(() => {
+    if (restaurantId && restaurants.length > 0) {
+      const selected = restaurants.find((r) => r._id === restaurantId);
+      if (selected) {
+        setSelectedRestaurant({
+          value: selected._id,
+          label: selected.restro_name,
+        });
+      } else {
+        toast.error("Restaurant not found");
+      }
+    }
+  }, [restaurantId, restaurants]);
+
+  // ✅ Derived subcategories
   const filteredSubCategories = dishSubCategories.filter(
     (sc) => sc.parentCategoryId === selectedDishCategory?.value
   );
 
   const addIngredient = () => {
     if (ingredient.trim() !== "") {
-      const newIngredient = {
-        name: ingredient,
-        icon: ingredientIcon,
-      };
-      setIngredients([...ingredients, newIngredient]);
+      setIngredients([...ingredients, { name: ingredient, icon: ingredientIcon }]);
       setIngredient("");
       setIngredientIcon(null);
     }
@@ -96,56 +125,56 @@ function AddDishes() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = new FormData();
 
-    // Basic fields
-    formData.append("restaurantId", selectedRestaurant?.value);
+    if (!selectedRestaurant) {
+      toast.error("Please select a restaurant");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("restaurantId", selectedRestaurant.value);
     formData.append("dish_category", selectedDishCategory?.value);
     formData.append("dish_sub_category", selectedDishSubCategory?.value);
     formData.append("dish_type", selectedDishType?.value);
-    formData.append("cuisines[0]", selectedCuisine?.value); // match Postman key
+    formData.append("cuisines[0]", selectedCuisine?.value);
     formData.append("dish_name", e.target.dish_name.value);
     formData.append("price", e.target.price.value);
     formData.append("description", e.target.description.value);
     formData.append("isAvailable", e.target.isAvailable.checked);
 
-    // ---------- Dish images (separate) ----------
-    images.forEach((img) => {
-      formData.append("dish_images", img);
+    images.forEach((img) => formData.append("dish_images", img));
+
+    formData.append("dish_ingredients", JSON.stringify(ingredients.map((i) => ({ name: i.name }))));
+
+    ingredients.forEach((i) => {
+      if (i.icon) formData.append("ingredient_icons", i.icon);
     });
 
-    // ---------- Ingredients ----------
-    const ingredientsData = ingredients.map((ing) => ({
-      name: ing.name,
-      // don’t include file object here, just name
-    }));
-    formData.append("dish_ingredients", JSON.stringify(ingredientsData));
-
-    // Ingredient icons, each file appended under the same key
-    ingredients.forEach((ing) => {
-      if (ing.icon) {
-        formData.append("ingredient_icons", ing.icon);
-      }
-    });
+    const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+    const config = { headers: { Authorization: `Bearer ${token}` } };
 
     axios
-      .post(`${BASE_URL}/dishes/create-dish`, formData)
+      .post(`${BASE_URL}/dishes/create-dish`, formData, config)
       .then(() => {
         toast.success("Dish created successfully!");
-        navigate("/DishesList");
+        navigate(`/DishesList/${restaurantId}`);
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Failed to create dish. Please try again.");
+        toast.error(err.response?.data?.message || "Failed to create dish");
       });
   };
 
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Dishes List", path: "/DishesList" }, { label: "Add New Dish", path: "/AddDishes" }]}
+        customTrail={[
+          { label: "Restaurant List", path: "/RestroList" },
+          { label: "Dishes List", path: `/DishesList/${restaurantId}` },
+          { label: "Add New Dish", path: `/AddDishes/${restaurantId}` },
+        ]}
       />
-      <div className=" bg-white shadow-lg rounded-2xl p-10">
+      <div className="bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Add New Dish"} />
 
         <form
@@ -192,19 +221,25 @@ function AddDishes() {
           </div>
 
           <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Restaurant
-            </label>
-            <Select
-              options={restaurants.map((r) => ({
-                value: r._id,
-                label: r.restro_name,
-              }))}
-              value={selectedRestaurant}
-              onChange={setSelectedRestaurant}
-              placeholder="Select Restaurant"
-              className="w-full"
-            />
+            <label className="block text-gray-600 font-medium mb-2">Restaurant</label>
+            {restaurantId ? (
+              <div className="relative">
+                <input
+                  type="text"
+                  value={selectedRestaurant?.label || "Loading..."}
+                  disabled
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2 text-gray-700 cursor-not-allowed"
+                />
+
+              </div>
+            ) : (
+              <Select
+                options={restaurants.map((r) => ({ value: r._id, label: r.restro_name }))}
+                value={selectedRestaurant}
+                onChange={setSelectedRestaurant}
+                placeholder="Select Restaurant"
+              />
+            )}
           </div>
 
           <div>
@@ -219,7 +254,7 @@ function AddDishes() {
               value={selectedDishCategory}
               onChange={(cat) => {
                 setSelectedDishCategory(cat);
-                setSelectedDishSubCategory(null); // reset subcategory when category changes
+                setSelectedDishSubCategory(null);
               }}
               placeholder="Select Category"
             />
@@ -237,23 +272,21 @@ function AddDishes() {
               value={selectedDishSubCategory}
               onChange={setSelectedDishSubCategory}
               placeholder="Select Sub Category"
-              isDisabled={!selectedDishCategory} // disable until category selected
+              isDisabled={!selectedDishCategory}
             />
           </div>
 
           <div>
             <label className="block text-gray-600 mb-2 font-medium">Type</label>
             <Select
-              options={dishTypes.map((dt) => ({
-                value: dt._id,
-                label: dt.name,
-              }))}
+              options={dishTypes} // Already mapped from restaurant's dish_types
               value={selectedDishType}
               onChange={setSelectedDishType}
               placeholder="Select Type"
-              className="w-full"
+              isDisabled={!selectedRestaurant} // disable until restaurant loads
             />
           </div>
+
 
           <div>
             <label className="block text-gray-600 mb-2 font-medium">
@@ -267,7 +300,6 @@ function AddDishes() {
               value={selectedCuisine}
               onChange={setSelectedCuisine}
               placeholder="Select Cuisine"
-              className="w-full"
             />
           </div>
 
@@ -277,7 +309,6 @@ function AddDishes() {
             </label>
 
             <div className="space-y-4 mb-4">
-              {/* name + icon + add in one row */}
               <div className="flex gap-2 items-center">
                 <input
                   type="text"
@@ -293,7 +324,6 @@ function AddDishes() {
                   placeholder="Enter ingredient name"
                 />
 
-                {/* icon choose button */}
                 <input
                   id="ingredientIcon"
                   type="file"
@@ -303,13 +333,14 @@ function AddDishes() {
                 />
                 <button
                   type="button"
-                  onClick={() => document.getElementById("ingredientIcon").click()}
+                  onClick={() =>
+                    document.getElementById("ingredientIcon").click()
+                  }
                   className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg cursor-pointer hover:bg-gray-200 transition text-sm"
                 >
                   Choose Icon
                 </button>
 
-                {/* add button */}
                 <button
                   type="button"
                   onClick={addIngredient}
@@ -319,7 +350,6 @@ function AddDishes() {
                 </button>
               </div>
 
-              {/* icon preview (inline if you like) */}
               {ingredientIcon && (
                 <div className="flex items-center gap-2 mt-2">
                   <img
@@ -327,7 +357,9 @@ function AddDishes() {
                     alt="ingredient icon preview"
                     className="w-8 h-8 object-cover rounded border"
                   />
-                  <span className="text-sm text-gray-600">{ingredientIcon.name}</span>
+                  <span className="text-sm text-gray-600">
+                    {ingredientIcon.name}
+                  </span>
                   <button
                     type="button"
                     onClick={() => setIngredientIcon(null)}
@@ -339,7 +371,6 @@ function AddDishes() {
               )}
             </div>
 
-            {/* list of added ingredients */}
             <div className="flex flex-wrap gap-2">
               {ingredients.map((ing, index) => (
                 <div
@@ -367,7 +398,6 @@ function AddDishes() {
               ))}
             </div>
           </div>
-
 
           <div className="md:col-span-2">
             <label className="block text-gray-600 mb-2 font-medium">
@@ -402,7 +432,7 @@ function AddDishes() {
                       {img.name}
                     </p>
                     <img
-                      src={URL.createObjectURL(img) || "/placeholder.svg"}
+                      src={URL.createObjectURL(img)}
                       alt={`preview-${index}`}
                       className="w-20 h-20 object-cover rounded-md border"
                     />
@@ -426,6 +456,7 @@ function AddDishes() {
               type="checkbox"
               name="isAvailable"
               id="isAvailable"
+              defaultChecked
               className="h-5 w-5 appearance-none rounded-md border border-gray-300 checked:bg-orange-500 checked:before:content-['✔'] checked:before:text-white checked:before:block checked:before:text-center"
             />
             <label htmlFor="isAvailable" className="text-gray-600 font-medium">

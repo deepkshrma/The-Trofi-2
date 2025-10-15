@@ -12,6 +12,7 @@ import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
 import AdminUpdateReviewStatus from "../../../components/AdminUpdateReviewStatus/AdminUpdateReviewStatus ";
+import dummyimg from "../../../assets/images/logo.jpg";
 
 function DishReview() {
   const { id: ratingId } = useParams();
@@ -178,8 +179,18 @@ function DishReview() {
     }
   }
 
-  if (!ratingId) return <div className="p-4">No rating id provided.</div>;
-  if (loading || !review) return <div className="p-4 text-gray-500">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">Loading review details...</p>
+        </div>
+      </div>
+    );
+
+  if (!review) return <div className="p-4 text-gray-500">No review data found.</div>;
+
 
   const face = faceStars[Math.max(0, Math.min(4, (review.star_value || 3) - 1))];
   const badgeClass = (active) => (active ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600");
@@ -215,7 +226,7 @@ function DishReview() {
         <div className="flex flex-wrap items-center gap-4">
           <img
             src={
-              review.images?.[0]?.src || "https://via.placeholder.com/150?text=No+Image"
+              review.images?.[0]?.src || dummyimg
             }
             alt="dish"
             className="w-24 h-24 rounded-lg object-cover"
@@ -337,13 +348,12 @@ function DishReview() {
         <p className="text-sm text-gray-600 mb-1">
           Current Status:{" "}
           <span
-            className={`font-semibold capitalize ${
-              review.status === "published"
+            className={`font-semibold capitalize ${review.status === "published"
                 ? "text-green-600"
                 : review.status === "rejected"
-                ? "text-red-600"
-                : "text-gray-700"
-            }`}
+                  ? "text-red-600"
+                  : "text-gray-700"
+              }`}
           >
             {review.status}
           </span>

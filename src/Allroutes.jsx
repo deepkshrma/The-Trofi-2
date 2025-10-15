@@ -119,12 +119,12 @@ const Allroutes = () => {
                 element={<UpdateRestaurant />}
               />
               <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
-              <Route path="/AddDishes" element={<AddDishes />} />
+              <Route path="/AddDishes/:restaurantId" element={<AddDishes />} />
               <Route path="/UpdateDishes/:id" element={<UpdateDishes />} />
               <Route path="/AddDishes/:id" element={<AddDishes />} />
               <Route path="/RestroDishType" element={<RestroDishType />} />
               <Route path="/RestroDishTypeList" element={<RestroDishTypeList />} />
-              <Route path="/DishesList" element={<DishesList />} />
+              <Route path="/DishesList/:restaurantId" element={<DishesList />} />
               <Route path="/RestroProfile" element={<RestroProfile />} />
               <Route path="/RestroDishCategory" element={<RestroDishCategory />} />
               <Route

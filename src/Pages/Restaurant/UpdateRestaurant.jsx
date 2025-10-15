@@ -936,8 +936,16 @@ function UpdateRestaurant() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>
 
         {/* ✅ Interactive Map */}
-        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+        <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
           <LocationPicker
+            defaultLocation={
+              restaurantData.latitude && restaurantData.longitude
+                ? {
+                  lat: parseFloat(restaurantData.latitude),
+                  lng: parseFloat(restaurantData.longitude),
+                }
+                : null
+            }
             onLocationSelect={({ lat, lng }) =>
               setRestaurantData({
                 ...restaurantData,
@@ -946,6 +954,7 @@ function UpdateRestaurant() {
               })
             }
           />
+
         </div>
 
         {/* Show selected lat/lng */}

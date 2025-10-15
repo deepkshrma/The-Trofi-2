@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../../components/common/Pagination/Pagination";
 import axios from "axios";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdRestaurantMenu } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
@@ -16,6 +16,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FiFilter } from "react-icons/fi";
 import { FaTriangleExclamation } from "react-icons/fa6";
+import RestaurantFilterModal from "../../components/common/locationFilter/RestaurantFilterModal";
 
 import {
   FaUtensils,
@@ -30,6 +31,14 @@ function RestroList() {
   const [restaurants, setRestaurants] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({});
+
+
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -55,27 +64,32 @@ function RestroList() {
 
   const navigate = useNavigate();
 
-  const truncateDescription = (text, wordLimit = 75) => {
+  const truncateDescription = (text, wordLimit = 10) => {
     if (!text) return "";
 
-    // Convert to string just in case
     let plainText = String(text);
-
-    // Remove HTML tags
     plainText = plainText.replace(/<\/?[^>]+(>|$)/g, "");
-
-    // Replace all whitespace (spaces, non-breaking, newlines, tabs) with single space
     plainText = plainText.replace(/\s+/g, " ").trim();
 
-    // Split words by space
     const words = plainText.split(" ");
-
     if (words.length > wordLimit) {
       return words.slice(0, wordLimit).join(" ") + "...";
     }
 
     return plainText;
   };
+
+
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setIsImageModalOpen(false);
+  };
+
 
 
 
@@ -90,16 +104,19 @@ function RestroList() {
   }
 
   // Fetch restaurants with pagination
-  const fetchRestaurants = async (page = 1, searchTerm = "") => {
+  const fetchRestaurants = async (page = 1, searchTerm = "", filters = appliedFilters) => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `${BASE_URL}/restro/get-restaurant-list?page=${page}&limit=${pagination.pageSize}&search=${searchTerm}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/restro/get-restaurant-list`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          page,
+          limit: pagination.pageSize,
+          search: searchTerm,
+          ...filters, // ✅ attach your filter fields here
+        },
+      });
 
       const { data, pagination: backendPagination, kpi: backendKpi } = response.data;
 
@@ -268,17 +285,13 @@ function RestroList() {
             {/* 📂 Right-side controls */}
             <div className="flex items-center gap-3">
               {/* 🧮 Filter button */}
-              {/* <button
+              <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
-                onClick={() => {
-                  // TODO: open a filter modal / drawer
-                  console.log(
-                    "Open filter options: cuisine, hygiene, favorites"
-                  );
-                }}
+                onClick={() => setShowFilterModal(true)}
               >
                 <FiFilter size={20} /> Filter
-              </button> */}
+              </button>
+
 
               {/* ⬇ Export button */}
               <button
@@ -298,6 +311,8 @@ function RestroList() {
                 <th className="p-3 border-b border-gray-300">Name</th>
                 <th className="p-3 border-b border-gray-300">Type</th>
                 <th className="p-3 border-b border-gray-300">Description</th>
+                <th className="p-3 border-b border-gray-300">Dishes</th>
+
                 <th className="p-3 border-b border-gray-300 text-center">Action</th>
               </tr>
             </thead>
@@ -321,6 +336,9 @@ function RestroList() {
                       <div className="bg-gray-300 h-6 w-full rounded"></div>
                     </td>
                     <td className="p-3 border-b border-gray-200">
+                      <div className="bg-gray-300 h-6 w-full rounded"></div>
+                    </td>
+                    <td className="p-3 border-b border-gray-200">
                       <div className="bg-gray-300 h-6 w-24 rounded mx-auto"></div>
                     </td>
                   </tr>
@@ -339,8 +357,16 @@ function RestroList() {
                               : staticimg
                           }
                           alt={restro.restro_name}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                          onClick={() =>
+                            openImageModal(
+                              restro.restaurant_images?.[0]
+                                ? `${IMAGE_URL}/${restro.restaurant_images[0]}`
+                                : staticimg
+                            )
+                          }
                         />
+
                       </td>
                       <td className="p-3 border-b border-gray-200 font-medium">
                         {restro.restro_name}
@@ -348,6 +374,15 @@ function RestroList() {
                       <td className="p-3 border-b border-gray-200">{restro.food_type}</td>
                       <td className="p-3 border-b border-gray-200">
                         {truncateDescription(restro.description)}
+                      </td>
+                      <td className="p-3 border-b border-gray-200 text-center">
+                        <button
+                          className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500 text-white cursor-pointer hover:bg-purple-600 mx-auto"
+                          onClick={() => navigate(`/DishesList/${restro._id}`)}
+                          title="View Dishes"
+                        >
+                          <MdRestaurantMenu size={16} />
+                        </button>
                       </td>
 
 
@@ -367,6 +402,7 @@ function RestroList() {
                             >
                               <MdEdit size={16} />
                             </button>
+
                           </div>
                         </div>
                       </td>
@@ -395,6 +431,45 @@ function RestroList() {
           />
         </div>
       </div>
+      {isImageModalOpen && selectedImage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Blurred Background */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={closeImageModal}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-xl shadow-lg max-w-md w-11/12 p-4 z-10">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={selectedImage}
+              alt="Restaurant Logo"
+              className="w-full h-auto object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+      <RestaurantFilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApply={(filters) => {
+          setAppliedFilters(filters);
+          fetchRestaurants(1, search, filters);
+        }}
+      />
+
+
+
       <DeleteModel
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}

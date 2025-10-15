@@ -54,6 +54,7 @@ function RestroAdd() {
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
 
+  
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -85,6 +86,8 @@ function RestroAdd() {
       } catch (err) {
         toast.error("Failed to fetch roles for restaurant.");
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -466,13 +469,20 @@ function RestroAdd() {
             <input
               type="number"
               name="price"
+              min="1" // 🔒 Prevents values below 1 via arrows
               value={restaurantData.price || ""}
-              onChange={handleChange}
-              className={`w-full border ${errors.price ? "border-red-500" : "border-gray-300"}
-      p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none`}
+              onChange={(e) => {
+                const value = Math.max(1, Number(e.target.value)); // 🛡️ Prevent manual entry below 1
+                handleChange({ target: { name: "price", value } });
+              }}
+              className={`w-full border ${errors.price ? "border-red-500" : "border-gray-300"
+                } p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none`}
             />
-            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+            {errors.price && (
+              <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+            )}
           </div>
+
 
         </div>
 
@@ -693,7 +703,7 @@ function RestroAdd() {
               htmlFor="birthYear"
               className="block mb-1 font-medium text-gray-600"
             >
-              Select Birth Year
+              Established Year
             </label>
             <select
               name="birthYear"
@@ -968,7 +978,7 @@ function RestroAdd() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>
 
         {/* ✅ Interactive Map */}
-        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+        <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
           <LocationPicker
             onLocationSelect={({ lat, lng }) =>
               setRestaurantData({

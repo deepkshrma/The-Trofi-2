@@ -102,7 +102,7 @@ function UpdateAdmin() {
           </div>
 
           {/* Role dropdown */}
-          <div>
+          {/* <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
             <Listbox value={selectedRole} onChange={setSelectedRole}>
               {({ open }) => (
@@ -149,7 +149,20 @@ function UpdateAdmin() {
                 </div>
               )}
             </Listbox>
+          </div> */}
+
+          {/* Role dropdown (read-only view) */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">Role</label>
+            <div
+              className="w-full cursor-not-allowed rounded-xl border border-gray-300
+      bg-gray-100 px-4 py-3 text-left text-gray-600 relative"
+            >
+              <span>{selectedRole ? selectedRole.name : "Select role"}</span>
+              <ChevronUpDownIcon className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+            </div>
           </div>
+
 
           <div>
             <label className="block text-gray-600 font-medium mb-2">

@@ -18,6 +18,12 @@ import { saveAs } from "file-saver";
 import { FaUsers, FaUserAlt } from "react-icons/fa";
 import { FaUserXmark, FaUserShield } from "react-icons/fa6";
 import { IoFilterSharp } from "react-icons/io5";
+import { Country, State, City } from "country-state-city";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiFilter } from "react-icons/fi";
+
+
+
 
 function UserList() {
   const [loading, setLoading] = useState(true);
@@ -34,7 +40,59 @@ function UserList() {
     totalUsers: 0,
   });
 
+  // Filters
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [country, setCountry] = useState("India");
+  const [stateName, setStateName] = useState("Rajasthan");
+  const [city, setCity] = useState("");
+
+
+  const [tier, setTier] = useState("");
+  const [availableStatuses, setAvailableStatuses] = useState([]);
+
+
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [address, setAddress] = useState("");
+
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+  }, []);
+
+
+  const handleCountryChange = (e) => {
+    const selectedCountry = e.target.value;
+    setCountry(selectedCountry);
+    setStates(State.getStatesOfCountry(selectedCountry));
+    setStateName("");
+    setCities([]);
+    setCity("");
+  };
+
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+    setStateName(selectedState);
+    setCities(City.getCitiesOfState(country, selectedState));
+    setCity("");
+  };
+
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setIsImageModalOpen(false);
+  };
 
   const fetchUsers = async (page = 1) => {
     setLoading(true);
@@ -50,6 +108,15 @@ function UserList() {
         `${BASE_URL}/admin/get-all-users?page=${page}&limit=10`,
         {
           headers: { Authorization: `Bearer ${token}` },
+          params: {
+            search: searchQuery,
+            city: city ? City.getCitiesOfState(country, stateName).find(ct => ct.name === city)?.name || "" : "",
+            state: stateName ? State.getStatesOfCountry(country).find(s => s.isoCode === stateName)?.name || "" : "",
+            country: country ? Country.getCountryByCode(country)?.name || "" : "",
+            tier,
+            status: statusFilter !== "all" ? statusFilter : "",
+          },
+
         }
       );
 
@@ -60,14 +127,16 @@ function UserList() {
           totalPages: response.data.data.totalPages,
           totalUsers: response.data.data.totalUsers,
         });
+        setAvailableStatuses(response.data.data.availableStatuses || []);
       }
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch users");
     } finally {
-      setLoading(false); // ✅ stop loader
+      setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchUsers(pagination.currentPage);
@@ -114,6 +183,9 @@ function UserList() {
     closeDeleteModal();
   };
 
+
+
+
   if (loading)
     return (
       <div className="flex items-center justify-start min-h-screen">
@@ -123,6 +195,11 @@ function UserList() {
         </div>
       </div>
     );
+
+  const fetchFilteredData = () => {
+    fetchUsers(1);
+  };
+
 
   return (
     <div className="main main_page font-Montserrat space-y-4 duration-900">
@@ -187,48 +264,52 @@ function UserList() {
 
       {/* User Table */}
       <div className="w-full h-auto p-2 mt-2 bg-white rounded-lg">
-        <div className="flex justify-between h-[40px] mb-2">
-          <form className="flex gap-1">
-            <div className="relative flex gap-2 px-3 bg-blue-50 w-[300px] rounded-md">
-              <FaSearch className="absolute opacity-40 top-3" size={15} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search here"
-                className="ml-6 text-[14px] outline-none bg-gray-100 appearance-none"
-              />
-            </div>
-          </form>
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 m-3">
+          <div className="flex w-full md:w-auto gap-2">
+            <input
+              type="text"
+              placeholder="Search by User Name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchUsers(1); // Only fetch when Enter is pressed
+                }
+              }}
+              className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-full md:w-64"
+            />
+            <button
+              onClick={() => fetchUsers(1)}
+              className="px-4 py-2 rounded-lg bg-[#F9832B] text-white cursor-pointer hover:bg-[#e67600] shadow-md"
+            >
+              Search
+            </button>
+          </div>
 
-          <div className="flex gap-2">
-            <div className="relative w-28 mr-2">
-              <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-gray-500">
-                <IoFilterSharp />
-              </span>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="block appearance-none bg-white border border-gray-300 pl-8 pr-2 py-2 rounded-md shadow-sm text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 w-full"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="banned">Banned</option>
-                <option value="suspended">Suspended</option>
-                <option value="spam">Spam</option>
-              </select>
-            </div>
 
-            <div
-              className="flex gap-2 justify-center items-center rounded px-4 border-[1px] border-gray-300 cursor-pointer"
+
+          <div className="flex items-center gap-3">
+            {/* Filter Button */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
+              onClick={() => setShowFilterModal(true)}
+            >
+              <FiFilter size={20} /> Filter
+            </button>
+
+
+            {/* Export Button */}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer"
               onClick={handleExport}
             >
-              <CiExport className="text-black" />
-              <span className="text-[14px]">Export</span>
-            </div>
+              <CiExport size={20} /> Export
+            </button>
           </div>
         </div>
+
+
 
         {/* Table */}
         <div className="overflow-x-auto">
@@ -262,13 +343,6 @@ function UserList() {
                 </tr>
               ) : (
                 users
-                  .filter(
-                    (item) =>
-                      (statusFilter === "all" || item.account_status === statusFilter) &&
-                      `${item.name} ${item.email} ${item.fullPhone}`
-                        .toLowerCase()
-                        .includes(searchQuery.toLowerCase())
-                  )
                   .map((item, index) => (
                     <tr key={item._id} className="border-b border-gray-200">
                       <td className="text-[14px] px-8 py-3 text-left">
@@ -279,9 +353,13 @@ function UserList() {
                         <div className="flex items-center gap-3">
                           <img
                             src={item.profile_picture ? `${IMAGE_URL}/${item.profile_picture}` : guest}
-                            alt={item.name || "Guest"}
-                            className="w-10 h-10 rounded-full object-cover bg-amber-200"
+                            alt={item.name || guest}
+                            className="w-10 h-10 rounded-full object-cover bg-amber-200 cursor-pointer"
+                            onClick={() =>
+                              openImageModal(item.profile_picture ? `${IMAGE_URL}/${item.profile_picture}` : guest)
+                            }
                           />
+
                           <div className="whitespace-nowrap font-semibold">{item.name}</div>
                         </div>
                       </td>
@@ -340,6 +418,175 @@ function UserList() {
           />
         </div>
       </div>
+
+      {isImageModalOpen && selectedImage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Blurred Background */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={closeImageModal}
+          ></div>
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-xl shadow-lg max-w-md w-11/12 p-4 z-10">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={selectedImage}
+              alt="Profile"
+              className="w-full h-auto object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+
+      {showFilterModal && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
+            >
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">
+                Apply Filters
+              </h2>
+
+              {/* Country */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">Country</label>
+                <select
+                  value={country}
+                  onChange={handleCountryChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((c) => (
+                    <option key={c.isoCode} value={c.isoCode}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* State */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">State</label>
+                <select
+                  value={stateName}
+                  onChange={handleStateChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                >
+                  <option value="">Select State</option>
+                  {states.map((s) => (
+                    <option key={s.isoCode} value={s.isoCode}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">City</label>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                >
+                  <option value="">Select City</option>
+                  {cities.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Tier */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">Tier</label>
+                <select
+                  value={tier}
+                  onChange={(e) => setTier(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                >
+                  <option value="">Select Tier</option>
+                  <option value="White">White</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Sapphire">Sapphire</option>
+                  <option value="Red">Red</option>
+                </select>
+              </div>
+
+              {/* Status */}
+              <div className="mb-4">
+                <label className="block text-sm text-gray-600 mb-1">Status</label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="banned">Banned</option>
+                  <option value="spam">Spam</option>
+                  {availableStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
+                  onClick={() => {
+                    setTier("");
+                    setCountry("India");
+                    setStateName("Rajasthan");
+                    setCity("");
+                    setStatusFilter("all");
+                    setShowFilterModal(false);
+                    fetchUsers(1);
+                  }}
+                >
+                  Clear
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer"
+                  onClick={() => {
+                    setShowFilterModal(false);
+                    fetchUsers(1);
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
 
       {/* Delete Modal */}
       <DeleteModel
