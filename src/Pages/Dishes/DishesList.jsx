@@ -78,6 +78,16 @@ function DishesList() {
     setIsImageModalOpen(false);
   };
 
+  const filteredSubCategories = selectedCategory
+    ? subCategories.filter(sub => sub.parentCategoryId === selectedCategory)
+    : subCategories;
+
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+    setSelectedSubCategory(""); // reset
+  };
+
   // -------- Fetch Dropdown Options --------
   const fetchDropdownOptions = async () => {
     try {
@@ -98,7 +108,7 @@ function DishesList() {
       const [catRes, subCatRes, typeRes, cuisineRes] = await Promise.all([
         axios.get(`${BASE_URL}/restro/get-dish-category`, config),
         axios.get(`${BASE_URL}/restro/get-dish-sub-category`, config),
-        axios.get(`${BASE_URL}/restro/dish-type/get-all-dish-type`, config),
+        axios.get(`${BASE_URL}/restro/get-dish-type`, config),
         axios.get(`${BASE_URL}/restro/get-cusine`, config),
       ]);
 
@@ -505,9 +515,10 @@ function DishesList() {
                     <option value="">All Categories</option>
                     {categories.map((cat) => (
                       <option key={cat._id} value={cat._id}>
-                        {cat.name}
+                        {cat.category_name} {/* use the correct field */}
                       </option>
                     ))}
+
                   </select>
                 </div>
 
@@ -519,15 +530,16 @@ function DishesList() {
                   <select
                     value={selectedSubCategory}
                     onChange={(e) => setSelectedSubCategory(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
                   >
                     <option value="">All Sub Categories</option>
-                    {subCategories.map((sub) => (
+                    {filteredSubCategories.map((sub) => (
                       <option key={sub._id} value={sub._id}>
-                        {sub.name}
+                        {sub.sub_categ_name}
                       </option>
                     ))}
+
                   </select>
+
                 </div>
 
                 {/* Dish Type */}

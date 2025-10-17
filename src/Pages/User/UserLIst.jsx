@@ -127,13 +127,13 @@ function UserList() {
     if (minAge) {
       const currentYear = new Date().getFullYear();
       const maxBirthYear = currentYear - parseInt(minAge);
-      params.minAge = parseInt(minAge); 
+      params.minAge = parseInt(minAge);
     }
 
     if (maxAge) {
       const currentYear = new Date().getFullYear();
       const minBirthYear = currentYear - parseInt(maxAge);
-      params.maxAge = parseInt(maxAge); 
+      params.maxAge = parseInt(maxAge);
     }
 
     if (gender && gender !== "") {
@@ -363,30 +363,32 @@ function UserList() {
             >
               Search
             </button>
+
+            {/* Buttons Row */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
+              <button
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border text-gray-600 hover:shadow-lg cursor-pointer relative whitespace-nowrap ${activeFiltersCount() > 0 ? "border-[#F9832B] bg-orange-50" : "border-gray-300"
+                  }`}
+                onClick={() => setShowFilterModal(true)}
+              >
+                <FiFilter size={20} /> Filter
+                {activeFiltersCount() > 0 && (
+                  <span className="absolute top-1 right-1 bg-[#F9832B] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {activeFiltersCount()}
+                  </span>
+                )}
+              </button>
+
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer whitespace-nowrap"
+                onClick={handleExport}
+              >
+                <CiExport size={20} /> Export
+              </button>
+            </div>
           </div>
 
-          {/* Buttons Row */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
-            <button
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border text-gray-600 hover:shadow-lg cursor-pointer relative whitespace-nowrap ${activeFiltersCount() > 0 ? "border-[#F9832B] bg-orange-50" : "border-gray-300"
-                }`}
-              onClick={() => setShowFilterModal(true)}
-            >
-              <FiFilter size={20} /> Filter
-              {activeFiltersCount() > 0 && (
-                <span className="absolute top-1 right-1 bg-[#F9832B] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {activeFiltersCount()}
-                </span>
-              )}
-            </button>
 
-            <button
-              className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 text-gray-600 hover:shadow-lg cursor-pointer whitespace-nowrap"
-              onClick={handleExport}
-            >
-              <CiExport size={20} /> Export
-            </button>
-          </div>
         </div>
 
         {/* Table */}

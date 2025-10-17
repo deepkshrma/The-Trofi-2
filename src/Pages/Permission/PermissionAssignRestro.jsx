@@ -1,3 +1,4 @@
+import { Visibility, Edit, Delete, Add } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -9,7 +10,7 @@ import ToggleButton from "../../components/common/Togglebutton/ToggleButton";
 import { BASE_URL } from "../../config/Config";
 import { FaSearch } from "react-icons/fa";
 
-function PermissionAssign() {
+function PermissionAssignRestro() {
   const { type, id } = useParams();
   const [modules, setModules] = useState([]);
   const [permissions, setPermissions] = useState({});
@@ -34,7 +35,7 @@ function PermissionAssign() {
           axios.get(`${BASE_URL}/admin/get-module`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`${BASE_URL}/admin/get-permissions?adminId=${id}`, {
+          axios.get(`${BASE_URL}/admin/get-permissions?restroId=${id}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -148,7 +149,7 @@ function PermissionAssign() {
       });
 
       toast.success("Permissions assigned successfully");
-      navigate("/AdminList");
+      navigate("/RestroList");
 
     } catch (err) {
       console.error(err);
@@ -167,8 +168,8 @@ function PermissionAssign() {
     <div className="main main_page min-h-screen p-6 duration-900">
       <BreadcrumbsNav
         customTrail={[
-          { label: "Admin List", path: "/AdminList" },
-          { label: "Assign Permission", path: `/PermissionAssign/${type}/${id}` },
+          { label: "Restaurant List", path: "/RestroList" },
+          { label: "Assign Permission", path: `/PermissionAssignRestro/${type}/${id}` },
         ]}
       />
       <PageTitle
@@ -178,7 +179,7 @@ function PermissionAssign() {
       {/* Header with Name & ID */}
       <div className="bg-white rounded-xl shadow-md p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <div>
-          <h3 className="text-xl font-semibold text-[#F9832B]">{name || "Unknown Admin"}</h3>
+          <h3 className="text-xl font-semibold text-[#F9832B]">{name || "Unknown Restaurant"}</h3>
           <p className="text-gray-500 text-sm">{email || "Restaurant"}</p>
         </div>
         <div className="mt-3 sm:mt-0">
@@ -281,4 +282,4 @@ function PermissionAssign() {
   );
 }
 
-export default PermissionAssign;
+export default PermissionAssignRestro;

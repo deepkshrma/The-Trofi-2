@@ -65,6 +65,7 @@ import ReportList from "./Pages/Reports/ReportList";
 import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
 import PermissionAssign from "./Pages/Permission/PermissionAssign";
 import DishDetails from "./Pages/Dishes/DishDetails";
+import PermissionAssignRestro from "./Pages/Permission/PermissionAssignRestro";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -90,7 +91,7 @@ const Allroutes = () => {
               <Route path="/RoleList" element={<RoleList />} />
               <Route path="/RoleCreate" element={<RoleCreate />} />
               <Route path="/PermissionAssign/:type/:id" element={<PermissionAssign />} />
-
+              <Route path="/PermissionAssignRestro/:type/:id" element={<PermissionAssignRestro />} />
               <Route path="/AdminProfile" element={<AdminProfile />} />
               <Route path="/CreateAdmin" element={<CreateAdmin />} />
               <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />

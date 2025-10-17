@@ -136,7 +136,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             icon: <AdminPanelSettingsIcon />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Admins", link: "AdminList", dropdown: false }, { name: "Roles", link: "RoleList", dropdown: false },],
+            subItems: [{ name: "Admins", link: "AdminList", dropdown: false }],
           },
         ],
         border: true,

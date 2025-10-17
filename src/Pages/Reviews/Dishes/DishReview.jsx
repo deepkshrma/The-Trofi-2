@@ -127,7 +127,7 @@ function DishReview() {
       setProcessing(true);
       const authData = JSON.parse(localStorage.getItem("trofi_user"));
       const token = authData?.token;
-      const payload = { images: [{ _id: imageId, is_view: decision === "accept" }] };
+      const payload = { imageUpdates: [{ id: imageId, is_view: decision === "accept" }] };
 
       await axios.patch(`${BASE_URL}/admin/update-rating-status/${review.id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
@@ -395,3 +395,4 @@ function DishReview() {
 }
 
 export default DishReview;
+

@@ -52,6 +52,66 @@ function RestroProfile() {
   const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
   if (!token) return toast.error("Please login first");
 
+  const handleViewReport = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) return toast.error("Please login first");
+
+      const res = await axios.get(`${BASE_URL}/admin/${id}/report`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = res.data.data;
+
+      const newWindow = window.open("", "_blank");
+      newWindow.document.write(`<html><head><title>${data.restro_name} Report</title></head><body style="font-family:sans-serif;padding:20px;background:#f9f9f9">
+      <h1>${data.restro_name} — Restaurant Report</h1>
+      <p>Email: ${data.email || "N/A"}</p>
+      <p>Phone: ${data.fullPhone || "N/A"}</p>
+      <p>Address: ${data.address}, ${data.city}, ${data.state}, ${data.country}</p>
+      <p>Status: ${data.account_status}</p>
+      <p>Average Rating: ${data.avgRating?.toFixed(2) || "N/A"} (${data.totalRatings} reviews)</p>
+      <h2>Cuisines: ${data.cuisines.map(c => c.name).join(", ") || "N/A"}</h2>
+      <h2>Restaurant Types: ${data.restaurant_type.map(r => r.name).join(", ") || "N/A"}</h2>
+      <h2>Amenities: ${data.amenities.map(a => a.amenity_name).join(", ") || "N/A"}</h2>
+      <h2>Good For: ${data.good_for.map(g => g.name).join(", ") || "N/A"}</h2>
+    </body></html>`);
+      newWindow.document.close();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load report");
+    }
+  };
+
+
+
+  const handleGenerateReport = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) return toast.error("Please login first");
+
+      const response = await axios.get(
+        `${BASE_URL}/admin/${id}/report/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob", // important for file download
+        }
+      );
+
+      // Create a blob link to download
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${restaurant.restro_name || "restaurant"}_report.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("Failed to generate report");
+    }
+  };
+
   useEffect(() => {
     const fetchRestaurant = async () => {
       const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
@@ -217,7 +277,7 @@ function RestroProfile() {
           onClick={() => navigate(-1)}
           className="absolute top-5 left-5 z-5 flex items-center cursor-pointer gap-2 px-3 py-2 bg-white/80 backdrop-blur-md text-gray-800 rounded-full shadow-md border border-white hover:bg-[#F9832B] hover:text-white transition-all duration-300 transform hover:-translate-x-1 hover:scale-105 active:scale-95"
         >
-          <ChevronLeft  className="w-5 h-5" />
+          <ChevronLeft className="w-5 h-5" />
           {/* <span className="font-medium hidden sm:block">Back</span> */}
         </button>
 
@@ -276,6 +336,16 @@ function RestroProfile() {
             </p>
           </div>
         </div>
+        {/* View Report Button */}
+        {/* <div className="absolute bottom-16 right-6 z-[2]">
+          <button
+            onClick={handleViewReport}
+            className="bg-white/80 backdrop-blur-md text-gray-800 cursor-pointer font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300 hover:bg-white hover:text-gray-900"
+          >
+            View Report
+          </button>
+
+        </div> */}
       </div>
 
 
@@ -632,6 +702,14 @@ function RestroProfile() {
                 ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
                 : "N/A"}
             </p>
+            <button
+              onClick={handleGenerateReport}
+              className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer ml-7  font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300"
+            >
+              Generate Report
+            </button>
+
+
 
           </div>
         </div>

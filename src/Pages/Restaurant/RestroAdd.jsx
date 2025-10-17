@@ -214,7 +214,6 @@ function RestroAdd() {
       postalCode: "Postal Code",
       price: "Price Per Person",
       description: "Short Description",
-      openingTime: "Opening Time",
       closingTime: "Closing Time",
     };
 
@@ -291,6 +290,7 @@ function RestroAdd() {
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
+      formData.append("time",restaurantData.closingTime || "");
       formData.append(
         "restaurant_type",
         JSON.stringify(restaurantData.restaurant_type)
@@ -303,12 +303,12 @@ function RestroAdd() {
         restaurantData.hygieneStatus || "general"
       );
 
-      if (restaurantData.openingTime && restaurantData.closingTime) {
-        formData.append(
-          "time",
-          `${restaurantData.openingTime} to ${restaurantData.closingTime}`
-        );
-      }
+      // if (restaurantData.openingTime && restaurantData.closingTime) {
+      //   formData.append(
+      //     "time",
+      //     `${restaurantData.openingTime} to ${restaurantData.closingTime}`
+      //   );
+      // }
 
       if (restaurantData.openDays.length > 0) {
         formData.append("days", restaurantData.openDays.join(", "));
@@ -740,7 +740,7 @@ function RestroAdd() {
 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            {/* <div>
               <label className="block mb-1 font-medium text-gray-600">
                 Opening Time <span className="text-red-500">*</span>
               </label>
@@ -755,7 +755,7 @@ function RestroAdd() {
               {errors.openingTime && (
                 <p className="text-red-500 text-sm mt-1">{errors.openingTime}</p>
               )}
-            </div>
+            </div> */}
 
             <div>
               <label className="block mb-1 font-medium text-gray-600">
