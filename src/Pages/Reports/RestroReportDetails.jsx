@@ -27,8 +27,8 @@ function RestroReportDetails() {
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
 
-                if (response.data.success && response.data.data.length > 0) {
-                    setReport(response.data.data[0]);
+                if (response.data.success && response.data.data) {
+                    setReport(response.data.data);
                 } else {
                     toast.error("Report not found");
                 }
@@ -42,6 +42,7 @@ function RestroReportDetails() {
 
         fetchReportDetails();
     }, [id]);
+
 
     // 🔹 Loader UI
     if (loading)
@@ -90,8 +91,8 @@ function RestroReportDetails() {
                         <p className="text-sm text-gray-500 mb-1">Status</p>
                         <span
                             className={`px-3 py-1 rounded-full text-xs font-medium ${report.status === "active"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
                                 }`}
                         >
                             {report.status}
@@ -119,8 +120,8 @@ function RestroReportDetails() {
                                 <p className="font-medium text-gray-800">{r.question}</p>
                                 <span
                                     className={`px-3 py-1 text-xs font-semibold rounded-full ${r.answer
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-red-100 text-red-700"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-red-100 text-red-700"
                                         }`}
                                 >
                                     {r.answer ? "Selected" : "Not Selected"}

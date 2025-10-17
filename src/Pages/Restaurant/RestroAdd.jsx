@@ -54,7 +54,7 @@ function RestroAdd() {
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
 
-  
+
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -261,6 +261,15 @@ function RestroAdd() {
     }
 
     try {
+      // ✅ Get token like in handleSave
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("role_id", restaurantData.role_id);
       formData.append("restro_name", restaurantData.name);
@@ -300,6 +309,7 @@ function RestroAdd() {
           `${restaurantData.openingTime} to ${restaurantData.closingTime}`
         );
       }
+
       if (restaurantData.openDays.length > 0) {
         formData.append("days", restaurantData.openDays.join(", "));
       }
@@ -312,12 +322,15 @@ function RestroAdd() {
         formData.append("restaurant_menu_images", file)
       );
 
-      // ✅ Axios POST request
+      // ✅ Include token in headers
       const { data } = await axios.post(
         `${BASE_URL}/restro/create-restaurant`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            Authorization: `Bearer ${token}`, // ✅ added
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
 
@@ -326,12 +339,12 @@ function RestroAdd() {
       navigate("/RestroList");
     } catch (err) {
       console.error("Error:", err);
-      // If Axios error, show message if available
       const msg =
         err.response?.data?.message || err.message || "Something went wrong";
       toast.error(msg);
     }
   };
+
 
   if (loading) return <p>Loading options...</p>;
 

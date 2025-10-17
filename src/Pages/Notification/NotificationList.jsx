@@ -245,7 +245,7 @@ export default function NotificationList() {
                       {item.title}
                     </td>
                     <td className="p-3 border-b border-gray-200">
-                      {item.senderId?.name || "N/A"}
+                      {item.senderId?.name || "Auto Assign"}
                     </td>
                     <td className="p-3 border-b border-gray-200">
                       {item.isGlobal

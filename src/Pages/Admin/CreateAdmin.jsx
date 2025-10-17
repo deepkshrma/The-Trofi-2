@@ -54,12 +54,28 @@ function CreateAdmin() {
 
       .then((res) => {
         if (res.data.success) {
+          const newAdminId = res.data.adminId;
+
           toast.success("Admin created successfully!");
-          navigate("/AdminList");
+
+          if (newAdminId) {
+            // ✅ send name & email along with ID
+            navigate(`/PermissionAssign/admin/${newAdminId}`, {
+              state: {
+                name: res.data.name,
+                email: res.data.email,
+              },
+            });
+          }
+          else {
+            toast.warn("Admin ID missing in response, going back to Admin List");
+            navigate("/AdminList");
+          }
         } else {
-          toast.error("Failed to create admin.");
+          toast.error(res.data.message || "Failed to create admin.");
         }
       })
+
       .catch((err) => {
         console.error(err);
         toast.error("Error while creating admin!");

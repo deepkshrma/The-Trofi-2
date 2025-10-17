@@ -64,6 +64,7 @@ import NotificationPost from "./Pages/Notification/NotificationPost";
 import ReportList from "./Pages/Reports/ReportList";
 import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
 import PermissionAssign from "./Pages/Permission/PermissionAssign";
+import DishDetails from "./Pages/Dishes/DishDetails";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -88,7 +89,8 @@ const Allroutes = () => {
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/RoleList" element={<RoleList />} />
               <Route path="/RoleCreate" element={<RoleCreate />} />
-              <Route path="/PermissionAssign" element={<PermissionAssign />} />
+              <Route path="/PermissionAssign/:type/:id" element={<PermissionAssign />} />
+
               <Route path="/AdminProfile" element={<AdminProfile />} />
               <Route path="/CreateAdmin" element={<CreateAdmin />} />
               <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />
@@ -124,6 +126,7 @@ const Allroutes = () => {
               <Route path="/AddDishes/:restaurantId" element={<AddDishes />} />
               <Route path="/UpdateDishes/:id" element={<UpdateDishes />} />
               <Route path="/AddDishes/:id" element={<AddDishes />} />
+              <Route path="/DishDetails/:id" element={<DishDetails />} />
               <Route path="/RestroDishType" element={<RestroDishType />} />
               <Route path="/RestroDishTypeList" element={<RestroDishTypeList />} />
               <Route path="/DishesList/:restaurantId" element={<DishesList />} />

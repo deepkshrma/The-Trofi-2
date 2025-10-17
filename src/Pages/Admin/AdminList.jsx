@@ -5,13 +5,12 @@ import {
   FaCaretLeft,
   FaCaretRight,
 } from "react-icons/fa";
-
+import { FaLock } from "react-icons/fa";
 import guestImg from "../../assets/images/guest.png";
 import axios from "axios";
 import { toast } from "react-toastify";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
-import AdminRoleChangeModel from "../../components/AdminRoleChangeModal/AdminRoleChangeModal";
 import { BASE_URL } from "../../config/Config";
 import { IMAGE_URL } from "../../config/Config";
 import {
@@ -22,13 +21,14 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { MdEdit } from "react-icons/md";
+import { MdAdminPanelSettings, MdEdit } from "react-icons/md";
 import { Navigate, useNavigate } from "react-router-dom";
 import { TfiLayoutMenuSeparated } from "react-icons/tfi";
 import AdminRoleModel from "../../components/AdminRoleModel/AdminRoleModel";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 import Pagination from "../../components/common/Pagination/Pagination";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import AdminUpdateStatusModal from "../../components/AdminUpdateStatusModal/AdminUpdateStatusModal ";
 
 const AdminList = () => {
   const [search, setSearch] = useState("");
@@ -42,12 +42,9 @@ const AdminList = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [allRoles, setAllRoles] = useState([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState(null);
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedAdminForRoleChange, setSelectedAdminForRoleChange] =
-    useState(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,130 +88,6 @@ const AdminList = () => {
     fetchData();
   }, []);
 
-  // const fetchAdminDetails = async (empId) => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
-
-  //     const res = await axios.get(`${BASE_URL}/admin/get-admin-byId/${empId}`, {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     });
-
-  //     const admin = res.data.data;
-
-  //     setSelectedAdmin({
-  //       empId: admin._id,
-  //       status: admin.status,
-  //       status_reason: admin.status_reason || "",
-  //     });
-
-  //     setShowStatusModal(true);
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error?.response?.data?.message || "Failed to fetch admin details";
-  //     toast.error(errorMessage);
-  //   }
-  // };
-
-  // const handleStatusChangeConfirm = async (newStatus) => {
-  //   try {
-  //     const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //     const token = authData?.token;
-
-  //     await axios.put(
-  //       `${BASE_URL}/admin/update-admin-status/${currentStatusAdmin.empId}`,
-  //       {
-  //         status: newStatus,
-  //         status_reason: "",
-  //       },
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       }
-  //     );
-
-  //     setAdmins((prevAdmins) =>
-  //       prevAdmins.map((admin) =>
-  //         admin.empId === currentStatusAdmin.empId
-  //           ? { ...admin, status: newStatus }
-  //           : admin
-  //       )
-  //     );
-  //   } catch (error) {
-  //     toast.error("Failed to change status !");
-  //   } finally {
-  //     setShowStatusModal(false);
-  //     setCurrentStatusAdmin(null);
-  //   }
-  // };
-
-  {
-    showStatusModal && (
-      <AdminRoleModel
-        onClose={() => setShowStatusModal(false)}
-        adminId={selectedAdmin?.empId}
-        currentStatus={selectedAdmin?.status}
-        onStatusUpdated={handleStatusChangeConfirm}
-      />
-    );
-  }
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const authData = JSON.parse(localStorage.getItem("broom_auth"));
-  //       const token = authData?.token;
-
-  //       if (!token) {
-  //         // toast.error("Token not found !! login again ");
-  //         return;
-  //       }
-
-  //       const [adminRes, rolesRes] = await Promise.all([
-  //         axios.get(`${BASE_URL}/admin/get-all-admins`, {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }),
-  //         axios.get(`${BASE_URL}/admin/get-all-roles`, {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         }),
-  //       ]);
-  //       setAllRoles(rolesRes.data.data);
-  //       // Build role map
-  //       const roleMap = {};
-  //       rolesRes.data.data.forEach((role) => {
-  //         roleMap[role._id] = role.name;
-  //       });
-  //       setRolesMap(roleMap);
-
-  //       // Transform admins
-  //       const transformedAdmins = adminRes.data.data.map((admin) => ({
-  //         name: `${admin.first_name} ${admin.last_name}`,
-  //         email: admin.email,
-  //         empId: admin._id,
-  //         role:
-  //           typeof admin.role === "string"
-  //             ? roleMap[admin.role] || "Unknown"
-  //             : admin.role?.name || roleMap[admin.role?._id] || "Unknown",
-  //         profilePhoto: admin.profile_picture
-  //           ? `${BASE_URL}/${admin.profile_picture}`
-  //           : guestImg,
-  //         status: admin.status,
-  //       }));
-
-  //       setAdmins(transformedAdmins);
-  //     } catch (error) {
-  //       const errorMessage =
-  //         error?.response?.data?.message ||
-  //         "failed to fetch admins and roles !";
-  //       // toast.error(errorMessage);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [search, statusFilter]);
 
   const openDeleteModal = (empId) => {
     setSelectedAdmin(empId);
@@ -325,29 +198,56 @@ const AdminList = () => {
           return (
             <div
               className={`flex gap-1 justify-center items-center rounded-full px-2 py-1 cursor-pointer font-semibold text-[14px] capitalize ${statusColor}`}
-              onClick={() => fetchAdminDetails(info.row.original.empId)}
+              onClick={() => {
+                setSelectedAdmin(info.row.original);
+                setShowStatusModal(true);
+              }}
             >
               {status}
             </div>
           );
         },
       },
-
+      {
+        header: "Permission",
+        size: 80,
+        cell: ({ row }) => {
+          const admin = row.original;
+          return (
+            <div className="flex justify-center items-center h-full">
+              <button
+                title="Assign Permissions"
+                className="flex items-center justify-center w-8 h-8 cursor-pointer rounded-lg bg-[#F9832B] text-white hover:bg-[#ba580e] transition"
+                onClick={() =>
+                  navigate(`/PermissionAssign/admin/${admin.empId}`, {
+                    state: { name: admin.name, email: admin.email },
+                  })
+                }
+              >
+                <MdAdminPanelSettings size={14} />
+              </button>
+            </div>
+          );
+        },
+      },
       {
         header: "Action",
-        size: 100,
+        size: 10,
         cell: ({ row }) => {
+          const admin = row.original;
           return (
-            <button
-              className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
-              onClick={() =>
-                navigate(`/UpdateAdmin/${row.original.empId}`, {
-                  state: { admin: row.original }, // <-- pass the admin object
-                })
-              }
-            >
-              <MdEdit size={16} />
-            </button>
+            <div className="flex items-center justify-center gap-2 h-full">
+              <button
+                className="flex items-center justify-center w-8 h-8 cursor-pointer rounded-lg bg-green-500 text-white hover:bg-green-600"
+                onClick={() =>
+                  navigate(`/UpdateAdmin/${admin.empId}`, {
+                    state: { admin },
+                  })
+                }
+              >
+                <MdEdit size={16} />
+              </button>
+            </div>
           );
         },
       },
@@ -463,8 +363,8 @@ const AdminList = () => {
                     <th
                       key={header.id}
                       className={`p-3 ${header.column.columnDef.header === "Status"
-                          ? "text-center px-10"
-                          : "text-left"
+                        ? "text-center px-10"
+                        : "text-left"
                         }`}
                       style={{ width: header.getSize() }}
                     >
@@ -487,8 +387,8 @@ const AdminList = () => {
                     <td
                       key={cell.id}
                       className={`p-3  ${cell.column.columnDef.header === "Status"
-                          ? "text-center px-10"
-                          : "text-left"
+                        ? "text-center px-10"
+                        : "text-left"
                         }`}
                     >
                       {flexRender(
@@ -510,27 +410,9 @@ const AdminList = () => {
           onPageChange={setCurrentPage}
         />
       </div>
-      {showRoleModal && selectedAdminForRoleChange && (
-        <AdminRoleChangeModel
-          onClose={() => setShowRoleModal(false)}
-          adminId={selectedAdminForRoleChange.id}
-          currentRoleId={selectedAdminForRoleChange.currentRoleId}
-          allRoles={allRoles}
-          onRoleUpdated={(newRoleId) => {
-            const newRoleName = rolesMap[newRoleId] || "Updated";
-            setAdmins((prev) =>
-              prev.map((admin) =>
-                admin.empId === selectedAdminForRoleChange.id
-                  ? { ...admin, role: newRoleName }
-                  : admin
-              )
-            );
-          }}
-        />
-      )}
 
       {showStatusModal && selectedAdmin && (
-        <AdminRoleModel
+        <AdminUpdateStatusModal
           onClose={() => setShowStatusModal(false)}
           adminId={selectedAdmin.empId}
           currentStatus={selectedAdmin.status}
@@ -550,6 +432,7 @@ const AdminList = () => {
             setShowStatusModal(false);
           }}
         />
+
       )}
 
       <DeleteModel

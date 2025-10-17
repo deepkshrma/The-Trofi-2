@@ -96,6 +96,30 @@ function UpdateDishes() {
     fetchData();
   }, [id]);
 
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        // Categories
+        const catRes = await axios.get(`${BASE_URL}/restro/get-dish-category`);
+        setDishCategories(catRes.data?.data || []);
+
+        // SubCategories
+        const subCatRes = await axios.get(`${BASE_URL}/restro/get-dish-sub-category`);
+        setDishSubCategories(subCatRes.data?.data || []);
+
+        // Cuisines
+        const cusRes = await axios.get(`${BASE_URL}/restro/get-cusine`);
+        setCuisines(cusRes.data?.data || []);
+      } catch (err) {
+        console.error("Dropdown fetch error:", err);
+        toast.error("Failed to load dropdowns.");
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
+
+
   // -------------------------
   // Set dish types after both dishData and restaurants are loaded
   // -------------------------
@@ -138,6 +162,66 @@ function UpdateDishes() {
     }
   };
 
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const formData = new FormData();
+
+  //   formData.append("restaurantId", selectedRestaurant?.value);
+  //   formData.append("dish_category", selectedDishCategory?.value);
+  //   formData.append("dish_sub_category", selectedDishSubCategory?.value);
+  //   formData.append("dish_type", selectedDishType?.value);
+  //   formData.append("cuisines[0]", selectedCuisine?.value);
+  //   formData.append("dish_name", e.target.dish_name.value);
+  //   formData.append("price", e.target.price.value);
+  //   formData.append("description", e.target.description.value);
+  //   formData.append("isAvailable", e.target.isAvailable.checked);
+
+  //   // ✅ Dish images (old + new)
+  //   images.forEach((img) => {
+  //     if (img instanceof File) {
+  //       formData.append("dish_images", img); // new uploads
+  //     } else if (img.url) {
+  //       formData.append("existing_dish_images", img.url.replace(IMAGE_URL + "/", "")); // keep old ones
+  //     }
+  //   });
+
+  //   const ingredientsData = ingredients.map((ing) => {
+  //     if (ing.icon instanceof File) {
+  //       // new upload — backend will get via ingredient_icons[]
+  //       return { name: ing.name, icon: "" };
+  //     } else if (ing.icon?.url) {
+  //       // existing icon — keep its relative path
+  //       return { name: ing.name, icon: ing.icon.url.replace(IMAGE_URL + "/", "") };
+  //     } else {
+  //       return { name: ing.name, icon: "" };
+  //     }
+  //   });
+
+
+
+  //   formData.append("dish_ingredients", JSON.stringify(ingredientsData));
+
+  //   ingredients.forEach((ing) => {
+  //     if (ing.icon instanceof File) {
+  //       formData.append("ingredient_icons", ing.icon);
+  //     } else {
+  //       formData.append("ingredient_icons", "");
+  //     }
+  //   });
+
+
+
+  //   axios
+  //     .patch(`${BASE_URL}/dishes/update-dish/${id}`, formData, config)
+  //     .then(() => {
+  //       toast.success("Dish updated successfully!");
+  //       navigate(`/DishesList/${restaurantId}`);
+  //     })
+  //     .catch((err) => {
+  //       console.error(err);
+  //       toast.error("Failed to update dish. Please try again.");
+  //     });
+  // };
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -152,18 +236,36 @@ function UpdateDishes() {
     formData.append("description", e.target.description.value);
     formData.append("isAvailable", e.target.isAvailable.checked);
 
-    // Dish images (file uploads)
+    // ✅ Dish images (old + new)
     images.forEach((img) => {
-      if (img instanceof File) formData.append("dish_images", img);
+      if (img instanceof File) {
+        formData.append("dish_images", img); // new uploads
+      } else if (img.url) {
+        formData.append("existing_dish_images", img.url.replace(IMAGE_URL + "/", "")); // keep old ones
+      }
     });
 
-    // Ingredients
-    const ingredientsData = ingredients.map((ing) => ({ name: ing.name }));
+    // ✅ Prepare ingredients data with proper icon handling
+    const ingredientsData = ingredients.map((ing) => {
+      if (ing.icon instanceof File) {
+        // New upload - backend will fill this from ingredient_icons array
+        return { name: ing.name, icon: "" };
+      } else if (ing.icon?.url) {
+        // Existing icon - keep its path
+        return { name: ing.name, icon: ing.icon.url.replace(IMAGE_URL + "/", "") };
+      } else {
+        // No icon
+        return { name: ing.name, icon: "" };
+      }
+    });
+
     formData.append("dish_ingredients", JSON.stringify(ingredientsData));
 
-    // Ingredient icons
+    // ✅ ONLY append actual File objects (no empty strings!)
     ingredients.forEach((ing) => {
-      if (ing.icon) formData.append("ingredient_icons", ing.icon);
+      if (ing.icon instanceof File) {
+        formData.append("ingredient_icons", ing.icon);
+      }
     });
 
     axios
@@ -177,6 +279,7 @@ function UpdateDishes() {
         toast.error("Failed to update dish. Please try again.");
       });
   };
+
 
   if (!dishData) return <div>Loading...</div>;
 

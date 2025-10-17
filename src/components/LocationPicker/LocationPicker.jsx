@@ -2,6 +2,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-lea
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useState, useEffect } from "react";
+import { MAP_TOKEN } from "../../config/Config";
 
 // 🟠 Custom orange marker icon
 const orangeIcon = new L.Icon({

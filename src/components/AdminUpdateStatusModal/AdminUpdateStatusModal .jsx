@@ -2,18 +2,17 @@ import React, { useState, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
 import { toast } from "react-toastify";
 import axios from "axios";
-
 import { BASE_URL } from "../../config/Config";
 
-const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
-  const [selectedStatus, setSelectedStatus] = useState(status || "");
-  const [statusReason, setStatusReason] = useState(reason || "");
+const AdminUpdateStatusModal = ({ adminId, currentStatus, defaultReason, onClose, onStatusUpdated }) => {
+  const [selectedStatus, setSelectedStatus] = useState(currentStatus || "");
+  const [statusReason, setStatusReason] = useState(defaultReason || "");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setSelectedStatus(status || "");
-    setStatusReason(reason || "");
-  }, [status, reason]);
+    setSelectedStatus(currentStatus || "");
+    setStatusReason(defaultReason || "");
+  }, [currentStatus, defaultReason]);
 
   const handleSubmit = async () => {
     if (!selectedStatus || !statusReason) {
@@ -31,10 +30,10 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
       }
 
       const response = await axios.patch(
-        `${BASE_URL}/user/update-status/${userId}`,
+        `${BASE_URL}/admin/update-status/${adminId}`,
         {
           status: selectedStatus,
-          reason: statusReason,
+          status_reason: statusReason,
         },
         {
           headers: {
@@ -44,13 +43,13 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
       );
 
       if (response.data.success) {
-        toast.success("Status updated successfully");
-        onSuccess();
+        toast.success("Admin status updated successfully");
+        onStatusUpdated(selectedStatus, statusReason);
       } else {
-        toast.error("Failed to update status");
+        toast.error(response.data.message || "Failed to update status");
       }
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating admin status:", error);
       toast.error("Something went wrong!");
     } finally {
       setLoading(false);
@@ -67,7 +66,7 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
           <IoMdClose size={20} />
         </button>
 
-        <h2 className="text-xl font-semibold mb-4">Change User Status</h2>
+        <h2 className="text-xl font-semibold mb-4">Change Admin Status</h2>
 
         <div className="mb-4">
           <label className="block font-medium text-gray-700">Status</label>
@@ -78,9 +77,8 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
           >
             <option value="">-- Select Status --</option>
             <option value="active">Active</option>
-            <option value="spam">Spam</option>
+            <option value="inactive">Inactive</option>
             <option value="suspended">Suspended</option>
-            <option value="banned">Banned</option>
           </select>
         </div>
 
@@ -114,4 +112,4 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
   );
 };
 
-export default UserUpdateStatus;
+export default AdminUpdateStatusModal;

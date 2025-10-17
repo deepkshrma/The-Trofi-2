@@ -17,7 +17,6 @@ export default function ProtectedRoute({ allowedRoles }) {
       sessionStorage.getItem("trofi_user");
 
     if (!stored) {
-      toast.error("Please login first");
       navigate("/login", { replace: true, state: { from: location } });
       return;
     }
