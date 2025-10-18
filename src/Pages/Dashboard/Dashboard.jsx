@@ -355,19 +355,6 @@ export default function Dashboard() {
     fetchRatingGraph();
   }, [ratingGraphFilter]); // ✅ dependency added
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   const BadgeButton = ({ label, isActive, onClick }) => (
     <button
       onClick={onClick}
@@ -380,8 +367,6 @@ export default function Dashboard() {
       {label}
     </button>
   );
-
-
 
   const sortedReviews = dashboardData?.recentReviews || [];
 
@@ -645,7 +630,13 @@ export default function Dashboard() {
         {/* Restaurant Graph */}
         <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-6">
           <div className="flex items-center justify-between mb-0 mt-3 ml-0 mr-2">
-            <h3 className="text-xl font-semibold">Restaurant Count</h3>
+            <h3
+              onClick={() => navigate("/RestroList")}
+              className="text-xl font-semibold cursor-pointer text-gray-800 hover:text-orange-600 transition"
+            >
+              Restaurant Count
+            </h3>
+
             <FilterPills active={revenueFilter} onChange={setRevenueFilter} />
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -671,7 +662,13 @@ export default function Dashboard() {
         {/* pie chart */}
         <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col gap-6">
           <div className="flex items-center justify-between  mb-4">
-            <h3 className="text-xl font-semibold">Rating Statistics</h3>
+            <h3
+              onClick={() => navigate("/RestaurantReviewList")}
+              className="text-xl font-semibold cursor-pointer text-gray-800 hover:text-orange-600 transition"
+            >
+              Rating Statistics
+            </h3>
+
             <div className="flex gap-2">
               {["all", "restaurant", "dish"].map((type) => (
                 <button
@@ -744,7 +741,13 @@ export default function Dashboard() {
         {/* bar chart */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Rating</h3>
+            <h3
+              onClick={() => navigate("/RestaurantReviewList")}
+              className="text-xl font-semibold cursor-pointer text-gray-800 hover:text-orange-600 transition"
+            >
+              Rating
+            </h3>
+
             <FilterPills active={ratingGraphFilter} onChange={setRatingGraphFilter} />
           </div>
 
@@ -825,7 +828,13 @@ export default function Dashboard() {
         {/* User Graph */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Users Count</h3>
+            <h3
+              onClick={() => navigate("/UserList")}
+              className="text-xl font-semibold cursor-pointer text-gray-800 hover:text-orange-600 transition"
+            >
+              Users Count
+            </h3>
+
             <FilterPills active={userGraphFilter} onChange={setUserGraphFilter} />
           </div>
           <ResponsiveContainer width="100%" height={300}>

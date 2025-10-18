@@ -29,7 +29,7 @@ const RestroDishCategoryList = () => {
     // setSelectedAdmin(null);
   };
 
-  const confirmDelete = async () => {};
+  const confirmDelete = async () => { };
 
   const getTextPreview = (html, limit = 100) => {
     const tempDiv = document.createElement("div");
@@ -44,25 +44,36 @@ const RestroDishCategoryList = () => {
   const fetchCategories = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await axios.get(`${BASE_URL}/restro/get-dish-category`);
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+
+      const res = await axios.get(`${BASE_URL}/restro/get-dish-category`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page, limit: pagination.pageSize }, // if API supports pagination
+      });
+
       if (res.data?.success) {
         setCategories(res.data.data);
-        setPagination({
-          currentPage: 1,
-          totalPages: 1,
-          pageSize: 10,
-          totalRecords: res.data.data.length,
-        });
+        setPagination((p) => ({
+          ...p,
+          currentPage: page,
+          totalRecords: res.data.totalRecords || res.data.data.length,
+          totalPages: Math.ceil(
+            (res.data.totalRecords || res.data.data.length) / p.pageSize
+          ),
+        }));
       } else {
         toast.error(res.data?.message || "Failed to fetch categories");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Error fetching categories");
+      console.error("Server error:", err);
+      toast.error(
+        err.response?.data?.message || "Error fetching dish categories"
+      );
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchCategories();
@@ -91,7 +102,7 @@ const RestroDishCategoryList = () => {
             <PlusCircle size={18} /> Add Dish Categories
           </button>
         </div>
-        
+
         <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
           {/* 🔍 Search */}
           <div className="flex flex-wrap gap-3 m-3">
@@ -132,9 +143,8 @@ const RestroDishCategoryList = () => {
                     </td>
                     <td className="p-3">
                       <img
-                        src={`${BASE_URL.replace("/api", "")}/${
-                          cat.category_icon
-                        }`}
+                        src={`${BASE_URL.replace("/api", "")}/${cat.category_icon
+                          }`}
                         alt={cat.category_name}
                         className="w-12 h-12 rounded-lg object-cover"
                       />
@@ -156,12 +166,6 @@ const RestroDishCategoryList = () => {
                         >
                           <MdEdit size={18} />
                         </button>
-                        {/* <button
-                          onClick={() => setShowDeleteModal(true)}
-                          className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm "
-                        >
-                          <MdDelete size={18} />
-                        </button> */}
                       </div>
                     </td>
                   </tr>

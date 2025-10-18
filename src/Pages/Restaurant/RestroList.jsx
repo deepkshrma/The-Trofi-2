@@ -13,6 +13,8 @@ import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { FiFilter, FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { Country, State, City } from "country-state-city";
 import {
   FaUtensils,
   FaLeaf,
@@ -34,6 +36,16 @@ function RestroList() {
 
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [country, setCountry] = useState("");
+  const [stateName, setStateName] = useState("");
+  const [city, setCity] = useState("");
+
+
+
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -59,6 +71,31 @@ function RestroList() {
 
   const navigate = useNavigate();
 
+  const handleCountryChange = (e) => {
+    const selectedCountry = e.target.value;
+    setCountry(selectedCountry);
+    const countryStates = State.getStatesOfCountry(selectedCountry);
+    setStates(countryStates);
+    setStateName("");
+    setCities([]);
+    setCity("");
+  };
+
+  const handleStateChange = (e) => {
+    const selectedState = e.target.value;
+    setStateName(selectedState);
+    const stateCities = City.getCitiesOfCountry(country, selectedState);
+    setCities(stateCities || []);
+    setCity("");
+  };
+
+
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+  }, []);
+
+
+
   const authData = JSON.parse(localStorage.getItem("trofi_user"));
   const token = authData?.token;
 
@@ -82,10 +119,70 @@ function RestroList() {
         searchName: searchTerm,
       };
 
-      // Build filters object
-      if (Object.keys(filters).length > 0) {
-        params.filters = filters;
+      // ============ FILTERS ============
+      // Controller expects: filters as object with nested structure
+      const backendFilters = {};
+
+      if (filters["filters[hygieneStatus][]"] && filters["filters[hygieneStatus][]"].length > 0) {
+        backendFilters.hygieneStatus = filters["filters[hygieneStatus][]"];
       }
+      if (filters["filters[dishType][]"] && filters["filters[dishType][]"].length > 0) {
+        backendFilters.dishType = filters["filters[dishType][]"];
+      }
+      if (filters["filters[accountStatus][]"] && filters["filters[accountStatus][]"].length > 0) {
+        backendFilters.accountStatus = filters["filters[accountStatus][]"];
+      }
+      if (filters["filters[minPrice]"]) {
+        backendFilters.minPrice = parseFloat(filters["filters[minPrice]"]);
+      }
+      if (filters["filters[maxPrice]"]) {
+        backendFilters.maxPrice = parseFloat(filters["filters[maxPrice]"]);
+      }
+      if (filters["filters[minRating]"]) {
+        backendFilters.minRating = parseFloat(filters["filters[minRating]"]);
+      }
+      if (filters["filters[startDate]"]) {
+        backendFilters.startDate = filters["filters[startDate]"];
+      }
+      if (filters["filters[endDate]"]) {
+        backendFilters.endDate = filters["filters[endDate]"];
+      }
+
+
+      // Add all filters to params
+      if (Object.keys(backendFilters).length > 0) {
+        params.filters = backendFilters;
+      }
+
+      // ============ LOCATION FILTERS ============
+      if (filters.country) {
+        params.country = filters.country;
+      }
+      if (filters.state) {
+        params.state = filters.state;
+      }
+      if (filters.city) {
+        params.city = filters.city;
+      }
+
+      // ============ SORTING ============
+      // Always include 'latest' as default, then add rating/price sort if selected
+      const sortArray = ["latest"];
+
+      // Add rating sort if selected
+      if (filters["sort[]_rating"]) {
+        sortArray.push(filters["sort[]_rating"]);
+      }
+
+      // Add price sort if selected
+      if (filters["sort[]_price"]) {
+        sortArray.push(filters["sort[]_price"]);
+      }
+
+      // Send sort as array - axios will convert to sort[]=latest&sort[]=rating_desc
+      params.sort = sortArray;
+
+      console.log("Sending params:", params); // Debug
 
       const response = await axios.get(
         `${BASE_URL}/restro/get-restaurant-list`,
@@ -109,16 +206,16 @@ function RestroList() {
         totalRecords: backendPagination.total,
       }));
 
-      // Update KPI counts
+      // ============ KPI COUNTS ============
       const foodCounts = { veg: 0, nonVeg: 0, both: 0 };
-      backendKpi.foodTypeCounts.forEach((item) => {
+      backendKpi.foodTypeCounts?.forEach((item) => {
         if (item._id === "veg") foodCounts.veg = item.count;
         else if (item._id === "non-veg") foodCounts.nonVeg = item.count;
         else if (item._id === "both") foodCounts.both = item.count;
       });
 
       const hygieneCounts = { hygiene: 0, general: 0 };
-      backendKpi.hygieneCounts.forEach((item) => {
+      backendKpi.hygieneCounts?.forEach((item) => {
         hygieneCounts[item._id] = item.count;
       });
 
@@ -128,7 +225,7 @@ function RestroList() {
         ...hygieneCounts,
       });
 
-      // Extract filter options from KPI data
+      // ============ FILTER OPTIONS ============
       if (backendKpi.dishTypeCounts) {
         setFilterOptions((prev) => ({
           ...prev,
@@ -215,6 +312,9 @@ function RestroList() {
       "Hygiene Status": restro.hygiene_status || "N/A",
       "Account Status": restro.account_status,
       Address: restro.address || "N/A",
+      City: restro.city || "N/A",
+      State: restro.state || "N/A",
+      Country: restro.country || "N/A",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -229,6 +329,20 @@ function RestroList() {
       type: "application/octet-stream",
     });
     saveAs(fileData, "Restaurants.xlsx");
+  };
+
+  // Helper function to get filter display text
+  const getFilterDisplayText = (key, value) => {
+    if (key === 'country') return `Country: ${value}`;
+    if (key === 'state') return `State: ${value}`;
+    if (key === 'city') return `City: ${value}`;
+    if (key === 'minPrice') return `Min Price: ₹${value}`;
+    if (key === 'maxPrice') return `Max Price: ₹${value}`;
+    if (key === 'minRating') return `Min Rating: ${value}⭐`;
+    if (key === 'priceSort') return value === 'price_asc' ? 'Price: Low to High' : 'Price: High to Low';
+    if (key === 'ratingSort') return value === 'rating_asc' ? 'Rating: Low to High' : 'Rating: High to Low';
+    if (Array.isArray(value)) return value.join(", ");
+    return value;
   };
 
   return (
@@ -344,25 +458,30 @@ function RestroList() {
           {Object.keys(appliedFilters).length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2 items-center">
               <span className="text-sm text-gray-600 font-medium">Active Filters:</span>
-              {Object.entries(appliedFilters).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                >
-                  {Array.isArray(value) ? value.join(", ") : value}
-                  <button
-                    onClick={() => {
-                      const newFilters = { ...appliedFilters };
-                      delete newFilters[key];
-                      setAppliedFilters(newFilters);
-                      fetchRestaurants(1, search, newFilters);
-                    }}
-                    className="hover:text-red-600 transition"
+              {Object.entries(appliedFilters).map(([key, value]) => {
+                // Skip empty values
+                if (!value || (Array.isArray(value) && value.length === 0)) return null;
+
+                return (
+                  <div
+                    key={key}
+                    className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
                   >
-                    <FiX size={16} />
-                  </button>
-                </div>
-              ))}
+                    {getFilterDisplayText(key, value)}
+                    <button
+                      onClick={() => {
+                        const newFilters = { ...appliedFilters };
+                        delete newFilters[key];
+                        setAppliedFilters(newFilters);
+                        fetchRestaurants(1, search, newFilters);
+                      }}
+                      className="hover:text-red-600 transition"
+                    >
+                      <FiX size={16} />
+                    </button>
+                  </div>
+                );
+              })}
               <button
                 onClick={() => {
                   setAppliedFilters({});
@@ -471,25 +590,6 @@ function RestroList() {
                             {truncateText(restro.restro_name, 25)}
                           </p>
                         </td>
-                        {/* <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {restro.dishTypes && restro.dishTypes.length > 0
-                              ? restro.dishTypes.slice(0, 2).map((dt) => (
-                                <span
-                                  key={dt._id}
-                                  className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium"
-                                >
-                                  {dt.name}
-                                </span>
-                              ))
-                              : <span className="text-xs text-gray-500">N/A</span>}
-                            {restro.dishTypes && restro.dishTypes.length > 2 && (
-                              <span className="inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full font-medium">
-                                +{restro.dishTypes.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        </td> */}
                         <td className="px-4 py-4">
                           <div className="flex flex-wrap gap-2 items-center">
                             {restro.dishTypes && restro.dishTypes.length > 0
@@ -660,287 +760,408 @@ function RestroList() {
       )}
 
       {/* Filter Modal */}
-      <RestaurantFilterModal
-        isOpen={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        onApply={(filters) => {
-          setAppliedFilters(filters);
-          fetchRestaurants(1, search, filters);
-        }}
-        filterOptions={filterOptions}
-      />
+      {showFilterModal && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 md:p-6"
+            >
+              <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-4 md:mb-6">
+                Apply Filters
+              </h2>
+
+              {/* Country */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Country
+                </label>
+                <select
+                  value={country}
+                  onChange={handleCountryChange}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((c) => (
+                    <option key={c.isoCode} value={c.isoCode}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* State */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  State
+                </label>
+                <select
+                  value={stateName}
+                  onChange={handleStateChange}
+                  disabled={!country}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm disabled:bg-gray-100"
+                >
+                  <option value="">Select State</option>
+                  {states.map((s) => (
+                    <option key={s.isoCode} value={s.isoCode}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* City */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  City
+                </label>
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  disabled={!stateName}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm disabled:bg-gray-100"
+                >
+                  <option value="">Select City</option>
+                  {cities.map((c) => (
+                    <option key={c.name} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 md:gap-4">
+                {/* Hygiene Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hygiene Status
+                  </label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                    {filterOptions.hygieneStatuses?.length > 0 ? (
+                      filterOptions.hygieneStatuses.map((status) => (
+                        <label
+                          key={status._id}
+                          className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(appliedFilters["filters[hygieneStatus][]"] || []).includes(
+                              status._id
+                            )}
+                            onChange={(e) => {
+                              const current = appliedFilters["filters[hygieneStatus][]"] || [];
+                              const updated = e.target.checked
+                                ? [...current, status._id]
+                                : current.filter((item) => item !== status._id);
+                              setAppliedFilters((prev) => ({
+                                ...prev,
+                                "filters[hygieneStatus][]": updated.length > 0 ? updated : undefined,
+                              }));
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {status._id} ({status.count})
+                          </span>
+                        </label>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-500">No options available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Dish Types Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Dish Types
+                  </label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                    {filterOptions.dishTypes?.length > 0 ? (
+                      filterOptions.dishTypes.map((dishType) => (
+                        <label
+                          key={dishType._id}
+                          className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(appliedFilters["filters[dishType][]"] || []).includes(
+                              dishType._id
+                            )}
+                            onChange={(e) => {
+                              const current = appliedFilters["filters[dishType][]"] || [];
+                              const updated = e.target.checked
+                                ? [...current, dishType._id]
+                                : current.filter((item) => item !== dishType._id);
+                              setAppliedFilters((prev) => ({
+                                ...prev,
+                                "filters[dishType][]": updated.length > 0 ? updated : undefined,
+                              }));
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {dishType.name} ({dishType.count})
+                          </span>
+                        </label>
+                      ))
+                    ) : (
+                      <p className="text-xs text-gray-500">No options available</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Account Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Account Status
+                  </label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                    {[
+                      { _id: "active", label: "Active" },
+                      { _id: "inactive", label: "Inactive" },
+                      { _id: "suspended", label: "Suspended" },
+                    ].map((status) => (
+                      <label
+                        key={status._id}
+                        className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={(appliedFilters["filters[accountStatus][]"] || []).includes(
+                            status._id
+                          )}
+                          onChange={(e) => {
+                            const current = appliedFilters["filters[accountStatus][]"] || [];
+                            const updated = e.target.checked
+                              ? [...current, status._id]
+                              : current.filter((item) => item !== status._id);
+                            setAppliedFilters((prev) => ({
+                              ...prev,
+                              "filters[accountStatus][]": updated.length > 0 ? updated : undefined,
+                            }));
+                          }}
+                          className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                        />
+                        <span className="text-sm text-gray-700">{status.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Min Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Min Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g., 100"
+                    value={appliedFilters["filters[minPrice]"] || ""}
+                    onChange={(e) =>
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        "filters[minPrice]": e.target.value ? parseFloat(e.target.value) : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  />
+                </div>
+
+                {/* Max Price */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Max Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g., 500"
+                    value={appliedFilters["filters[maxPrice]"] || ""}
+                    onChange={(e) =>
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        "filters[maxPrice]": e.target.value ? parseFloat(e.target.value) : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  />
+                </div>
+
+                {/* Min Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Minimum Rating
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    placeholder="e.g., 3.5"
+                    value={appliedFilters["filters[minRating]"] || ""}
+                    onChange={(e) =>
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        "filters[minRating]": e.target.value ? parseFloat(e.target.value) : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  />
+                </div>
+                {/* Date Range Filter */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date Added Range
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {/* Start Date */}
+                    <input
+                      type="date"
+                      value={appliedFilters["filters[startDate]"] || ""}
+                      onChange={(e) =>
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "filters[startDate]": e.target.value || undefined,
+                        }))
+                      }
+                      className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                    />
+                    {/* End Date */}
+                    <input
+                      type="date"
+                      value={appliedFilters["filters[endDate]"] || ""}
+                      onChange={(e) =>
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "filters[endDate]": e.target.value || undefined,
+                        }))
+                      }
+                      className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                    />
+                  </div>
+                </div>
+
+
+
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sort by Rating
+                  </label>
+                  <select
+                    value={appliedFilters["sort[]_rating"] || ""}
+                    onChange={(e) => {
+                      const sortArray = appliedFilters["sort[]"] ? [].concat(appliedFilters["sort[]"]) : [];
+                      const filtered = sortArray.filter(s => !s.includes("rating"));
+
+                      if (e.target.value) {
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "sort[]": [...filtered, e.target.value],
+                          "sort[]_rating": e.target.value,
+                        }));
+                      } else {
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "sort[]": filtered,
+                          "sort[]_rating": "",
+                        }));
+                      }
+                    }}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  >
+                    <option value="">No Sort</option>
+                    <option value="rating_desc">High to Low</option>
+                    <option value="rating_asc">Low to High</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Sort by Price
+                  </label>
+                  <select
+                    value={appliedFilters["sort[]_price"] || ""}
+                    onChange={(e) => {
+                      const sortArray = appliedFilters["sort[]"] ? [].concat(appliedFilters["sort[]"]) : [];
+                      const filtered = sortArray.filter(s => !s.includes("price"));
+
+                      if (e.target.value) {
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "sort[]": [...filtered, e.target.value],
+                          "sort[]_price": e.target.value,
+                        }));
+                      } else {
+                        setAppliedFilters((prev) => ({
+                          ...prev,
+                          "sort[]": filtered,
+                          "sort[]_price": "",
+                        }));
+                      }
+                    }}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  >
+                    <option value="">No Sort</option>
+                    <option value="price_asc">Low to High</option>
+                    <option value="price_desc">High to Low</option>
+                  </select>
+                </div> */}
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-3 mt-6 md:mt-8 pt-4 border-t">
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer font-medium text-sm transition"
+                  onClick={() => {
+                    setAppliedFilters({});
+                    setShowFilterModal(false);
+                    fetchRestaurants(1, search, {});
+                  }}
+                >
+                  Clear All
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer font-medium text-sm transition"
+                  onClick={() => {
+                    // Convert selected codes into readable names
+                    const selectedCountryName = Country.getCountryByCode(country)?.name || "";
+                    const selectedStateName = State.getStateByCodeAndCountry(stateName, country)?.name || "";
+                    const selectedCityName = city || "";
+
+                    // Merge with existing appliedFilters safely
+                    const updatedFilters = {
+                      ...appliedFilters,
+                      ...(selectedCountryName && { country: selectedCountryName }),
+                      ...(selectedStateName && { state: selectedStateName }),
+                      ...(selectedCityName && { city: selectedCityName }),
+                    };
+
+                    // Update filters + trigger fetch
+                    setAppliedFilters(updatedFilters);
+                    setShowFilterModal(false);
+                    fetchRestaurants(1, search, updatedFilters);
+                  }}
+                >
+                  Apply Filters
+                </button>
+
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
+
     </>
-  );
-}
 
-// Filter Modal Component
-function RestaurantFilterModal({
-  isOpen,
-  onClose,
-  onApply,
-  filterOptions,
-}) {
-  const [tempFilters, setTempFilters] = useState({
-    hygieneStatus: [],
-    dishType: [],
-    accountStatus: [],
-    minPrice: "",
-    maxPrice: "",
-    minRating: "",
-    maxRating: "",
-    priceSort: "",
-    ratingSort: "",
-  });
-
-  const accountStatusOptions = [
-    { _id: "active", label: "Active" },
-    { _id: "inactive", label: "Inactive" },
-    { _id: "suspended", label: "Suspended" },
-  ];
-
-  const handleCheckboxChange = (filterKey, value) => {
-    setTempFilters((prev) => {
-      const current = prev[filterKey] || [];
-      const updated = current.includes(value)
-        ? current.filter((item) => item !== value)
-        : [...current, value];
-      return { ...prev, [filterKey]: updated };
-    });
-  };
-
-  const handleInputChange = (key, value) => {
-    setTempFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleApply = () => {
-    const filters = {};
-
-    if (tempFilters.hygieneStatus.length > 0) {
-      filters.hygieneStatus = tempFilters.hygieneStatus;
-    }
-    if (tempFilters.dishType.length > 0) {
-      filters.dishType = tempFilters.dishType;
-    }
-    if (tempFilters.accountStatus.length > 0) {
-      filters.accountStatus = tempFilters.accountStatus;
-    }
-    if (tempFilters.minPrice) {
-      filters.minPrice = parseFloat(tempFilters.minPrice);
-    }
-    if (tempFilters.maxPrice) {
-      filters.maxPrice = parseFloat(tempFilters.maxPrice);
-    }
-    if (tempFilters.minRating) {
-      filters.minRating = parseFloat(tempFilters.minRating);
-    }
-
-    // Handle sorting
-    if (tempFilters.priceSort) {
-      filters.sort = tempFilters.priceSort;
-    }
-    if (tempFilters.ratingSort) {
-      filters.sort = tempFilters.ratingSort;
-    }
-
-    onApply(filters);
-    onClose();
-  };
-
-  const handleReset = () => {
-    setTempFilters({
-      hygieneStatus: [],
-      dishType: [],
-      accountStatus: [],
-      minPrice: "",
-      maxPrice: "",
-      minRating: "",
-      maxRating: "",
-      priceSort: "",
-      ratingSort: "",
-    });
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
-        <div className="sticky top-0 bg-gray-100 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-bold text-gray-800">Advanced Filters</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-600 cursor-pointer text-2xl font-bold transition"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* Hygiene Status Filter */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <FaShieldAlt size={16} /> Hygiene Status
-            </h3>
-            <div className="space-y-2">
-              {filterOptions.hygieneStatuses?.map((status) => (
-                <label key={status._id} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={tempFilters.hygieneStatus.includes(status._id)}
-                    onChange={() =>
-                      handleCheckboxChange("hygieneStatus", status._id)
-                    }
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700">
-                    {status._id} ({status.count})
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Dish Type Filter */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <FaUtensils size={16} /> Dish Types
-            </h3>
-            <div className="space-y-2">
-              {filterOptions.dishTypes?.map((dishType) => (
-                <label key={dishType._id} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={tempFilters.dishType.includes(dishType._id)}
-                    onChange={() =>
-                      handleCheckboxChange("dishType", dishType._id)
-                    }
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700">
-                    {dishType.name} ({dishType.count})
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Account Status Filter */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Account Status
-            </h3>
-            <div className="space-y-2">
-              {accountStatusOptions.map((status) => (
-                <label key={status._id} className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={tempFilters.accountStatus.includes(status._id)}
-                    onChange={() =>
-                      handleCheckboxChange("accountStatus", status._id)
-                    }
-                    className="w-4 h-4 rounded border-gray-300 cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700">{status.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Range Filter */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Price Per Person (₹)
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="number"
-                placeholder="Min Price"
-                value={tempFilters.minPrice}
-                onChange={(e) => handleInputChange("minPrice", e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Max Price"
-                value={tempFilters.maxPrice}
-                onChange={(e) => handleInputChange("maxPrice", e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Rating Filter */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Minimum Rating
-            </h3>
-            <input
-              type="number"
-              placeholder="Min Rating (0-5)"
-              min="0"
-              max="5"
-              step="0.1"
-              value={tempFilters.minRating}
-              onChange={(e) => handleInputChange("minRating", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-            />
-          </div>
-
-          {/* Price Sort */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Sort by Price
-            </h3>
-            <select
-              value={tempFilters.priceSort}
-              onChange={(e) => handleInputChange("priceSort", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-            >
-              <option value="">Select Sort</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-          </div>
-
-          {/* Rating Sort */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Sort by Rating
-            </h3>
-            <select
-              value={tempFilters.ratingSort}
-              onChange={(e) => handleInputChange("ratingSort", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#F9832B] outline-none"
-            >
-              <option value="">Select Sort</option>
-              <option value="rating_desc">Rating: High to Low</option>
-              <option value="rating_asc">Rating: Low to High</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer transition font-medium"
-          >
-            Reset
-          </button>
-          <button
-            onClick={handleApply}
-            className="px-6 py-2 rounded-lg text-white cursor-pointer transition font-medium"
-            style={{ backgroundColor: "#F9832B" }}
-          >
-            Apply Filters
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+  )
 }
 
 export default RestroList;

@@ -248,6 +248,9 @@ function UserList() {
     setGender("");
     setShowFilterModal(false);
     fetchUsers(1);
+    setRegistrationToDate("");
+    setRegistrationFromDate("");
+
   };
 
   const applyFilters = () => {
@@ -604,37 +607,7 @@ function UserList() {
                   </select>
                 </div>
 
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="suspended">Suspended</option>
-                    <option value="banned">Banned</option>
-                    <option value="spam">Spam</option>
-                  </select>
-                </div>
 
-                {/* Gender */}
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                  <select
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
-                  >
-                    <option value="">All Genders</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                    <option value="prefer_not_to_say">Prefer not to say</option>
-                  </select>
-                </div> */}
 
                 {/* Min Age */}
                 <div>
@@ -680,7 +653,7 @@ function UserList() {
                 {/* Registration Date From */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Registration From
+                    Registered From
                   </label>
                   <input
                     type="date"
@@ -693,7 +666,7 @@ function UserList() {
                 {/* Registration Date To */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Registration To
+                    Registered To
                   </label>
                   <input
                     type="date"
@@ -701,6 +674,22 @@ function UserList() {
                     onChange={(e) => setRegistrationToDate(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
                   />
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="suspended">Suspended</option>
+                    <option value="banned">Banned</option>
+                    <option value="spam">Spam</option>
+                  </select>
                 </div>
               </div>
 

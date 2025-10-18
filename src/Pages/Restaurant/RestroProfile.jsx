@@ -386,14 +386,17 @@ function RestroProfile() {
             </p>
             <p className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.time || "N/A"}
+              {restaurant.time
+                ? (() => {
+                  
+                  const [hours, minutes] = restaurant.time.split(":").map(Number);
+                  const period = hours >= 12 ? "PM" : "AM";
+                  const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                  return `Till ${formattedHour}:${minutes.toString().padStart(2, "0")} ${period} `;
+                })()
+                : "N/A"}
             </p>
-            {/* <p className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
-              <span className="font-semibold text-gray-800">
-                {restaurant.price ? `₹${restaurant.price}` : "N/A"}
-              </span>
-            </p> */}
+
           </div>
 
         </div>

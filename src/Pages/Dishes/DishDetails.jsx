@@ -124,11 +124,10 @@ function DishDetails() {
                 key={index}
                 src={`${IMAGE_URL}/${img}`}
                 alt={`Dish ${index + 1}`}
-                className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer ${
-                  currentImageIndex === index
+                className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer ${currentImageIndex === index
                     ? "border-[#F9832B]"
                     : "border-gray-200"
-                }`}
+                  }`}
                 onClick={() => openImageModal(index)}
                 onError={(e) => (e.target.src = guest)}
               />
@@ -253,25 +252,39 @@ function DishDetails() {
                     <td className="px-6 py-3 flex items-center gap-2">
                       <img
                         src={
-                          r.userId.profile_picture
+                          r.userId?.profile_picture
                             ? `${IMAGE_URL}/${r.userId.profile_picture}`
                             : guest
                         }
-                        alt={r.userId.name}
-                        className="w-8 h-8 rounded-full object-cover"
+                        alt={r.userId?.name}
+                        className="w-8 h-8 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-[#F9832B] transition"
+                        onClick={() => {
+                          if (r.userId?._id) navigate(`/UserProfile/${r.userId._id}`);
+                        }}
                         onError={(e) => (e.target.src = guest)}
                       />
-                      {r.userId.name}
+
+                      <span
+                        className={`${r.userId?._id
+                            ? "text-[#F9832B] cursor-pointer hover:underline"
+                            : "text-gray-700"
+                          }`}
+                        onClick={() => {
+                          if (r.userId?._id) navigate(`/UserProfile/${r.userId._id}`);
+                        }}
+                      >
+                        {r.userId?.name || "Anonymous"}
+                      </span>
                     </td>
+
                     <td className="px-6 py-3">⭐ {r.star_value}</td>
                     <td className="px-6 py-3">{r.reviewComment}</td>
                     <td className="px-6 py-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          r.status === "published"
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${r.status === "published"
                             ? "bg-green-100 text-green-700"
                             : "bg-yellow-100 text-yellow-700"
-                        }`}
+                          }`}
                       >
                         {r.status}
                       </span>

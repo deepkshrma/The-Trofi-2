@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { toast } from "react-toastify";
 
 function RestroCuisine() {
-  const { id } = useParams(); // check if edit mode
+  const { id } = useParams();
   const location = useLocation();
-  const [cuisine, setCuisine] = useState("");
   const navigate = useNavigate();
+  const [cuisine, setCuisine] = useState("");
 
-  // Prefill if edit mode
+  // Prefill data if editing
   useEffect(() => {
     if (id && location.state?.name) {
       setCuisine(location.state.name);
@@ -25,38 +23,59 @@ function RestroCuisine() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!cuisine) {
-      
+    if (!cuisine.trim()) {
       toast.error("Please enter a cuisine name");
       return;
     }
 
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
     try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
       let res;
       if (id) {
         // Update mode
-        res = await axios.patch(`${BASE_URL}/restro/edit-cusine/${id}`, {
-          name: cuisine,
-        });
+        res = await axios.patch(
+          `${BASE_URL}/restro/edit-cusine/${id}`,
+          { name: cuisine },
+          config
+        );
       } else {
         // Create mode
-        res = await axios.post(`${BASE_URL}/restro/create-cusine`, {
-          name: cuisine,
-        });
+        res = await axios.post(
+          `${BASE_URL}/restro/create-cusine`,
+          { name: cuisine },
+          config
+        );
       }
 
-      if (res.status === 200 || res.status === 201 || res.data?.status) {
-        
-        toast.success(res.data?.message || (id ? "Cuisine updated" : "Cuisine created"))
-        if (!id) setCuisine(""); // clear only in create
+      if (res.data?.success || res.status === 200 || res.status === 201) {
+        toast.success(res.data?.message || (id ? "Cuisine updated" : "Cuisine created"));
+        if (!id) setCuisine("");
         navigate("/RestroCuisineList");
       } else {
-        
-        toast.error(res.data?.message || "Something went wrong")
+        toast.error(res.data?.message || "Something went wrong");
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err || "Error while saving cuisine")
+      console.error("Error while saving cuisine:", err);
+      if (err.response?.data?.message) {
+        // Handle backend errors (like permission denied)
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Server error, please try again later");
+      }
     }
   };
 
@@ -71,7 +90,7 @@ function RestroCuisine() {
           },
         ]}
       />
-      <div className="bg-white rounded-2xl shadow-md p-6 ">
+      <div className="bg-white rounded-2xl shadow-md p-6">
         <PageTitle title={id ? "Update Cuisine" : "Restaurant Cuisine"} />
         <form onSubmit={handleSubmit} className="space-y-6 mt-5">
           {/* Cuisine Name */}

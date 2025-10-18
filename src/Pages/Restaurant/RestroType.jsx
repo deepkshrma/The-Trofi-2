@@ -51,6 +51,15 @@ function RestroType() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ Get token
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
     if (!type) {
       toast.error("Please enter restaurant type");
       return;
@@ -61,11 +70,16 @@ function RestroType() {
     if (iconFile) formData.append("icon", iconFile);
 
     try {
+      const headers = {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`, // ✅ Add token here
+      };
+
       if (isEdit) {
         const res = await axios.patch(
           `${BASE_URL}/restro/edit-restaurant-type/${editData.id}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          { headers }
         );
 
         if (res.status === 200 || res.data?.status) {
@@ -78,7 +92,7 @@ function RestroType() {
         const res = await axios.post(
           `${BASE_URL}/restro/create-restro-type`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          { headers }
         );
 
         if (res.status === 201 || res.data?.status) {
@@ -93,8 +107,20 @@ function RestroType() {
         }
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Error while saving Restaurant Type");
+      console.error("Error in RestroType:", error);
+
+      // ✅ Show backend message if available
+      if (error.response) {
+        const message =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          "Something went wrong on the server.";
+        toast.error(message);
+      } else if (error.request) {
+        toast.error("No response from server. Please try again.");
+      } else {
+        toast.error("Error while saving Restaurant Type");
+      }
     }
   };
 

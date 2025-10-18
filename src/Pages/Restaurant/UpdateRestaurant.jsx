@@ -36,7 +36,6 @@ function UpdateRestaurant() {
     description: "",
     longDescription: "",
     hygieneStatus: "general",
-    openingTime: "", // will be in "HH:MM" format for <input type="time" />
     closingTime: "",
     openDays: [], // ["Monday","Tuesday"...]
     dish_type: [], // array of IDs
@@ -225,8 +224,8 @@ function UpdateRestaurant() {
           longDescription: data.long_description || "",
           hygieneStatus: data.hygiene_status || "general",
           is_best_seller: data.is_best_seller || false,
-          openingTime: parseTimeToInput(rawOpen),
-          closingTime: parseTimeToInput(rawClose),
+
+          closingTime: parseTimeToInput(data.time),
           openDays: parseDaysToFullNames(data.days),
           dish_type: normalizeIdArray(data.dish_type),
           restaurant_type: normalizeIdArray(data.restaurant_type),
@@ -353,11 +352,8 @@ function UpdateRestaurant() {
         "hygiene_status",
         restaurantData.hygieneStatus || "general"
       );
-      if (restaurantData.openingTime && restaurantData.closingTime) {
-        formData.append(
-          "time",
-          `${restaurantData.openingTime} to ${restaurantData.closingTime}`
-        );
+      if (restaurantData.closingTime) {
+        formData.append("time", restaurantData.closingTime);
       }
       if (restaurantData.openDays.length > 0) {
         formData.append("days", restaurantData.openDays.join(", "));
@@ -768,18 +764,6 @@ function UpdateRestaurant() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium text-gray-600">
-                Opening Time
-              </label>
-              <input
-                type="time"
-                name="openingTime"
-                value={restaurantData.openingTime}
-                onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              />
-            </div>
             <div>
               <label className="block mb-1 font-medium text-gray-600">
                 Closing Time

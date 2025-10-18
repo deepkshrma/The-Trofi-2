@@ -524,7 +524,7 @@ function DishesList() {
 
                 {/* Sub Category */}
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">
+                  <label className="block text-sm text-gray-600 mb-1 ">
                     Sub Category
                   </label>
                   <select

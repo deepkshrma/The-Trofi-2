@@ -40,28 +40,40 @@ function RestroDishSubCategoryList() {
   const navigate = useNavigate();
 
   // Fetch Sub Categories
-  const fetchSubCategories = async (page = 1) => {
-    try {
-      const res = await axios.get(
-        `${BASE_URL}/restro/get-dish-sub-category?page=${page}&limit=${pagination.pageSize}`
-      );
+ const fetchSubCategories = async (page = 1) => {
+  try {
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
 
-      if (res.data?.success) {
-        setSubCategories(res.data?.data || []);
-        setPagination((prev) => ({
-          ...prev,
-          currentPage: page,
-          totalRecords: res.data?.totalRecords || res.data?.data.length,
-          totalPages: res.data?.totalPages || 1,
-        }));
-      } else {
-        toast.error(res.data?.message || "Failed to fetch sub categories");
+    const res = await axios.get(
+      `${BASE_URL}/restro/get-dish-sub-category?page=${page}&limit=${pagination.pageSize}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // pass token here
+        },
       }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error fetching dish sub categories");
+    );
+
+    if (res.status === 200 && res.data?.success) {
+      setSubCategories(res.data.data || []);
+      setPagination((prev) => ({
+        ...prev,
+        currentPage: page,
+        totalRecords: res.data.totalRecords || res.data.data.length,
+        totalPages: res.data.totalPages || 1,
+      }));
+    } else {
+      toast.error(res.data?.message || "Failed to fetch sub categories");
     }
-  };
+  } catch (err) {
+    console.error("Server error:", err);
+    toast.error(
+      err.response?.data?.message || "Server error while fetching sub categories"
+    );
+  }
+};
+
+
 
   useEffect(() => {
     fetchSubCategories(1);

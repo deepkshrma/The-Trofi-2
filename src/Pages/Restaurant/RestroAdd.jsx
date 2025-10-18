@@ -33,7 +33,6 @@ function RestroAdd() {
     longDescription: "",
     hygieneStatus: "general",
     is_best_seller: false,
-    openingTime: "",
     closingTime: "",
     openDays: [],
     dish_type: [],
@@ -159,9 +158,7 @@ function RestroAdd() {
             !value || value <= 0 ? "Enter a valid price per person" : "";
           break;
 
-        case "openingTime":
-          newErrors.openingTime = value ? "" : "Opening time is required";
-          break;
+
 
         case "closingTime":
           newErrors.closingTime = value ? "" : "Closing time is required";
@@ -290,7 +287,7 @@ function RestroAdd() {
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
-      formData.append("time",restaurantData.closingTime || "");
+
       formData.append(
         "restaurant_type",
         JSON.stringify(restaurantData.restaurant_type)
@@ -302,13 +299,9 @@ function RestroAdd() {
         "hygiene_status",
         restaurantData.hygieneStatus || "general"
       );
-
-      // if (restaurantData.openingTime && restaurantData.closingTime) {
-      //   formData.append(
-      //     "time",
-      //     `${restaurantData.openingTime} to ${restaurantData.closingTime}`
-      //   );
-      // }
+      if (restaurantData.closingTime) {
+        formData.append("time", restaurantData.closingTime);
+      }
 
       if (restaurantData.openDays.length > 0) {
         formData.append("days", restaurantData.openDays.join(", "));
@@ -740,23 +733,6 @@ function RestroAdd() {
 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* <div>
-              <label className="block mb-1 font-medium text-gray-600">
-                Opening Time <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="time"
-                name="openingTime"
-                value={restaurantData.openingTime}
-                onChange={handleChange}
-                className={`w-full border ${errors.openingTime ? "border-red-500" : "border-gray-300"}
-        p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none`}
-              />
-              {errors.openingTime && (
-                <p className="text-red-500 text-sm mt-1">{errors.openingTime}</p>
-              )}
-            </div> */}
-
             <div>
               <label className="block mb-1 font-medium text-gray-600">
                 Closing Time <span className="text-red-500">*</span>

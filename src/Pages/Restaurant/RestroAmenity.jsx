@@ -7,9 +7,15 @@ import { useLocation, useNavigate } from "react-router-dom";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
+
+
 function RestroAmenity() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
+
   const editData = location.state || null;
 
   const [iconName, setIconName] = useState(editData?.name || "");
@@ -52,6 +58,12 @@ function RestroAmenity() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
+
     if (!iconName) {
       toast.error("Please provide amenity name");
       return;
@@ -69,11 +81,15 @@ function RestroAmenity() {
           `${BASE_URL}/restro/edit-amenity/${editData.id}`,
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
-        if (res.status === 200 || res.data?.status) {
+        // ✅ check all possible flags (status/success/sucess)
+        if (res.data?.status || res.data?.success || res.data?.sucess) {
           toast.success(res.data?.message || "Amenity updated successfully");
           navigate("/RestroAmenityList");
         } else {
@@ -84,26 +100,38 @@ function RestroAmenity() {
           `${BASE_URL}/restro/create-amenity`,
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
-        if (res.status === 201 || res.data?.status) {
+        // ✅ handle backend misspelling "sucess"
+        if (res.data?.status || res.data?.success || res.data?.sucess) {
           toast.success(res.data?.message || "Amenity created successfully");
           setIconName("");
           setFile(null);
           setPreview(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
-          navigate("/RestroAmenityList");  // navigate amnity list
+          navigate("/RestroAmenityList");
         } else {
           toast.error(res.data?.message || "Something went wrong");
         }
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error while saving amenity:", err);
 
-      toast.error(err || "Error while saving amenity");
+      // ✅ Extract correct error message from backend
+      const backendMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Error while saving amenity";
+
+      toast.error(backendMsg);
     }
+
   };
 
   return (

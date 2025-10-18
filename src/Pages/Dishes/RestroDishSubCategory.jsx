@@ -28,15 +28,19 @@ function RestroDishSubCategory() {
     const fetchCategories = async () => {
       try {
         const res = await axios.get(`${BASE_URL}/restro/get-dish-category`);
-        if (res.status === 200) {
-          setParentCategories(res.data?.data || []); // store fetched categories
+        if (res.status === 200 && res.data?.success) {
+          setParentCategories(res.data.data || []);
+        } else {
+          toast.error(res.data?.message || "Failed to fetch parent categories");
         }
       } catch (err) {
         console.error("Error fetching categories:", err);
+        toast.error(err.response?.data?.message || "Server error while fetching categories");
       }
     };
     fetchCategories();
   }, []);
+
 
   // Agar edit mode hai to form prefill karo
   useEffect(() => {
@@ -61,6 +65,14 @@ function RestroDishSubCategory() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
 
     if (!parentCategoryId || !subCategoryName || !description) {
       toast.error("Please provide all fields");
@@ -74,31 +86,40 @@ function RestroDishSubCategory() {
     if (file) formData.append("icon", file);
 
     try {
-      let res;
       if (isEdit) {
         res = await axios.patch(
           `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}` // <-- add token here
+            },
+          }
         );
       } else {
-        // CREATE
         res = await axios.post(
           `${BASE_URL}/restro/create-dish-sub-category`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}` // <-- add token here
+            },
+          }
         );
       }
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success(res.data?.message || "Success");
-        navigate("/RestroDishSubCategoryList"); 
+
+      if ([200, 201].includes(res.status) && res.data?.success) {
+        toast.success(res.data.message || "Sub-category saved successfully");
+        navigate("/RestroDishSubCategoryList");
       } else {
-        toast.error(res.data?.message || "Something went wrong");
+        toast.error(res.data?.message || "Something went wrong on the server");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Error while saving sub-category");
+      console.error("API Error:", err);
+      toast.error(err.response?.data?.message || "Server error while saving sub-category");
     }
   };
 
