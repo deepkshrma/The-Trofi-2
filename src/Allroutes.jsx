@@ -172,7 +172,8 @@ const Allroutes = () => {
               <Route path="/AppFeedback" element={<AppFeedback />} />
               <Route path="/AppFeedback/:id" element={<AppFeedbackSee />} />
               <Route path="/NotificationList" element={<NotificationList />} />
-              <Route path="/NotificationView/:id" element={<NotificationView />} />
+              <Route path="/NotificationView" element={<NotificationView />} />
+              <Route path="/NotificationView?notificationId=${item._id}" element={<NotificationView />} />
               <Route path="/NotificationPost" element={<NotificationPost />} />
               <Route path="/ReportList" element={<ReportList />} />
               <Route path="/RestroReportDetails/:id" element={<RestroReportDetails />} />

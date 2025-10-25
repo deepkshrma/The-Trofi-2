@@ -639,8 +639,11 @@ export default function Dashboard() {
 
             <FilterPills active={revenueFilter} onChange={setRevenueFilter} />
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={graphData.restaurantSeries}>
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart
+              data={graphData.restaurantSeries}
+              margin={{ top: 20, right: 20, left: 0, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="colorRestro" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#F97316" stopOpacity={0.8} />
@@ -654,9 +657,16 @@ export default function Dashboard() {
               />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="count" stroke="#F97316" fillOpacity={1} fill="url(#colorRestro)" />
+              <Area
+                type="monotone"
+                dataKey="count"
+                stroke="#F97316"
+                fillOpacity={1}
+                fill="url(#colorRestro)"
+              />
             </AreaChart>
           </ResponsiveContainer>
+
         </div>
 
         {/* pie chart */}
@@ -690,12 +700,12 @@ export default function Dashboard() {
             {ratingLoading ? (
               <SkeletonGraph />
             ) : pieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={pieData.filter((item) => item.value > 0)}
                     cx="50%"
-                    cy="50%"
+                    cy="55%"         // Move slightly down to balance top label space
                     outerRadius={100}
                     dataKey="value"
                     labelLine={false}
@@ -703,15 +713,20 @@ export default function Dashboard() {
                       percent > 0 ? `${(percent * 100).toFixed(0)}%` : ""
                     }
                   >
-
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend layout="vertical" verticalAlign="middle" align="right" />
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="right"
+                  />
                 </PieChart>
               </ResponsiveContainer>
+
+
             ) : (
               <p className="text-gray-500 text-center py-6">No rating data available.</p>
             )}
@@ -967,7 +982,7 @@ export default function Dashboard() {
                 </div>
                 <button
                   onClick={() => navigate(`/RestroProfile/${rest.id}`)}
-                  className="text-gray-500 cursor-pointer hover:text-gray-700"
+                  className="text-gray-500 cursor-pointer hover:text-orange-600"
                 >
                   <FiEye size={18} />
                 </button>

@@ -9,10 +9,15 @@ import guest from "../../assets/images/guest.png"
 
 function UserProfile() {
   const [user, setUser] = useState(null);
+  // Separate states for each search input
   const [favSearchRestaurants, setFavSearchRestaurants] = useState("");
   const [favSearchDishes, setFavSearchDishes] = useState("");
+  const [ratingSearchRestaurants, setRatingSearchRestaurants] = useState("");
+  const [ratingSearchDishes, setRatingSearchDishes] = useState("");
+
   const [checkinSearch, setCheckinSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isLoadingDishes, setIsLoadingDishes] = useState(false);
 
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -434,9 +439,9 @@ function UserProfile() {
               <p className="text-xl font-bold">Restaurant Ratings</p>
               <input
                 type="text"
-                placeholder="Search Restaurants..."
-                value={favSearchRestaurants}
-                onChange={(e) => setFavSearchRestaurants(e.target.value)}
+                placeholder="Search rated restaurants..."
+                value={ratingSearchRestaurants}
+                onChange={(e) => setRatingSearchRestaurants(e.target.value)}
                 className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
             </div>
@@ -458,14 +463,14 @@ function UserProfile() {
                   ?.filter((r) =>
                     r.typeId?.restro_name
                       ?.toLowerCase()
-                      .includes(favSearchRestaurants.toLowerCase())
+                      .includes(ratingSearchRestaurants.toLowerCase())
                   ).length > 0 ? (
                   user?.ratings
                     ?.filter((r) => r.type === "Restaurant")
                     ?.filter((r) =>
                       r.typeId?.restro_name
                         ?.toLowerCase()
-                        .includes(favSearchRestaurants.toLowerCase())
+                        .includes(ratingSearchRestaurants.toLowerCase())
                     )
                     .map((r) => (
                       <tr
@@ -510,9 +515,9 @@ function UserProfile() {
               <p className="text-xl font-bold">Dish Ratings</p>
               <input
                 type="text"
-                placeholder="Search Dishes..."
-                value={favSearchDishes}
-                onChange={(e) => setFavSearchDishes(e.target.value)}
+                placeholder="Search rated dishes..."
+                value={ratingSearchDishes}
+                onChange={(e) => setRatingSearchDishes(e.target.value)}
                 className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
             </div>
@@ -534,14 +539,14 @@ function UserProfile() {
                   ?.filter((r) =>
                     r.typeId?.dish_name
                       ?.toLowerCase()
-                      .includes(favSearchDishes.toLowerCase())
+                      .includes(ratingSearchDishes.toLowerCase())
                   ).length > 0 ? (
                   user?.ratings
                     ?.filter((r) => r.type === "Dish")
                     ?.filter((r) =>
                       r.typeId?.dish_name
                         ?.toLowerCase()
-                        .includes(favSearchDishes.toLowerCase())
+                        .includes(ratingSearchDishes.toLowerCase())
                     )
                     .map((r) => (
                       <tr
@@ -596,7 +601,7 @@ function UserProfile() {
             <p className="  text-xl font-bold">Restaurants</p>
             <input
               type="text"
-              placeholder="Search Restaurants..."
+              placeholder="Search favourite restaurants..."
               value={favSearchRestaurants}
               onChange={(e) => setFavSearchRestaurants(e.target.value)}
               className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
@@ -637,7 +642,7 @@ function UserProfile() {
             <p className=" text-xl font-bold">Dishes</p>
             <input
               type="text"
-              placeholder="Search Dishes..."
+              placeholder="Search favourite dishes..."
               value={favSearchDishes}
               onChange={(e) => setFavSearchDishes(e.target.value)}
               className="border border-gray-300 bg-white mt-1 mr-1 p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"

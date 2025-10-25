@@ -56,7 +56,7 @@ function UpdateDishes() {
         setRestaurants(restaurantsData);
 
         // 2️⃣ Fetch the dish
-        const resDish = await axios.get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`);
+        const resDish = await axios.get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`, config);
         if (resDish.data.success) {
           const d = resDish.data.data;
           setDishData(d);
@@ -99,16 +99,20 @@ function UpdateDishes() {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         // Categories
-        const catRes = await axios.get(`${BASE_URL}/restro/get-dish-category`);
+        const catRes = await axios.get(`${BASE_URL}/restro/get-dish-category`, { headers });
         setDishCategories(catRes.data?.data || []);
 
         // SubCategories
-        const subCatRes = await axios.get(`${BASE_URL}/restro/get-dish-sub-category`);
+        const subCatRes = await axios.get(`${BASE_URL}/restro/get-dish-sub-category`, { headers });
         setDishSubCategories(subCatRes.data?.data || []);
 
         // Cuisines
-        const cusRes = await axios.get(`${BASE_URL}/restro/get-cusine`);
+        const cusRes = await axios.get(`${BASE_URL}/restro/get-cusine`, { headers });
         setCuisines(cusRes.data?.data || []);
       } catch (err) {
         console.error("Dropdown fetch error:", err);
@@ -161,6 +165,24 @@ function UpdateDishes() {
       setIngredientIcon(null);
     }
   };
+
+  const handleAvailabilityToggle = (e) => {
+    const checked = e.target.checked;
+
+    // Only validate when making it available
+    if (checked) {
+      const validDishType = dishTypes.some(
+        (dt) => dt.value === selectedDishType?.value
+      );
+
+      if (!validDishType) {
+        e.preventDefault(); // Stop the checkbox change
+        toast.error("Current dish type is no longer available for this restaurant. Please select a valid type before activating the dish.");
+        return;
+      }
+    }
+  };
+
 
   // const handleSubmit = (e) => {
   //   e.preventDefault();
@@ -576,8 +598,10 @@ function UpdateDishes() {
               name="isAvailable"
               id="isAvailable"
               defaultChecked={dishData.isAvailable}
+              onChange={handleAvailabilityToggle}
               className="h-5 w-5 appearance-none rounded-md border border-gray-300 checked:bg-orange-500 checked:before:content-['✔'] checked:before:text-white checked:before:block checked:before:text-center"
             />
+
             <label htmlFor="isAvailable" className="text-gray-600 font-medium">
               Available
             </label>

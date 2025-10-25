@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker,Popup, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useState, useEffect } from "react";
@@ -35,9 +35,23 @@ function MapboxSearch({ mapboxToken, onSelect, setMarkerPosition }) {
     input.type = "text";
     input.placeholder = "Search business, restaurant, or address...";
     input.style.cssText =
-      "position:absolute; top:10px; left:50px; z-index:1000; width:280px; padding:8px 10px; border:1px solid #ccc; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); background:white; font-size:14px;";
+      "position:absolute; top:12px; left:12px; right:12px; z-index:1000; padding:12px 14px; border:1px solid #ccc; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15); background:white; font-size:15px; outline:none; transition:0.2s;";
+
+
+    input.addEventListener("focus", () => {
+      input.style.borderColor = "#F9832B";
+      input.style.boxShadow = "0 0 4px #F9832B";
+    });
+
+    input.addEventListener("blur", () => {
+      input.style.borderColor = "#ccc";
+      input.style.boxShadow = "0 2px 6px rgba(0,0,0,0.1)";
+    });
+
     resultsDiv.style.cssText =
-      "position:absolute; top:45px; left:50px; z-index:1001; width:280px; background:white; border:1px solid #ddd; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.15); max-height:200px; overflow-y:auto; display:none;";
+      "position:absolute; top:58px; left:12px; right:12px; z-index:1001; background:white; border:1px solid #ddd; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.18); max-height:260px; overflow-y:auto; display:none;";
+
+
 
     L.DomEvent.disableClickPropagation(searchDiv);
     L.DomEvent.disableScrollPropagation(searchDiv);
@@ -75,7 +89,7 @@ function MapboxSearch({ mapboxToken, onSelect, setMarkerPosition }) {
               const [lng, lat] = f.center;
               map.setView([lat, lng], 15);
               setMarkerPosition({ lat, lng }); // ✅ Update marker globally
-              onSelect({ lat, lng, name: f.place_name });
+              onSelect({ lat, lng, address: f.place_name });
               input.value = f.place_name;
               resultsDiv.style.display = "none";
             });
@@ -104,13 +118,76 @@ function MapboxSearch({ mapboxToken, onSelect, setMarkerPosition }) {
   return null;
 }
 
-// 📍 Marker on map click
-function LocationMarker({ icon, onSelect, setMarkerPosition }) {
+// 📍 Marker on map click with reverse geocoding
+function LocationMarker({ icon, onSelect, setMarkerPosition, mapboxToken }) {
+  // Helper function to extract address components
+  const parseAddressComponents = (features) => {
+    if (!features || features.length === 0) return null;
+
+    let city = "";
+    let state = "";
+    let postalCode = "";
+    let fullAddress = features[0]?.place_name || "";
+
+    // Parse context array for address components
+    features[0]?.context?.forEach((item) => {
+      if (item.id.includes("postcode")) {
+        postalCode = item.text;
+      } else if (item.id.includes("place")) {
+        city = item.text;
+      } else if (item.id.includes("region")) {
+        state = item.text;
+      }
+    });
+
+    // If city not found in context, check if the feature itself is a place
+    if (!city && features[0]?.place_type?.includes("place")) {
+      city = features[0]?.text;
+    }
+
+    // Extract street address (first part before the first comma)
+    const addressParts = fullAddress.split(",");
+    const streetAddress = addressParts[0]?.trim() || fullAddress;
+
+    return {
+      fullAddress,
+      streetAddress,
+      city,
+      state,
+      postalCode,
+    };
+  };
+
   useMapEvents({
-    click(e) {
+    async click(e) {
       const { lat, lng } = e.latlng;
-      setMarkerPosition({ lat, lng }); // ✅ Update marker globally
-      onSelect(e.latlng);
+      setMarkerPosition({ lat, lng });
+
+      // Perform reverse geocoding to get address
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxToken}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const addressData = parseAddressComponents(data.features);
+
+        if (addressData) {
+          onSelect({
+            lat,
+            lng,
+            address: addressData.fullAddress,
+            streetAddress: addressData.streetAddress,
+            city: addressData.city,
+            state: addressData.state,
+            postalCode: addressData.postalCode,
+          });
+        } else {
+          onSelect({ lat, lng, address: `${lat.toFixed(5)}, ${lng.toFixed(5)}` });
+        }
+      } catch (err) {
+        console.error("Reverse geocoding error:", err);
+        onSelect({ lat, lng, address: `${lat.toFixed(5)}, ${lng.toFixed(5)}` });
+      }
     },
   });
 
@@ -118,17 +195,41 @@ function LocationMarker({ icon, onSelect, setMarkerPosition }) {
 }
 
 // 🌍 Main map
-export default function LocationPicker({ onLocationSelect }) {
-  const mapboxToken =
-    "pk.eyJ1IjoiYWoxODE4MTgiLCJhIjoiY21mb3owOXRiMGJ1MTJrc2Z4dHVpdGNneSJ9.MhXMnGKgPp_NuRrksweolw";
+export default function LocationPicker({ onLocationSelect, defaultLocation, defaultAddress }) {
+  const mapboxToken = MAP_TOKEN;
+  const [markerPosition, setMarkerPosition] = useState(defaultLocation || null);
+  const [currentAddress, setCurrentAddress] = useState(defaultAddress || "");
 
-  const [markerPosition, setMarkerPosition] = useState(null);
+  // Reverse geocode on mount if defaultLocation exists but no defaultAddress
+  useEffect(() => {
+    const fetchInitialAddress = async () => {
+      if (defaultLocation && !defaultAddress) {
+        try {
+          const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${defaultLocation.lng},${defaultLocation.lat}.json?access_token=${mapboxToken}&types=poi,place,address,locality`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const address = data.features?.[0]?.place_name || "";
+          setCurrentAddress(address);
+          onLocationSelect({ ...defaultLocation, address });
+        } catch (err) {
+          console.error("Initial reverse geocoding error:", err);
+        }
+      }
+    };
+
+    fetchInitialAddress();
+  }, [defaultLocation, defaultAddress, mapboxToken, onLocationSelect]);
+
+  const handleLocationSelect = (locationData) => {
+    setCurrentAddress(locationData.address || "");
+    onLocationSelect(locationData);
+  };
 
   return (
     <div className="h-100 w-full rounded-lg overflow-hidden border border-gray-300 shadow-sm relative">
       <MapContainer
-        center={[20.5937, 78.9629]}
-        zoom={5}
+        center={defaultLocation ? [defaultLocation.lat, defaultLocation.lng] : [20.5937, 78.9629]}
+        zoom={defaultLocation ? 15 : 5}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
@@ -137,15 +238,23 @@ export default function LocationPicker({ onLocationSelect }) {
         />
         <MapboxSearch
           mapboxToken={mapboxToken}
-          onSelect={onLocationSelect}
+          onSelect={handleLocationSelect}
           setMarkerPosition={setMarkerPosition}
         />
         <LocationMarker
           icon={orangeIcon}
-          onSelect={onLocationSelect}
+          onSelect={handleLocationSelect}
           setMarkerPosition={setMarkerPosition}
+          mapboxToken={mapboxToken}
         />
-        {markerPosition && <Marker position={markerPosition} icon={orangeIcon} />}
+        {markerPosition && (
+          <Marker position={markerPosition} icon={orangeIcon}>
+            <Popup>
+              {currentAddress || "Address not available"}
+            </Popup>
+          </Marker>
+        )}
+
       </MapContainer>
     </div>
   );

@@ -141,6 +141,9 @@ function RestroList() {
       if (filters["filters[minRating]"]) {
         backendFilters.minRating = parseFloat(filters["filters[minRating]"]);
       }
+      if (filters["filters[maxRating]"]) {
+        backendFilters.maxRating = parseFloat(filters["filters[maxRating]"]);
+      }
       if (filters["filters[startDate]"]) {
         backendFilters.startDate = filters["filters[startDate]"];
       }
@@ -339,6 +342,7 @@ function RestroList() {
     if (key === 'minPrice') return `Min Price: ₹${value}`;
     if (key === 'maxPrice') return `Max Price: ₹${value}`;
     if (key === 'minRating') return `Min Rating: ${value}⭐`;
+    if (key === 'maxRating') return `Max Rating: ${value}⭐`;
     if (key === 'priceSort') return value === 'price_asc' ? 'Price: Low to High' : 'Price: High to Low';
     if (key === 'ratingSort') return value === 'rating_asc' ? 'Rating: Low to High' : 'Rating: High to Low';
     if (Array.isArray(value)) return value.join(", ");
@@ -483,11 +487,18 @@ function RestroList() {
                 );
               })}
               <button
+                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer font-medium text-sm transition"
                 onClick={() => {
                   setAppliedFilters({});
+                  // Also reset location dropdowns
+                  setCountry("");
+                  setStateName("");
+                  setCity("");
+                  setStates([]);
+                  setCities([]);
+                  setShowFilterModal(false);
                   fetchRestaurants(1, search, {});
                 }}
-                className="text-sm text-red-600 hover:text-red-700 underline cursor-pointer transition"
               >
                 Clear All
               </button>
@@ -839,123 +850,8 @@ function RestroList() {
 
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 md:gap-4">
-                {/* Hygiene Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hygiene Status
-                  </label>
-                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
-                    {filterOptions.hygieneStatuses?.length > 0 ? (
-                      filterOptions.hygieneStatuses.map((status) => (
-                        <label
-                          key={status._id}
-                          className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={(appliedFilters["filters[hygieneStatus][]"] || []).includes(
-                              status._id
-                            )}
-                            onChange={(e) => {
-                              const current = appliedFilters["filters[hygieneStatus][]"] || [];
-                              const updated = e.target.checked
-                                ? [...current, status._id]
-                                : current.filter((item) => item !== status._id);
-                              setAppliedFilters((prev) => ({
-                                ...prev,
-                                "filters[hygieneStatus][]": updated.length > 0 ? updated : undefined,
-                              }));
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
-                          />
-                          <span className="text-sm text-gray-700">
-                            {status._id} ({status.count})
-                          </span>
-                        </label>
-                      ))
-                    ) : (
-                      <p className="text-xs text-gray-500">No options available</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Dish Types Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Dish Types
-                  </label>
-                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
-                    {filterOptions.dishTypes?.length > 0 ? (
-                      filterOptions.dishTypes.map((dishType) => (
-                        <label
-                          key={dishType._id}
-                          className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={(appliedFilters["filters[dishType][]"] || []).includes(
-                              dishType._id
-                            )}
-                            onChange={(e) => {
-                              const current = appliedFilters["filters[dishType][]"] || [];
-                              const updated = e.target.checked
-                                ? [...current, dishType._id]
-                                : current.filter((item) => item !== dishType._id);
-                              setAppliedFilters((prev) => ({
-                                ...prev,
-                                "filters[dishType][]": updated.length > 0 ? updated : undefined,
-                              }));
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
-                          />
-                          <span className="text-sm text-gray-700">
-                            {dishType.name} ({dishType.count})
-                          </span>
-                        </label>
-                      ))
-                    ) : (
-                      <p className="text-xs text-gray-500">No options available</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Account Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Account Status
-                  </label>
-                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-                    {[
-                      { _id: "active", label: "Active" },
-                      { _id: "inactive", label: "Inactive" },
-                      { _id: "suspended", label: "Suspended" },
-                    ].map((status) => (
-                      <label
-                        key={status._id}
-                        className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={(appliedFilters["filters[accountStatus][]"] || []).includes(
-                            status._id
-                          )}
-                          onChange={(e) => {
-                            const current = appliedFilters["filters[accountStatus][]"] || [];
-                            const updated = e.target.checked
-                              ? [...current, status._id]
-                              : current.filter((item) => item !== status._id);
-                            setAppliedFilters((prev) => ({
-                              ...prev,
-                              "filters[accountStatus][]": updated.length > 0 ? updated : undefined,
-                            }));
-                          }}
-                          className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
-                        />
-                        <span className="text-sm text-gray-700">{status.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Min Price */}
                 <div>
@@ -1016,6 +912,31 @@ function RestroList() {
                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
                   />
                 </div>
+
+                {/* Max Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Maximum Rating
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    placeholder="e.g., 4.8"
+                    value={appliedFilters["filters[maxRating]"] || ""}
+                    onChange={(e) =>
+                      setAppliedFilters((prev) => ({
+                        ...prev,
+                        "filters[maxRating]": e.target.value
+                          ? parseFloat(e.target.value)
+                          : undefined,
+                      }))
+                    }
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  />
+                </div>
+
                 {/* Date Range Filter */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1046,6 +967,126 @@ function RestroList() {
                       }
                       className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
                     />
+                  </div>
+
+                  {/* Dish Types Filter */}
+                  <div>
+                    <label className="block text-sm mt-3 font-medium text-gray-700 mb-2">
+                      Dish Types
+                    </label>
+                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                      {filterOptions.dishTypes?.length > 0 ? (
+                        filterOptions.dishTypes.map((dishType) => (
+                          <label
+                            key={dishType._id}
+                            className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={(appliedFilters["filters[dishType][]"] || []).includes(
+                                dishType._id
+                              )}
+                              onChange={(e) => {
+                                const current = appliedFilters["filters[dishType][]"] || [];
+                                const updated = e.target.checked
+                                  ? [...current, dishType._id]
+                                  : current.filter((item) => item !== dishType._id);
+                                setAppliedFilters((prev) => ({
+                                  ...prev,
+                                  "filters[dishType][]": updated.length > 0 ? updated : undefined,
+                                }));
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {dishType.name} ({dishType.count})
+                            </span>
+                          </label>
+                        ))
+                      ) : (
+                        <p className="text-xs text-gray-500">No options available</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Hygiene Status Filter */}
+                  <div>
+                    <label className="block text-sm mt-3 font-medium text-gray-700 mb-2">
+                      Hygiene Status
+                    </label>
+                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                      {filterOptions.hygieneStatuses?.length > 0 ? (
+                        filterOptions.hygieneStatuses.map((status) => (
+                          <label
+                            key={status._id}
+                            className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={(appliedFilters["filters[hygieneStatus][]"] || []).includes(
+                                status._id
+                              )}
+                              onChange={(e) => {
+                                const current = appliedFilters["filters[hygieneStatus][]"] || [];
+                                const updated = e.target.checked
+                                  ? [...current, status._id]
+                                  : current.filter((item) => item !== status._id);
+                                setAppliedFilters((prev) => ({
+                                  ...prev,
+                                  "filters[hygieneStatus][]": updated.length > 0 ? updated : undefined,
+                                }));
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {status._id} ({status.count})
+                            </span>
+                          </label>
+                        ))
+                      ) : (
+                        <p className="text-xs text-gray-500">No options available</p>
+                      )}
+                    </div>
+                  </div>
+
+
+
+                  {/* Account Status Filter */}
+                  <div>
+                    <label className="block text-sm mt-3 font-medium text-gray-700 mb-2">
+                      Account Status
+                    </label>
+                    <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                      {[
+                        { _id: "active", label: "Active" },
+                        { _id: "suspended", label: "Suspended" },
+                        { _id: "banned", label: "Banned" },  // ← Changed from "inactive" to "banned"
+                      ].map((status) => (
+                        <label
+                          key={status._id}
+                          className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={(appliedFilters["filters[accountStatus][]"] || []).includes(
+                              status._id
+                            )}
+                            onChange={(e) => {
+                              const current = appliedFilters["filters[accountStatus][]"] || [];
+                              const updated = e.target.checked
+                                ? [...current, status._id]
+                                : current.filter((item) => item !== status._id);
+                              setAppliedFilters((prev) => ({
+                                ...prev,
+                                "filters[accountStatus][]": updated.length > 0 ? updated : undefined,
+                              }));
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 cursor-pointer accent-[#F9832B]"
+                          />
+                          <span className="text-sm text-gray-700">{status.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -1122,6 +1163,12 @@ function RestroList() {
                   className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer font-medium text-sm transition"
                   onClick={() => {
                     setAppliedFilters({});
+                    // Also reset location dropdowns
+                    setCountry("");
+                    setStateName("");
+                    setCity("");
+                    setStates([]);
+                    setCities([]);
                     setShowFilterModal(false);
                     fetchRestaurants(1, search, {});
                   }}
@@ -1136,9 +1183,19 @@ function RestroList() {
                     const selectedStateName = State.getStateByCodeAndCountry(stateName, country)?.name || "";
                     const selectedCityName = city || "";
 
-                    // Merge with existing appliedFilters safely
+                    // Create NEW filter object (don't merge with old appliedFilters)
                     const updatedFilters = {
-                      ...appliedFilters,
+                      // Only include filters that have values from the modal
+                      ...(appliedFilters["filters[dishType][]"] && { "filters[dishType][]": appliedFilters["filters[dishType][]"] }),
+                      ...(appliedFilters["filters[hygieneStatus][]"] && { "filters[hygieneStatus][]": appliedFilters["filters[hygieneStatus][]"] }),
+                      ...(appliedFilters["filters[accountStatus][]"] && { "filters[accountStatus][]": appliedFilters["filters[accountStatus][]"] }),
+                      ...(appliedFilters["filters[minPrice]"] && { "filters[minPrice]": appliedFilters["filters[minPrice]"] }),
+                      ...(appliedFilters["filters[maxPrice]"] && { "filters[maxPrice]": appliedFilters["filters[maxPrice]"] }),
+                      ...(appliedFilters["filters[minRating]"] && { "filters[minRating]": appliedFilters["filters[minRating]"] }),
+                      ...(appliedFilters["filters[maxRating]"] && { "filters[maxRating]": appliedFilters["filters[maxRating]"] }),
+                      ...(appliedFilters["filters[startDate]"] && { "filters[startDate]": appliedFilters["filters[startDate]"] }),
+                      ...(appliedFilters["filters[endDate]"] && { "filters[endDate]": appliedFilters["filters[endDate]"] }),
+                      // Add location filters from state (not from appliedFilters)
                       ...(selectedCountryName && { country: selectedCountryName }),
                       ...(selectedStateName && { state: selectedStateName }),
                       ...(selectedCityName && { city: selectedCityName }),

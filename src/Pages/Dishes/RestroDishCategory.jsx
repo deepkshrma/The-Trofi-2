@@ -71,10 +71,17 @@ function RestroDishCategory() {
           {
             headers: {
               "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}` // <-- pass token here
+              Authorization: `Bearer ${token}`,
             },
           }
         );
+
+        if (res.data?.success) {
+          toast.success(res.data.message || "Category updated successfully");
+          navigate("/RestroDishCategoryList");
+        } else {
+          toast.error(res.data?.message || "Failed to update category");
+        }
       } else {
         res = await axios.post(
           `${BASE_URL}/restro/create-dish-category`,
@@ -82,20 +89,19 @@ function RestroDishCategory() {
           {
             headers: {
               "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}` // <-- pass token here
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
-
-
-        if (res.data?.success) {
+        if (res.data?.status===true) {
           toast.success(res.data.message || "Category created successfully");
           navigate("/RestroDishCategoryList");
         } else {
           toast.error(res.data?.message || "Failed to create category");
         }
       }
+
     } catch (err) {
       console.error("Server Error:", err);
       toast.error(

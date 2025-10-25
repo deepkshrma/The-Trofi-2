@@ -69,6 +69,8 @@ function UpdateRestaurant() {
   const [pendingDishType, setPendingDishType] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false); // optional spinner state
 
+  const [locationAddress, setLocationAddress] = useState("");
+
 
 
 
@@ -150,6 +152,11 @@ function UpdateRestaurant() {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         const urls = [
           `${BASE_URL}/restro/get-dish-type`,
           `${BASE_URL}/restro/get-cusine`,
@@ -160,7 +167,7 @@ function UpdateRestaurant() {
         const responses = await Promise.all(
           urls.map((u) =>
             axios
-              .get(u)
+              .get(u, { headers })
               .then((r) => r.data)
               .catch(() => ({ data: [] }))
           )
@@ -1002,6 +1009,7 @@ function UpdateRestaurant() {
 
 
       {/* Location Info */}
+
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
@@ -1010,7 +1018,7 @@ function UpdateRestaurant() {
           <MapPin size={20} /> Location Details
         </h2>
 
-        <input
+        {/* <input
           type="text"
           name="address"
           placeholder="Full Address + Landmark"
@@ -1044,8 +1052,7 @@ function UpdateRestaurant() {
             onChange={handleChange}
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>
+        </div> */}
 
         {/* ✅ Interactive Map */}
         <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
@@ -1058,24 +1065,36 @@ function UpdateRestaurant() {
                 }
                 : null
             }
-            onLocationSelect={({ lat, lng }) =>
-              setRestaurantData({
-                ...restaurantData,
+            defaultAddress={locationAddress}
+            onLocationSelect={({ lat, lng, address, streetAddress, city, state, postalCode }) => {
+              setRestaurantData((prev) => ({
+                ...prev,
                 latitude: lat,
                 longitude: lng,
-              })
-            }
+                // Update address fields if they are provided
+                ...(streetAddress && { address: streetAddress }),
+                ...(city && { city }),
+                ...(state && { state }),
+                ...(postalCode && { postalCode }),
+              }));
+              setLocationAddress(address || "");
+            }}
           />
-
         </div>
 
-        {/* Show selected lat/lng */}
+        {/* Show selected address */}
         {restaurantData.latitude != null &&
           restaurantData.longitude != null && (
-            <p className="mt-3 text-gray-700">
-              📍 Selected: {parseFloat(restaurantData.latitude).toFixed(5)},{" "}
-              {parseFloat(restaurantData.longitude).toFixed(5)}
-            </p>
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-gray-700 flex items-start gap-2">
+                <span className="text-lg">📍</span>
+                <span className="flex-1">
+                  <strong className="text-orange-600">Selected Location:</strong>
+                  <br />
+                  {locationAddress || "Loading address..."}
+                </span>
+              </p>
+            </div>
           )}
       </div>
       <button
@@ -1085,49 +1104,6 @@ function UpdateRestaurant() {
       >
         Update Restaurant
       </button>
-
-      {/* {showDishTypeModal && selectedDishType && (
-        <AnimatePresence>
-          <motion.div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6"
-            >
-              <h2 className="text-lg font-semibold text-gray-700 mb-4">
-                Remove Dish Type
-              </h2>
-              <p className="text-gray-600 text-sm mb-6">
-                If you remove <span className="font-semibold">{selectedDishType.name}</span>,
-                all related dishes will be <span className="text-red-500 font-semibold">disabled</span>.
-                Do you really want to continue?
-              </p>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowDishTypeModal(false)}
-                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={() => handleConfirmDisable(selectedDishType._id)}
-                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer"
-                >
-                  Confirm
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </AnimatePresence>
-      )} */}
 
     </div>
 

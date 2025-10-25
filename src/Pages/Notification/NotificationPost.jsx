@@ -191,8 +191,8 @@ function NotificationPost() {
           >
             <option value="all_users">All Users</option>
             <option value="selected_users">Selected Users</option>
-            <option value="all_restaurants">All Restaurants</option>
-            <option value="selected_restaurants">Selected Restaurants</option>
+            {/* <option value="all_restaurants">All Restaurants</option>
+            <option value="selected_restaurants">Selected Restaurants</option> */}
           </select>
         </div>
 

@@ -27,8 +27,17 @@ function RestroDishSubCategory() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/restro/get-dish-category`);
-        if (res.status === 200 && res.data?.success) {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+        const res = await axios.get(`${BASE_URL}/restro/get-dish-category`,{
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}` 
+            },
+          })
+        ;
+        if ( res.data?.success) {
           setParentCategories(res.data.data || []);
         } else {
           toast.error(res.data?.message || "Failed to fetch parent categories");
@@ -85,42 +94,25 @@ function RestroDishSubCategory() {
     formData.append("description", description);
     if (file) formData.append("icon", file);
 
-    try {
-      if (isEdit) {
-        res = await axios.patch(
-          `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}` // <-- add token here
-            },
-          }
-        );
-      } else {
-        res = await axios.post(
-          `${BASE_URL}/restro/create-dish-sub-category`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}` // <-- add token here
-            },
-          }
-        );
-      }
+    const res = await axios[isEdit ? "patch" : "post"](
+  isEdit
+    ? `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`
+    : `${BASE_URL}/restro/create-dish-sub-category`,
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  }
+);
 
+if (res.data?.success === true) {
+  toast.success(res.data.message || "Sub-category saved successfully");
+  navigate("/RestroDishSubCategoryList");
+} else {
+  toast.error(res.data?.message || "Something went wrong on the server");
+}
 
-      if ([200, 201].includes(res.status) && res.data?.success) {
-        toast.success(res.data.message || "Sub-category saved successfully");
-        navigate("/RestroDishSubCategoryList");
-      } else {
-        toast.error(res.data?.message || "Something went wrong on the server");
-      }
-    } catch (err) {
-      console.error("API Error:", err);
-      toast.error(err.response?.data?.message || "Server error while saving sub-category");
-    }
   };
 
   return (

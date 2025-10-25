@@ -1,6 +1,5 @@
-// @ts-nocheck
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { BASE_URL } from "../../config/Config";
@@ -8,44 +7,49 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import PageTitle from "../../components/PageTitle/PageTitle";
 
 const NotificationView = () => {
-  const { id } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const notificationId = queryParams.get("notificationId");
+
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchNotification = async () => {
-      try {
-        setLoading(true);
-        const authData = JSON.parse(localStorage.getItem("trofi_user"));
-        const token = authData?.token;
-        if (!token) {
-          toast.error("Please login first");
-          navigate("/login");
-          return;
-        }
-
-        const res = await axios.get(`${BASE_URL}/admin/notification`, {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { id },
-        });
-
-        if (res.data.success) {
-          setNotification(res.data.data[0]);
-
-        } else {
-          toast.error(res.data.message || "Failed to fetch notification");
-        }
-      } catch (err) {
-        console.error(err);
-        toast.error("Something went wrong while fetching notification");
-      } finally {
-        setLoading(false);
+  const fetchNotification = async () => {
+    try {
+      setLoading(true);
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        navigate("/login");
+        return;
       }
-    };
 
-    fetchNotification();
-  }, [id, navigate]);
+      const res = await axios.get(`${BASE_URL}/admin/notification`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { notificationId },
+      });
+
+      if (res.data.success) {
+        // ✅ fix here
+        setNotification(res.data.data);
+      } else {
+        toast.error(res.data.message || "Failed to fetch notification");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong while fetching notification");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (notificationId) fetchNotification();
+}, [notificationId, navigate]);
+
+
 
   // Loader JSX like UserList
   if (loading)
@@ -71,7 +75,8 @@ const NotificationView = () => {
       <BreadcrumbsNav
         customTrail={[
           { label: "Notification Management", path: "/NotificationList" },
-          { label: "Notification Detail", path: `/NotificationView/${id}` },
+          { label: "Notification Detail", path: `/NotificationView?notificationId=${notificationId}` },
+
         ]}
       />
 

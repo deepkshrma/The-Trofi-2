@@ -3,11 +3,13 @@ import { IoMdClose } from "react-icons/io";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { BASE_URL } from "../../config/Config";
+import { useNavigate } from "react-router-dom";
 
 const AdminUpdateReviewStatus = ({ reviewId, currentStatus, notes, onClose, onSuccess }) => {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus || "pending");
   const [adminNotes, setAdminNotes] = useState(notes || "");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setSelectedStatus(currentStatus || "pending");
@@ -43,6 +45,7 @@ const AdminUpdateReviewStatus = ({ reviewId, currentStatus, notes, onClose, onSu
       if (res.data.success) {
         toast.success("Review status updated successfully");
         onSuccess(); // reload parent
+        // navigate("/RestaurantReviewList")
       } else {
         toast.error("Failed to update review status");
       }

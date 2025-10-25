@@ -412,8 +412,8 @@ function DishReviewList() {
 
                     <td
                       className={`px-4 py-3 whitespace-nowrap ${review.userId?._id
-                          ? "text-[#F9832B] cursor-pointer hover:underline"
-                          : "text-gray-500"
+                        ? "text-[#F9832B] cursor-pointer hover:underline"
+                        : "text-gray-500"
                         }`}
                       onClick={() => {
                         if (review.userId?._id) navigate(`/UserProfile/${review.userId._id}`);
@@ -585,23 +585,7 @@ function DishReviewList() {
                   </select>
                 </div>
 
-                {/* Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
-                  >
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="published">Published</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
+
 
                 {/* Min Rating */}
                 <div>
@@ -666,6 +650,23 @@ function DishReviewList() {
                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
                   />
                 </div>
+                {/* Status Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                  >
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="published">Published</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
               </div>
 
               {/* Active Filters Display */}
@@ -680,11 +681,7 @@ function DishReviewList() {
                         Restaurant: {restaurants.find(r => r._id === restaurantFilter)?.restro_name}
                       </span>
                     )}
-                    {statusFilter && (
-                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
-                        Status: {statusFilter}
-                      </span>
-                    )}
+
                     {minRating && (
                       <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
                         Min Rating: {minRating}★
@@ -703,6 +700,11 @@ function DishReviewList() {
                     {endDate && (
                       <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
                         To: {new Date(endDate).toLocaleDateString()}
+                      </span>
+                    )}
+                    {statusFilter && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        Status: {statusFilter}
                       </span>
                     )}
                   </div>

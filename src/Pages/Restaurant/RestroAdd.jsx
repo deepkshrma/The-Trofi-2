@@ -48,7 +48,7 @@ function RestroAdd() {
   const [restroTypes, setRestroTypes] = useState([]);
   const [amenities, setAmenities] = useState([]);
   const [errors, setErrors] = useState({});
-
+  const [locationAddress, setLocationAddress] = useState("");
   const [gallery, setGallery] = useState([]);
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
@@ -96,6 +96,11 @@ function RestroAdd() {
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         const endpoints = [
           "restro/get-dish-type",
           "restro/get-cusine",
@@ -107,7 +112,7 @@ function RestroAdd() {
         const [dishRes, cuisineRes, goodForRes, restroTypeRes, amenityRes] =
           await Promise.all(
             endpoints.map((ep) =>
-              fetch(`${BASE_URL}/${ep}`).then((res) => res.json())
+              axios.get(`${BASE_URL}/${ep}`, { headers }).then((res) => res.data)
             )
           );
 
@@ -969,23 +974,37 @@ function RestroAdd() {
         {/* ✅ Interactive Map */}
         <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
           <LocationPicker
-            onLocationSelect={({ lat, lng }) =>
-              setRestaurantData({
-                ...restaurantData,
+            onLocationSelect={({ lat, lng, address, streetAddress, city, state, postalCode }) => {
+              setRestaurantData((prev) => ({
+                ...prev,
                 latitude: lat,
                 longitude: lng,
-              })
-            }
+                // Optional: populate address fields if available
+                ...(streetAddress && { address: streetAddress }),
+                ...(city && { city }),
+                ...(state && { state }),
+                ...(postalCode && { postalCode }),
+              }));
+              setLocationAddress(address || "");
+            }}
           />
+
         </div>
 
         {/* Show selected lat/lng */}
         {restaurantData.latitude && restaurantData.longitude && (
-          <p className="mt-3 text-gray-700">
-            📍 Selected: {restaurantData.latitude.toFixed(5)},{" "}
-            {restaurantData.longitude.toFixed(5)}
-          </p>
+          <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+            <p className="text-gray-700 flex items-start gap-2">
+              <span className="text-lg">📍</span>
+              <span className="flex-1">
+                <strong className="text-orange-600">Selected Location:</strong>
+                <br />
+                {locationAddress || "Loading address..."}
+              </span>
+            </p>
+          </div>
         )}
+
       </div>
 
       {/* Submit */}
