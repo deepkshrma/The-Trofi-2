@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -63,6 +64,17 @@ function UpdateRestaurant() {
   const [deletedMenus, setDeletedMenus] = useState([]);
   const [deletedGallery, setDeletedGallery] = useState([]);
 
+  // Add these state variables with your other useState hooks (around line 40-50)
+  const [groups, setGroups] = useState([]);
+  const [groupId, setGroupId] = useState(null);
+  const [groupSearch, setGroupSearch] = useState("");
+  const [showGroupDropdown, setShowGroupDropdown] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+
+  // Group Add Modal States
+  const [groupName, setGroupName] = useState("");
+  const [description, setDescription] = useState("");
+
 
   // Add with your other useState hooks
   const [showDishTypeModal, setShowDishTypeModal] = useState(false);
@@ -121,6 +133,55 @@ function UpdateRestaurant() {
     return `${hh}:${mm}`;
   };
 
+  // Add filtered groups logic (after state declarations, around line 60)
+  const filteredGroups = groups.filter((g) =>
+    g.group_name.toLowerCase().includes(groupSearch.toLowerCase())
+  );
+
+
+  // Add handleCreateGroup function (around line 220, before handleChange)
+  const handleCreateGroup = async () => {
+    if (!groupName.trim()) {
+      toast.error("Group name is required");
+      return;
+    }
+
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/admin/restaurant-group`,
+        {
+          group_name: groupName.trim(),
+          description,
+          is_active: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.data.success) {
+        toast.success("Group created ✅");
+        setGroups((prev) => [...prev, res.data.data]);
+        setGroupId(res.data.data._id);
+        setGroupName("");
+        setDescription("");
+        setShowGroupModal(false);
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
+
+
   const parseDaysToFullNames = (daysStr) => {
     if (!daysStr) return [];
     const abbMap = {
@@ -147,6 +208,41 @@ function UpdateRestaurant() {
       })
       .filter(Boolean);
   };
+
+  // Add this useEffect to fetch groups (add after other useEffect hooks, around line 180)
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+
+        const res = await axios.get(`${BASE_URL}/admin/restaurant-groups`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.data.success) {
+          setGroups(res.data.data);
+        }
+      } catch (err) {
+        toast.error("Failed to load groups");
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  // Add useEffect for dropdown close (after other useEffects, around line 200)
+  useEffect(() => {
+    const close = (e) => {
+      if (!e.target.closest(".relative")) setShowGroupDropdown(false);
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+
 
   // Fetch dropdowns and restaurant details (axios)
   useEffect(() => {
@@ -241,6 +337,8 @@ function UpdateRestaurant() {
           amenities: normalizeIdArray(data.amenities),
           role_id: data.role_id || prev.role_id || "",
         }));
+
+         setGroupId(data.group_id?._id || null);
 
         setExistingMenus(
           (data.restaurant_menu_images || []).map((img) => ({
@@ -362,6 +460,10 @@ function UpdateRestaurant() {
       if (restaurantData.closingTime) {
         formData.append("time", restaurantData.closingTime);
       }
+      // Update handleSubmit - add this line before formData.append for other fields (around line 260)
+      if (groupId) {
+        formData.append("group_id", groupId);
+      }
       if (restaurantData.openDays.length > 0) {
         formData.append("days", restaurantData.openDays.join(", "));
       }
@@ -421,6 +523,76 @@ function UpdateRestaurant() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           {" "}
+
+          {/* Restaurant Group */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Restaurant Group
+            </label>
+
+            <div className="relative w-full">
+              {/* Main Select Button */}
+              <button
+                onClick={() => setShowGroupDropdown(!showGroupDropdown)}
+                type="button"
+                className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-700 shadow-sm 
+text-left flex justify-between items-center focus:ring focus:ring-orange-300 focus:border-orange-400 outline-none"
+              >
+                {groupId
+                  ? groups.find((g) => g._id === groupId)?.group_name
+                  : "Select Group"}
+
+                <span className="text-gray-500 text-xs">▼</span>
+              </button>
+
+              {/* Dropdown */}
+              {showGroupDropdown && (
+                <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-auto">
+                  {/* Search input inside dropdown */}
+                  <div className="p-2 border-b">
+                    <input
+                      type="text"
+                      value={groupSearch}
+                      onChange={(e) => setGroupSearch(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full px-3 py-1 rounded-md border border-gray-300 text-sm 
+      focus:ring focus:ring-orange-300 outline-none"
+                    />
+                  </div>
+
+                  {/* Group List */}
+                  {filteredGroups.length > 0 ? (
+                    filteredGroups.map((g) => (
+                      <div
+                        key={g._id}
+                        onClick={() => {
+                          setGroupId(g._id);
+                          setShowGroupDropdown(false);
+                        }}
+                        className="px-3 py-2 hover:bg-orange-100 cursor-pointer text-sm text-gray-700"
+                      >
+                        {g.group_name}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 text-center text-gray-500 text-sm">
+                      No group found
+                    </div>
+                  )}
+
+                  <div className="border-t">
+                    <button
+                      type="button"
+                      className="text-blue-500 text-xs hover:underline p-2"
+                      onClick={() => setShowGroupModal(true)}
+                    >
+                      + Create New Group
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <div>
             <label className="block text-gray-600 font-medium mb-2">
               Restaurant Name
@@ -435,7 +607,7 @@ function UpdateRestaurant() {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
             <select
               name="role_id"
@@ -447,7 +619,7 @@ function UpdateRestaurant() {
               <option value="68aead7b9db7925a61de75bb">Restro Owner</option>
             </select>
 
-          </div>
+          </div> */}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           <div>
@@ -943,6 +1115,8 @@ function UpdateRestaurant() {
           </div>
         ))}
 
+
+
         {/* Dish Type confirmation modal (only displayed when attempting to remove a selected Dish Type) */}
         {showDishTypeModal && pendingDishType && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -1094,8 +1268,11 @@ function UpdateRestaurant() {
                   {locationAddress || "Loading address..."}
                 </span>
               </p>
+
             </div>
+
           )}
+
       </div>
       <button
         className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
@@ -1107,7 +1284,84 @@ function UpdateRestaurant() {
 
     </div>
 
+
   );
+  // Add the Group Modal JSX before the closing </div> of the main component (before the last </div>, around line 850)
+  {
+    showGroupModal && (
+      <AnimatePresence>
+        <motion.div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 md:p-6"
+          >
+            <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-4">
+              Create Restaurant Group
+            </h2>
+
+            {/* Form */}
+            <div className="space-y-5">
+              {/* Group Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Group Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  placeholder="Enter Group Name"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  placeholder="Enter Description"
+                  rows={3}
+                ></textarea>
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer font-medium text-sm transition"
+                  onClick={() => {
+                    setGroupName("");
+                    setDescription("");
+                    setShowGroupModal(false);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer font-medium text-sm transition"
+                  onClick={handleCreateGroup}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
 }
 
 export default UpdateRestaurant;

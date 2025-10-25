@@ -66,6 +66,9 @@ import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
 import PermissionAssign from "./Pages/Permission/PermissionAssign";
 import DishDetails from "./Pages/Dishes/DishDetails";
 import PermissionAssignRestro from "./Pages/Permission/PermissionAssignRestro";
+import CreateGroup from "./Pages/Restaurant/CreateGroup";
+import RestroGroup from "./Pages/Restaurant/RestroGroup";
+import RestroGroupDetail from "./Pages/Restaurant/RestroGroupDetail";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -177,6 +180,11 @@ const Allroutes = () => {
               <Route path="/NotificationPost" element={<NotificationPost />} />
               <Route path="/ReportList" element={<ReportList />} />
               <Route path="/RestroReportDetails/:id" element={<RestroReportDetails />} />
+              <Route path="/CreateGroup" element={<CreateGroup />} />
+              <Route path="/UpdateGroup/:id" element={<CreateGroup />} />
+              <Route path="/RestroGroup" element={<RestroGroup />} />
+              <Route path="/GroupInDetail/:id" element={<RestroGroupDetail />} />
+
             </Route>
           </Route>
 

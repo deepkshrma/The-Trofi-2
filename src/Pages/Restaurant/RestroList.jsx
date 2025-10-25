@@ -37,6 +37,12 @@ function RestroList() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deleteComment, setDeleteComment] = useState("");
+
+  const [groups, setGroups] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState("");
+
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -95,6 +101,22 @@ function RestroList() {
   }, []);
 
 
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/admin/restaurant-groups`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setGroups(res.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching groups:", err);
+      }
+    };
+    fetchGroups();
+  }, []);
+
 
   const authData = JSON.parse(localStorage.getItem("trofi_user"));
   const token = authData?.token;
@@ -149,6 +171,9 @@ function RestroList() {
       }
       if (filters["filters[endDate]"]) {
         backendFilters.endDate = filters["filters[endDate]"];
+      }
+      if (filters["filters[groupId]"]) {
+        backendFilters.groupId = filters["filters[groupId]"];
       }
 
 
@@ -260,16 +285,29 @@ function RestroList() {
 
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
+    setSelectedRestaurant(null);
+    setDeleteReason("");
+    setDeleteComment("");
   };
 
   const confirmDelete = async () => {
     if (!selectedRestaurant) return;
 
+    // Validate reason
+    if (!deleteReason) {
+      toast.error("Please select a deletion reason");
+      return;
+    }
+
     try {
       const res = await axios.delete(
-        `${BASE_URL}/restro/delete-restaurant/${selectedRestaurant._id}`,
+        `${BASE_URL}/admin/restaurant/${selectedRestaurant._id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
+          data: {
+            reason: deleteReason,
+            comment: deleteComment || ""
+          }
         }
       );
 
@@ -281,10 +319,12 @@ function RestroList() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong while deleting");
+      toast.error(err.response?.data?.message || "Something went wrong while deleting");
     } finally {
       setShowDeleteModal(false);
       setSelectedRestaurant(null);
+      setDeleteReason("");
+      setDeleteComment("");
     }
   };
 
@@ -432,7 +472,7 @@ function RestroList() {
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <input
               type="text"
-              placeholder="Search by Restaurant Name"
+              placeholder=" Restaurant / Group Name..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -737,14 +777,125 @@ function RestroList() {
       </div>
 
       {/* Delete Modal */}
-      <DeleteModel
-        isOpen={showDeleteModal}
-        onClose={closeDeleteModal}
-        onConfirm={confirmDelete}
-        redbutton="Confirm"
-        para="Are you sure you want to delete this restaurant? Deleting it will permanently remove all its data, including dishes, menus, and related records from the App. This action cannot be undone."
-      />
+      {showDeleteModal && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <MdDelete size={20} className="text-red-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg md:text-xl font-semibold text-gray-800">
+                      Delete Restaurant
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeDeleteModal}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
 
+              {/* Body */}
+              <div className="p-4 md:p-6 space-y-4">
+                {/* Warning Message */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-800">
+                    <strong>Warning:</strong> Deleting{" "}
+                    <span className="font-semibold">{selectedRestaurant?.restro_name}</span> will
+                    permanently remove all its data, including dishes, menus, ratings,
+                    and related records. This action cannot be undone.
+                  </p>
+                </div>
+
+                {/* Reason Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Deletion Reason <span className="text-red-500">*</span>
+                  </label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-48 overflow-y-auto">
+                    {[
+                      "Violation of Terms",
+                      "Duplicate Entry",
+                      "Closed Permanently",
+                      "Fake/Fraudulent",
+                      "Owner Request",
+                      "Quality Issues",
+                      "Other"
+                    ].map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                      >
+                        <input
+                          type="radio"
+                          name="deleteReason"
+                          value={option}
+                          checked={deleteReason === option}
+                          onChange={(e) => setDeleteReason(e.target.value)}
+                          className="w-4 h-4 border-gray-300 cursor-pointer accent-red-600"
+                        />
+                        <span className="text-sm text-gray-700">{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Additional Comment */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Comment (Optional)
+                  </label>
+                  <textarea
+                    value={deleteComment}
+                    onChange={(e) => setDeleteComment(e.target.value)}
+                    placeholder="Add any additional details about the deletion..."
+                    rows="3"
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500 outline-none text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 pt-0">
+                <button
+                  onClick={closeDeleteModal}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-gray-200 text-gray-700 cursor-pointer hover:bg-gray-300 font-medium text-sm transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={!deleteReason}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-red-600 text-white cursor-pointer hover:bg-red-700 font-medium text-sm transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <MdDelete size={16} />
+                  Confirm Delete
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
       {/* Image Modal */}
       {isImageModalOpen && selectedImage && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
@@ -1060,7 +1211,8 @@ function RestroList() {
                       {[
                         { _id: "active", label: "Active" },
                         { _id: "suspended", label: "Suspended" },
-                        { _id: "banned", label: "Banned" },  // ← Changed from "inactive" to "banned"
+                        { _id: "banned", label: "Banned" },
+                        { _id: "deleted", label: "Deleted" },
                       ].map((status) => (
                         <label
                           key={status._id}

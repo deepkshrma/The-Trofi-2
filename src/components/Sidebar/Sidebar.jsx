@@ -149,7 +149,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             icon: <SettingsIcon className="w-5 h-5" />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }, { name: "Manage Dish Category", link: "RestroDishCategoryList", dropdown: false },
+            subItems: [{ name: "Manage Restro Group", link: "RestroGroup", dropdown: false },{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }, { name: "Manage Dish Category", link: "RestroDishCategoryList", dropdown: false },
             {
               name: "Manage Dish Sub Category",
               link: "RestroDishSubCategoryList",

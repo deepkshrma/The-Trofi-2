@@ -138,7 +138,7 @@ export default function NotificationList() {
   };
 
   return (
-    <div className="main main_page p-6 min-h-screen duration-900 bg-gray-50">
+    <div className="main main_page p-6 duration-900">
       <BreadcrumbsNav
         customTrail={[
           { label: "Notification List", path: "/NotificationList" },

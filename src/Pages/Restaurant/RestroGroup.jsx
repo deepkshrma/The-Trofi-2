@@ -11,8 +11,8 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { FaTrash, FaEye } from "react-icons/fa";
 
-const FAQList = () => {
-    const [faqs, setFaqs] = useState([]);
+const RestroGroup = () => {
+    const [groups, setGroups] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -24,23 +24,21 @@ const FAQList = () => {
         totalRecords: 0,
     });
 
-    // delete modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedFAQ, setSelectedFAQ] = useState(null);
-
-    const closeDeleteModal = () => {
-        setShowDeleteModal(false);
-        setSelectedFAQ(null);
-    };
+    const [selectedGroup, setSelectedGroup] = useState(null);
 
     const navigate = useNavigate();
 
-    // Fetch FAQs
+    const closeDeleteModal = () => {
+        setShowDeleteModal(false);
+        setSelectedGroup(null);
+    };
+
     useEffect(() => {
-        fetchFAQs();
+        fetchGroups();
     }, []);
 
-    async function fetchFAQs() {
+    async function fetchGroups() {
         setLoading(true);
         setError(null);
         try {
@@ -50,7 +48,7 @@ const FAQList = () => {
                 toast.error("Please login first");
                 return;
             }
-            const res = await fetch(`${BASE_URL}/admin/faq`, {
+            const res = await fetch(`${BASE_URL}/admin/restaurant-groups`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
@@ -60,22 +58,22 @@ const FAQList = () => {
             const json = await res.json();
             if (!json?.success) throw new Error(json.message || "API Error");
 
-            setFaqs(json.data);
+            setGroups(json.data);
             setPagination((p) => ({
                 ...p,
                 totalRecords: json.data.length,
                 totalPages: Math.ceil(json.data.length / pageSize),
             }));
         } catch (err) {
-            setError(err.message || "Failed to fetch FAQs");
+            setError(err.message || "Failed to fetch Groups");
         } finally {
             setLoading(false);
         }
     }
 
-    // delete confirm handler
     const confirmDelete = async () => {
-        if (!selectedFAQ) return;
+        if (!selectedGroup) return;
+
         try {
             const authData = JSON.parse(localStorage.getItem("trofi_user"));
             const token = authData?.token;
@@ -85,40 +83,38 @@ const FAQList = () => {
             }
 
             const payload = {
-                id: selectedFAQ._id,
-                title: selectedFAQ.title,
-                description: selectedFAQ.description,
-                status: selectedFAQ.status,
+                id: selectedGroup._id,
                 action: "delete",
             };
 
-            const res = await axios.post(`${BASE_URL}/admin/faq`, payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            const res = await axios.post(
+                `${BASE_URL}/admin/restaurant-groups`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
             if (res.data.success) {
-                toast.success("FAQ deleted successfully");
-                fetchFAQs();
+                toast.success("Restaurant Group deleted successfully");
+                fetchGroups();
             } else {
                 toast.error(res.data.message || "Delete failed");
             }
-        } catch (err) {
-            console.error(err);
+        } catch {
             toast.error("Something went wrong while deleting");
         } finally {
             closeDeleteModal();
         }
     };
 
-    // Search filter
-    const filtered = faqs.filter((faq) =>
-        faq.title.toLowerCase().includes(search.toLowerCase())
+    const filtered = groups.filter((g) =>
+        g.group_name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Pagination slice
     const start = (pagination.currentPage - 1) * pageSize;
     const paginated = filtered.slice(start, start + pageSize);
 
@@ -126,94 +122,87 @@ const FAQList = () => {
         <>
             <div className="main main_page p-6 duration-900">
                 <BreadcrumbsNav
-                    customTrail={[{ label: "FAQs List", path: "/FAQList" }]}
+                    customTrail={[{ label: "Restaurant Groups", path: "/RestroGroup" }]}
                 />
+
                 <div className="flex justify-between items-center mb-3">
-                    <PageTitle title={"FAQ List"} />
+                    <PageTitle title={"Restaurant Groups"} />
                     <button
                         className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
                         style={{ backgroundColor: "#F9832B" }}
-                        onClick={() => navigate("/CreateFAQ")}
+                        onClick={() => navigate("/CreateGroup")}
                     >
-                        <PlusCircle size={18} /> Add FAQ
+                        <PlusCircle size={18} /> Add Group
                     </button>
                 </div>
 
                 <div className="overflow-x-auto bg-white rounded-2xl shadow-md pb-3 mt-5">
-                    {/* 🔍 Search */}
                     <div className="flex justify-between items-center m-3">
                         <input
                             type="text"
-                            placeholder="Search by title..."
+                            placeholder="Search by group name..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
                         />
                     </div>
 
-                    {/* Table */}
                     {loading ? (
-                        <div className="text-center p-6">Loading FAQs…</div>
+                        <div className="text-center p-6">Loading groups…</div>
                     ) : error ? (
-                        <div className="text-center p-6 text-red-500">Error: {error}</div>
+                        <div className="text-center p-6 text-red-500">
+                            Error: {error}
+                        </div>
                     ) : (
                         <>
-                            <table className="min-w-full border-collapse text-sm sm:text-base">
+                            <table className="min-w-full border-collapse">
                                 <thead>
                                     <tr className="bg-gray-200 text-left text-gray-700">
                                         <th className="p-3 pl-4 text-center">S.No.</th>
-                                        <th className="p-3">Title</th>
-                                        <th className="p-3">Description</th>
-                                        <th className="p-3 text-center">Status</th>
+                                        <th className="p-3">Group Name</th>
                                         <th className="p-3 text-center">Action</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {paginated.length > 0 ? (
-                                        paginated.map((faq, index) => (
+                                        paginated.map((g, index) => (
                                             <tr
-                                                key={faq._id}
+                                                key={g._id}
                                                 className="border-b border-gray-300 hover:bg-orange-50 transition"
                                             >
                                                 <td className="p-3 pl-4 font-medium text-gray-700 text-center">
                                                     {start + index + 1}
                                                 </td>
-                                                <td className="p-3 text-gray-700">{faq.title}</td>
-                                                <td className="p-3 text-gray-500">
-                                                    {faq.description.replace(/<[^>]+>/g, "").slice(0, 50)}...
-                                                </td>
+                                                <td className="p-3 text-gray-700">{g.group_name}</td>
+
                                                 <td className="p-3 text-center">
-                                                    <span
-                                                        className={`inline-block rounded-full px-3 py-1 text-[13px] sm:text-[14px] capitalize ${faq.status === "active"
-                                                            ? "bg-green-100 text-green-600 font-semibold"
-                                                            : "bg-red-100 text-red-600 font-semibold"
-                                                            }`}
-                                                    >
-                                                        {faq.status}
-                                                    </span>
-                                                </td>
-                                                <td className="p-3 text-center">
-                                                    <div className="flex justify-center gap-2 sm:gap-3">
+                                                    <div className="flex justify-center gap-2">
                                                         <button
-                                                            onClick={() => navigate(`/FAQInDetail/${faq._id}`)}
-                                                            className="flex justify-center items-center cursor-pointer bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded"
+                                                            onClick={() =>
+                                                                navigate(`/GroupInDetail/${g._id}`)
+                                                            }
+                                                            className="flex justify-center items-center bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded"
                                                         >
                                                             <FaEye size={14} />
                                                         </button>
+
                                                         <button
                                                             onClick={() =>
-                                                                navigate("/CreateFAQ", { state: { faq } })
+                                                                navigate("/CreateGroup", { state: { rowData: g } })
+
                                                             }
-                                                            className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
+                                                            className="flex justify-center items-center bg-green-500 hover:bg-green-600 text-white w-8 h-8 rounded"
                                                         >
                                                             <MdEdit size={16} />
                                                         </button>
+
                                                         <button
                                                             onClick={() => {
-                                                                setSelectedFAQ(faq);
+                                                                setSelectedGroup(g);
                                                                 setShowDeleteModal(true);
                                                             }}
-                                                            className="flex justify-center items-center cursor-pointer bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded"
+                                                            className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded"
                                                         >
                                                             <FaTrash size={14} />
                                                         </button>
@@ -224,18 +213,16 @@ const FAQList = () => {
                                     ) : (
                                         <tr>
                                             <td
-                                                colSpan="5"
+                                                colSpan="3"
                                                 className="text-center p-6 text-gray-500 italic"
                                             >
-                                                No FAQ found.
+                                                No Restaurant Group found.
                                             </td>
                                         </tr>
                                     )}
                                 </tbody>
                             </table>
 
-
-                            {/* Pagination */}
                             <Pagination
                                 currentPage={pagination.currentPage}
                                 totalItems={filtered.length}
@@ -251,16 +238,15 @@ const FAQList = () => {
                 </div>
             </div>
 
-            {/* Delete Modal */}
             <DeleteModel
                 isOpen={showDeleteModal}
                 onClose={closeDeleteModal}
                 onConfirm={confirmDelete}
                 redbutton="Confirm"
-                para="Do you really want to delete this FAQ? This action cannot be undone."
+                para="Do you really want to delete this group? This action cannot be undone."
             />
         </>
     );
 };
 
-export default FAQList;
+export default RestroGroup;

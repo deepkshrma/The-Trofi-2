@@ -21,6 +21,7 @@ import { XCircle } from "lucide-react";
 import { Trophy } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 
 
@@ -38,6 +39,12 @@ function RestroProfile() {
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  const [statusHistory, setStatusHistory] = useState([]);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [statusReason, setStatusReason] = useState('');
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
   const openImageModal = (imgUrl) => {
     setSelectedImage(imgUrl);
@@ -83,8 +90,6 @@ function RestroProfile() {
     }
   };
 
-
-
   const handleGenerateReport = async () => {
     try {
       const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
@@ -109,6 +114,126 @@ function RestroProfile() {
     } catch (error) {
       console.error("Error generating report:", error);
       toast.error("Failed to generate report");
+    }
+  };
+
+  useEffect(() => {
+    const fetchStatusHistory = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+        if (!token) return;
+
+        const res = await axios.get(
+          `${BASE_URL}/admin/restaurant/${id}/status-history`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.data.success) {
+          setStatusHistory(res.data.data.statusHistory || []);
+        }
+      } catch (error) {
+        console.error("Error fetching status history:", error);
+      }
+    };
+
+    if (id) {
+      fetchStatusHistory();
+    }
+  }, [id]);
+
+
+  useEffect(() => {
+    if (isStatusModalOpen && restaurant) {
+
+      setSelectedStatus(restaurant.account_status || '');
+      setStatusReason(restaurant.account_status_reason || '');
+    }
+  }, [isStatusModalOpen, restaurant]);
+
+
+  const handleStatusChange = async () => {
+    if (!selectedStatus) {
+      toast.error("Please select a status");
+      return;
+    }
+
+    if ((selectedStatus === 'suspended' || selectedStatus === 'banned') && !statusReason.trim()) {
+      toast.error("Reason is required for suspended or banned status");
+      return;
+    }
+
+    try {
+      setIsLoadingStatus(true);
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      const res = await axios.patch(
+        `${BASE_URL}/admin/restaurant/${id}/status`,
+        {
+          status: selectedStatus,
+          reason: statusReason.trim() || null,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        toast.success(res.data.message || "Status updated successfully");
+
+        // Update restaurant status in state immediately
+        setRestaurant(prev => ({
+          ...prev,
+          account_status: selectedStatus,
+          account_status_reason: statusReason.trim() || null
+        }));
+
+        // Refresh status history
+        try {
+          const historyRes = await axios.get(
+            `${BASE_URL}/admin/restaurant/${id}/status-history`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (historyRes.data.success) {
+            setStatusHistory(historyRes.data.data.statusHistory || []);
+          }
+        } catch (historyError) {
+          console.error("Error refreshing history:", historyError);
+          // Don't show error to user, history will refresh on next page load
+        }
+
+        // Close modal after successful update
+        setIsStatusModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error changing status:", error);
+      toast.error(error.response?.data?.message || "Failed to change status");
+    } finally {
+      setIsLoadingStatus(false);
+    }
+  };
+
+  // Add function to get status badge color
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-700';
+      case 'suspended':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'banned':
+        return 'bg-red-100 text-red-700';
+      case 'deleted':
+        return 'bg-gray-100 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
@@ -388,7 +513,7 @@ function RestroProfile() {
               <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
               {restaurant.time
                 ? (() => {
-                  
+
                   const [hours, minutes] = restaurant.time.split(":").map(Number);
                   const period = hours >= 12 ? "PM" : "AM";
                   const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
@@ -666,8 +791,6 @@ function RestroProfile() {
             </div>
           )}
 
-
-
         {/* Map Section */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Location</h2>
@@ -694,6 +817,77 @@ function RestroProfile() {
             )}
           </div>
         </div>
+
+        {/* Account Management Section - ADD THIS BEFORE ADDITIONAL INFO */}
+        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-800">Account Management</h2>
+            <button
+              onClick={() => {
+                // Use current restaurant state, not stale closure
+                setSelectedStatus(restaurant?.account_status || '');
+                setStatusReason(restaurant?.account_status_reason || '');
+                console.log('Opening modal with:', {
+                  status: restaurant?.account_status,
+                  reason: restaurant?.account_status_reason
+                });
+                setIsStatusModalOpen(true);
+              }}
+              className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
+            >
+              Change Status
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Current Status */}
+            <div className="flex items-center gap-3">
+              <span className="text-gray-600 font-medium">Current Status:</span>
+              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(restaurant.account_status)}`}>
+                {restaurant.account_status?.toUpperCase() || 'N/A'}
+              </span>
+            </div>
+
+            {/* Current Reason */}
+            {restaurant.account_status_reason && (
+              <div className="flex items-start gap-3">
+                <span className="text-gray-600 font-medium">Reason:</span>
+                <span className="text-gray-700">{restaurant.account_status_reason}</span>
+              </div>
+            )}
+
+            {/* Status History */}
+            {statusHistory.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-md font-semibold text-gray-800 mb-3">Status History</h3>
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {statusHistory.map((history, idx) => (
+                    <div key={idx} className="border-l-4 border-[#F9832B] pl-4 py-2 bg-gray-50 rounded">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(history.status)}`}>
+                          {history.status?.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(history.changedAt).toLocaleString('en-IN', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                          })}
+                        </span>
+                      </div>
+                      {history.reason && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          <span className="font-medium">Reason:</span> {history.reason}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Additional Info Section */}
         <div className="bg-white p-5 rounded-xl shadow-md mt-6">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             Additional Info
@@ -717,6 +911,103 @@ function RestroProfile() {
           </div>
         </div>
       </div>
+
+      {/* Status Change Modal */}
+      {isStatusModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+          {/* Background Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => {
+              if (!isLoadingStatus) {
+                setIsStatusModalOpen(false);
+                setSelectedStatus('');
+                setStatusReason('');
+              }
+            }}
+          ></div>
+
+          {/* Modal Box */}
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-[90%] p-6 z-10">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                if (!isLoadingStatus) {
+                  setIsStatusModalOpen(false);
+                  setSelectedStatus('');
+                  setStatusReason('');
+                }
+              }}
+              className="absolute top-3 right-3 text-gray-700 text-xl  font-bold hover:text-red-600 cursor-pointer"
+              disabled={isLoadingStatus}
+            >
+              ✕
+            </button>
+
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Change Account Status</h3>
+
+            {/* Status Dropdown */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Select Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedStatus || ''}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9832B] focus:outline-none"
+                disabled={isLoadingStatus}
+              >
+                <option value="">-- Select Status --</option>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="banned">Banned</option>
+              </select>
+            </div>
+
+            {/* Reason Textarea */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Reason {(selectedStatus === 'suspended' || selectedStatus === 'banned') && (
+                  <span className="text-red-500">*</span>
+                )}
+              </label>
+              <textarea
+                value={statusReason || ''}
+                onChange={(e) => setStatusReason(e.target.value)}
+                placeholder="Enter reason for status change..."
+                rows="4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9832B] focus:outline-none resize-none"
+                disabled={isLoadingStatus}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  if (!isLoadingStatus) {
+                    setIsStatusModalOpen(false);
+                    // Reset to empty only on cancel
+                    setSelectedStatus('');
+                    setStatusReason('');
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 cursor-pointer font-semibold rounded-lg transition-all duration-300"
+                disabled={isLoadingStatus}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStatusChange}
+                disabled={isLoadingStatus}
+                className="flex-1 px-4 py-2 bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingStatus ? 'Updating...' : 'Update Status'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {isImageModalOpen && selectedImage && (
