@@ -207,7 +207,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
             icon: <PeopleIcon />,
             link: "#",
             dropdown: true,
-            subItems: [{ name: "Users", link: "UserList", dropdown: false }],
+            subItems: [{ name: "Users", link: "UserList", dropdown: false },{ name: "Deleted Users", link: "DeletedUserList", dropdown: false }],
           },
         ],
         border: true,

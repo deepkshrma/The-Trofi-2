@@ -63,6 +63,12 @@ function DishesList() {
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedDishType, setSelectedDishType] = useState("");
   const [selectedCuisine, setSelectedCuisine] = useState("");
+  const [showDeleted, setShowDeleted] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDish, setSelectedDish] = useState(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteComment, setDeleteComment] = useState("");
 
   // Image modal
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -86,6 +92,52 @@ function DishesList() {
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
     setSelectedSubCategory(""); // reset
+  };
+
+  // Close delete modal
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setSelectedDish(null);
+    setDeleteReason("");
+    setDeleteComment("");
+  };
+
+  // Confirm delete
+  const confirmDelete = async () => {
+    if (!selectedDish) return;
+
+    if (!deleteReason) {
+      toast.error("Please select a deletion reason");
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+
+      const res = await axios.delete(
+        `${BASE_URL}/admin/dish/${selectedDish._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          data: {
+            reason: deleteReason,
+            comment: deleteComment || "" // Add this line
+          }
+        }
+      );
+
+      if (res.data.success) {
+        toast.success("Dish deleted successfully");
+        fetchDishesForTable(pagination.currentPage);
+        closeDeleteModal();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete dish");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // -------- Fetch Dropdown Options --------
@@ -145,6 +197,7 @@ function DishesList() {
       if (selectedDishType) params.typeId = selectedDishType;
       if (selectedCuisine) params.cuisineId = selectedCuisine;
       if (sortBy) params.sort = sortBy;
+      if (showDeleted) params.showDeleted = true;
 
       const { data } = await axios.get(`${BASE_URL}/dishes/get-all-dishes-admin`, { params });
 
@@ -191,6 +244,7 @@ function DishesList() {
     setSearch("");
     setShowFilterModal(false);
     fetchDishesForTable(1);
+    setShowDeleted(false);
   };
 
   // -------- Apply Filters --------
@@ -415,9 +469,21 @@ function DishesList() {
                         </button>
                         <button
                           className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
-                          onClick={() => navigate(`/DishDetails/${dish._id}`)}
+                          onClick={() => navigate(`/DishDetails/${dish._id}`, {
+                            state: { isDeleted: dish.isDeleted }
+                          })}
                         >
                           <FaEye size={16} />
+                        </button>
+                        <button
+                          className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600"
+                          onClick={() => {
+                            setSelectedDish(dish);
+                            setShowDeleteModal(true);
+                          }}
+                          title="Delete"
+                        >
+                          <FaTrashAlt size={16} />
                         </button>
                       </div>
                     </td>
@@ -444,6 +510,134 @@ function DishesList() {
           />
         </div>
       </div>
+
+      {/* Delete Modal */}
+      {showDeleteModal && (
+        <AnimatePresence>
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                    <FaTrashAlt size={18} className="text-red-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg md:text-xl font-semibold text-gray-800">
+                      Delete Dish
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      This action cannot be undone
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeDeleteModal}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-4 md:p-6 space-y-4">
+                {/* Warning Message */}
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-800">
+                    <strong>Warning:</strong> Deleting{" "}
+                    <span className="font-semibold">{selectedDish?.dish_name}</span> will
+                    mark it as deleted along with all its ratings and related data.
+                  </p>
+                </div>
+
+                {/* Reason Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Deletion Reason <span className="text-red-500">*</span>
+                  </label>
+                  <div className="space-y-2 bg-gray-50 p-3 rounded-lg max-h-48 overflow-y-auto">
+                    {[
+                      "Discontinued Item",
+                      "Quality Issues",
+                      "Duplicate Entry",
+                      "Ingredient Unavailable",
+                      "Low Demand",
+                      "Price Change",
+                      "Other"
+                    ].map((option) => (
+                      <label
+                        key={option}
+                        className="flex items-center gap-3 cursor-pointer hover:text-[#F9832B] transition"
+                      >
+                        <input
+                          type="radio"
+                          name="deleteReason"
+                          value={option}
+                          checked={deleteReason === option}
+                          onChange={(e) => setDeleteReason(e.target.value)}
+                          className="w-4 h-4 border-gray-300 cursor-pointer accent-red-600"
+                        />
+                        <span className="text-sm text-gray-700">{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Additional Comment (Optional)
+                  </label>
+                  <textarea
+                    value={deleteComment}
+                    onChange={(e) => setDeleteComment(e.target.value)}
+                    placeholder="Add any additional details about the deletion..."
+                    rows="3"
+                    className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-red-500 outline-none text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex flex-col sm:flex-row justify-end gap-3 p-4 md:p-6 pt-0">
+                <button
+                  onClick={closeDeleteModal}
+                  disabled={isDeleting}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-gray-200 text-gray-700 cursor-pointer hover:bg-gray-300 font-medium text-sm transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={!deleteReason || isDeleting}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-red-600 text-white cursor-pointer hover:bg-red-700 font-medium text-sm transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <FaTrashAlt size={14} />
+                      Confirm Delete
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
 
       {/* Image Modal */}
       {isImageModalOpen && selectedImage && (
@@ -654,6 +848,21 @@ function DishesList() {
                     step="0.1"
                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
                   />
+                </div>
+                
+                {/* Show Deleted Dishes */}
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">
+                    Show Deleted Dishes
+                  </label>
+                  <select
+                    value={showDeleted}
+                    onChange={(e) => setShowDeleted(e.target.value === "true")}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                  >
+                    <option value="false">No (Active Only)</option>
+                    <option value="true">Yes (Deleted Only)</option>
+                  </select>
                 </div>
               </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -16,10 +16,12 @@ import {
   ChevronLeft,
   ChevronRight as ArrowRight,
 } from "lucide-react";
+import { FaTrashAlt } from "react-icons/fa";
 
 function DishDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [dish, setDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -36,12 +38,39 @@ function DishDetails() {
         return;
       }
 
-      const response = await axios.get(`${BASE_URL}/admin/dishes/${id}/details`, {
+      // Check if viewing deleted dish (pass via route state or query param)
+      const isDeleted = location.state?.isDeleted || false;
+
+      // Choose endpoint based on dish status
+      const endpoint = isDeleted
+        ? `${BASE_URL}/admin/dish/${id}/deleted-details`
+        : `${BASE_URL}/admin/dishes/${id}/details`;
+
+      const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.data.success) {
-        setDish(response.data.data);
+        let normalizedDish = response.data.data;
+
+        // If it's a deleted dish, normalize the structure
+        if (isDeleted && normalizedDish.dish) {
+          normalizedDish = {
+            ...normalizedDish.dish,
+            dish_name: normalizedDish.dish.name,
+            dish_images: normalizedDish.dish.images,
+            dish_ingredients: normalizedDish.dish.ingredients,
+            restaurantId: normalizedDish.dish.restaurant,
+            avgRating: normalizedDish.dish.avgRating,
+            ratings: normalizedDish.relatedData?.ratings?.recent || [],
+            totalRatings: normalizedDish.relatedData?.ratings?.total || 0,
+            deletionInfo: normalizedDish.deletionInfo,
+            // Keep the nested dish object for isDeleted check
+            dish: normalizedDish.dish
+          };
+        }
+
+        setDish(normalizedDish);
       } else {
         toast.error(response.data.message || "Failed to fetch dish details");
       }
@@ -125,8 +154,8 @@ function DishDetails() {
                 src={`${IMAGE_URL}/${img}`}
                 alt={`Dish ${index + 1}`}
                 className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer ${currentImageIndex === index
-                    ? "border-[#F9832B]"
-                    : "border-gray-200"
+                  ? "border-[#F9832B]"
+                  : "border-gray-200"
                   }`}
                 onClick={() => openImageModal(index)}
                 onError={(e) => (e.target.src = guest)}
@@ -195,17 +224,52 @@ function DishDetails() {
           <div className="mt-4 space-y-2 text-gray-700">
             <p className="flex items-center gap-2">
               <span className="font-semibold">Restaurant:</span>{" "}
-              {dish.restaurantId?.restro_name || "N/A"}
+              {dish.dish?.restaurant?.restro_name || dish.restaurantId?.restro_name || "N/A"}
             </p>
             <p className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-[#F9832B]" />
-              {dish.restaurantId?.address || "N/A"}
+              {dish.dish?.restaurant?.address || dish.restaurantId?.address || "N/A"}
             </p>
             <p className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-[#F9832B]" />
               {dish.restaurantId?.email || "N/A"}
             </p>
           </div>
+
+          {/* Deletion Info - Only for deleted dishes */}
+          {dish.dish?.isDeleted && dish.deletionInfo && (
+            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg space-y-3">
+              <h4 className="font-semibold text-red-800 mb-2 flex items-center gap-2">
+                <FaTrashAlt className="w-4 h-4" />
+                Deletion Information
+              </h4>
+              <div className="space-y-2 text-sm text-red-700">
+                <p>
+                  <span className="font-medium">Deleted At:</span>{" "}
+                  {new Date(dish.deletionInfo.deletedAt).toLocaleString()}
+                </p>
+                <p>
+                  <span className="font-medium">Deleted By:</span>{" "}
+                  {dish.deletionInfo.deletedBy?.name || "N/A"}
+                  {dish.deletionInfo.deletedBy?.email && (
+                    <span className="text-xs ml-1">({dish.deletionInfo.deletedBy.email})</span>
+                  )}
+                </p>
+                <p>
+                  <span className="font-medium">Reason:</span>{" "}
+                  <span className="bg-red-100 px-2 py-0.5 rounded">
+                    {dish.deletionInfo.reason}
+                  </span>
+                </p>
+                {dish.deletionInfo.comment && (
+                  <p>
+                    <span className="font-medium">Comment:</span>{" "}
+                    <span className="italic">{dish.deletionInfo.comment}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Ratings Summary */}
           <div className="mt-5 flex flex-wrap gap-4">
@@ -266,8 +330,8 @@ function DishDetails() {
 
                       <span
                         className={`${r.userId?._id
-                            ? "text-[#F9832B] cursor-pointer hover:underline"
-                            : "text-gray-700"
+                          ? "text-[#F9832B] cursor-pointer hover:underline"
+                          : "text-gray-700"
                           }`}
                         onClick={() => {
                           if (r.userId?._id) navigate(`/UserProfile/${r.userId._id}`);
@@ -282,8 +346,8 @@ function DishDetails() {
                     <td className="px-6 py-3">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${r.status === "published"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
                           }`}
                       >
                         {r.status}

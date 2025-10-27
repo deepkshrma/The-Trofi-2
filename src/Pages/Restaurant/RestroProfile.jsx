@@ -24,8 +24,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 
 
-
-
 function RestroProfile() {
   const { isToggle } = useContext(LayoutContext);
   const { id } = useParams();
@@ -243,11 +241,15 @@ function RestroProfile() {
       if (!token) return toast.error("Please login first");
       try {
         setLoading(true);
-        const res = await axios.get(`${BASE_URL}/restro/get-restaurant-list/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axios.get(
+          `${BASE_URL}/restro/get-restaurant-list/${id}?includeDeleted=true`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
 
         setRestaurant(res.data.data);
       } catch (error) {
@@ -390,9 +392,14 @@ function RestroProfile() {
 
   return (
     <div
-      className={`w-[100%] pt-[1.5rem] pb-[1rem] ${isToggle ? "pl-[19.3rem]" : ""
-        } duration-900 min-h-screen `}
+      className={`w-full pt-[1.5rem] pb-[1rem] ${isToggle ? "pl-[19.3rem]" : ""
+        } min-h-screen duration-900 ${restaurant.isDeleted
+          ? "bg-red-50 border-t-4 border-red-300"
+          : "bg-white"
+        }`}
     >
+
+
 
       {/* Banner Carousel */}
       <div className="relative w-full h-100">
@@ -441,6 +448,11 @@ function RestroProfile() {
           )}
         </Carousel>
 
+        {restaurant.isDeleted && (
+          <div className="absolute top-4 right-6 bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm font-semibold shadow">
+            Deleted Restaurant
+          </div>
+        )}
 
         {/* Logo, Name & Rating */}
         <div className="absolute bottom-4 left-6 flex items-center gap-4 z-[1]">
@@ -477,54 +489,202 @@ function RestroProfile() {
 
       {/* Restaurant Details */}
       <div className="p-6 space-y-6">
+        {/* Restaurant Details (kept outer card look; inner split when deleted) */}
         <div className="bg-white p-5 rounded-xl shadow-md">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             About {restaurant.restro_name || restaurant.name}
           </h2>
-          <p className="text-gray-600">{longDescription}</p>
 
-          <div className="mt-4 grid sm:grid-cols-2 gap-4 text-gray-700">
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.address || restaurant.location || "N/A"}
-            </p>
+          {/* Long description (kept as-is, full width) */}
+          <p className="text-gray-600 mb-4">{longDescription}</p>
 
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
-            </p>
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.postalCode || "N/A"}
-            </p>
+          {/* If deleted → show left (current/deleted) and right (original) columns.
+      Otherwise → show single-column content (keeps exact previous markup). */}
+          {restaurant.isDeleted ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* LEFT: Current (deleted) data — keep same paragraph layout you had */}
+              <div className="p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+                <div className="grid gap-3 text-gray-700">
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.address || restaurant.location || "N/A"}
+                  </p>
 
-            <p className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-[#F9832B]" />{" "}
-              {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
-                (restaurant.phone || "N/A")}
-            </p>
-            <p className="flex items-center gap-2">
-              <Utensils className="w-5 h-5 text-[#F9832B]" />{" "}
-              {Array.isArray(restaurant.food_type)
-                ? restaurant.food_type.join(", ")
-                : restaurant.food_type || "N/A"}
-            </p>
-            <p className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.time
-                ? (() => {
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
+                  </p>
 
-                  const [hours, minutes] = restaurant.time.split(":").map(Number);
-                  const period = hours >= 12 ? "PM" : "AM";
-                  const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
-                  return `Till ${formattedHour}:${minutes.toString().padStart(2, "0")} ${period} `;
-                })()
-                : "N/A"}
-            </p>
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.postalCode || "N/A"}
+                  </p>
 
-          </div>
+                  <p className="flex items-center gap-2">
+                    <Phone className="w-5 h-5 text-[#F9832B]" />
+                    {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                      (restaurant.phone || "N/A")}
+                  </p>
 
+                  <p className="flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-[#F9832B]" />
+                    {Array.isArray(restaurant.food_type)
+                      ? restaurant.food_type.join(", ")
+                      : restaurant.food_type || "N/A"}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.time
+                      ? (() => {
+                        const [hours, minutes] = restaurant.time.split(":").map(Number);
+                        const period = hours >= 12 ? "PM" : "AM";
+                        const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                        return `Till ${formattedHour}:${minutes
+                          .toString()
+                          .padStart(2, "0")} ${period} `;
+                      })()
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT: Original info before deletion */}
+              <div className="p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                  Original (Pre-deletion) Information
+                </h3>
+
+                <div className="grid gap-3 text-gray-700 text-sm">
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {restaurant.deleted_restro_name || restaurant.restro_name || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Email:</strong> {restaurant.deleted_email || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Phone:</strong>{" "}
+                    {restaurant.deleted_phone
+                      ? // if deleted_phone maybe stored without country code, prefer deleted_phone
+                      (restaurant.deleted_phone.startsWith("+") ||
+                        restaurant.deleted_phone.startsWith("00")
+                        ? restaurant.deleted_phone
+                        : (restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                        restaurant.deleted_phone)
+                      : "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Address:</strong> {restaurant.address || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>City:</strong> {restaurant.city || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>State:</strong> {restaurant.state || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Postal Code:</strong> {restaurant.postalCode || "N/A"}
+                  </p>
+
+                  {/* optional: show deleted_restro_name separate label if different */}
+                  {restaurant.deleted_restro_name && (
+                    <p>
+                      <strong>Saved As (deleted):</strong> {restaurant.resto_name || restaurant.restro_name || "N/A"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // NON-deleted (original layout preserved exactly)
+            <div className="mt-4 grid sm:grid-cols-2 gap-4 text-gray-700">
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.address || restaurant.location || "N/A"}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
+              </p>
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.postalCode || "N/A"}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-[#F9832B]" />{" "}
+                {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                  (restaurant.phone || "N/A")}
+              </p>
+              <p className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-[#F9832B]" />{" "}
+                {Array.isArray(restaurant.food_type)
+                  ? restaurant.food_type.join(", ")
+                  : restaurant.food_type || "N/A"}
+              </p>
+              <p className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.time
+                  ? (() => {
+                    const [hours, minutes] = restaurant.time.split(":").map(Number);
+                    const period = hours >= 12 ? "PM" : "AM";
+                    const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                    return `Till ${formattedHour}:${minutes.toString().padStart(2, "0")} ${period} `;
+                  })()
+                  : "N/A"}
+              </p>
+            </div>
+          )}
         </div>
+
+        {/* Restaurant Group Section - ADD THIS AFTER "About Restaurant" */}
+        {restaurant.group_id && (
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Restaurant Group</h2>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Group Image */}
+              {restaurant.group_id.group_image && (
+                <img
+                  src={getImageUrl(restaurant.group_id.group_image)}
+                  alt={restaurant.group_id.group_name}
+                  className="w-20 h-20 rounded-lg object-cover shadow-sm cursor-pointer"
+                  onClick={() => openImageModal(getImageUrl(restaurant.group_id.group_image))}
+                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                />
+              )}
+
+              {/* Group Details */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {restaurant.group_id.group_name}
+                  </h3>
+                  {restaurant.group_id.is_active && (
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {restaurant.group_id.description && (
+                  <p className="text-gray-600 text-sm">
+                    {restaurant.group_id.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* ⭐ Average Rating Section */}
         <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
@@ -592,6 +752,35 @@ function RestroProfile() {
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             Status Information
           </h2>
+          {restaurant.isDeleted && restaurant.deletion_info && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <h3 className="text-red-700 font-semibold text-lg mb-2">
+                ⚠️ Deleted Restaurant Information
+              </h3>
+              <p className="text-gray-700">
+                <strong>Deleted At:</strong>{" "}
+                {new Date(restaurant.deletion_info.deletedAt).toLocaleString("en-IN", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </p>
+              <p className="text-gray-700">
+                <strong>Deleted By:</strong>{" "}
+                {restaurant.deletion_info.deletedBy?.name || "Unknown"} (
+                {restaurant.deletion_info.deletedBy?.email || "N/A"})
+              </p>
+              <p className="text-gray-700">
+                <strong>Reason:</strong>{" "}
+                {restaurant.deletion_info.reason || "No reason provided"}
+              </p>
+              {restaurant.deletion_info.comment && (
+                <p className="text-gray-700">
+                  <strong>Comment:</strong> {restaurant.deletion_info.comment}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="grid sm:grid-cols-3 gap-4 text-gray-700">
             <p className="flex items-center gap-2">
               <Star className="w-5 h-5 text-[#F9832B]" /> Status:{" "}
@@ -819,97 +1008,101 @@ function RestroProfile() {
         </div>
 
         {/* Account Management Section - ADD THIS BEFORE ADDITIONAL INFO */}
-        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Account Management</h2>
-            <button
-              onClick={() => {
-                // Use current restaurant state, not stale closure
-                setSelectedStatus(restaurant?.account_status || '');
-                setStatusReason(restaurant?.account_status_reason || '');
-                console.log('Opening modal with:', {
-                  status: restaurant?.account_status,
-                  reason: restaurant?.account_status_reason
-                });
-                setIsStatusModalOpen(true);
-              }}
-              className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
-            >
-              Change Status
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* Current Status */}
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600 font-medium">Current Status:</span>
-              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(restaurant.account_status)}`}>
-                {restaurant.account_status?.toUpperCase() || 'N/A'}
-              </span>
+        {!restaurant.isDeleted && (
+          <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Account Management</h2>
+              <button
+                onClick={() => {
+                  // Use current restaurant state, not stale closure
+                  setSelectedStatus(restaurant?.account_status || '');
+                  setStatusReason(restaurant?.account_status_reason || '');
+                  console.log('Opening modal with:', {
+                    status: restaurant?.account_status,
+                    reason: restaurant?.account_status_reason
+                  });
+                  setIsStatusModalOpen(true);
+                }}
+                className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
+              >
+                Change Status
+              </button>
             </div>
 
-            {/* Current Reason */}
-            {restaurant.account_status_reason && (
-              <div className="flex items-start gap-3">
-                <span className="text-gray-600 font-medium">Reason:</span>
-                <span className="text-gray-700">{restaurant.account_status_reason}</span>
+            <div className="space-y-4">
+              {/* Current Status */}
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 font-medium">Current Status:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(restaurant.account_status)}`}>
+                  {restaurant.account_status?.toUpperCase() || 'N/A'}
+                </span>
               </div>
-            )}
 
-            {/* Status History */}
-            {statusHistory.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-md font-semibold text-gray-800 mb-3">Status History</h3>
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {statusHistory.map((history, idx) => (
-                    <div key={idx} className="border-l-4 border-[#F9832B] pl-4 py-2 bg-gray-50 rounded">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(history.status)}`}>
-                          {history.status?.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(history.changedAt).toLocaleString('en-IN', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short'
-                          })}
-                        </span>
-                      </div>
-                      {history.reason && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          <span className="font-medium">Reason:</span> {history.reason}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+              {/* Current Reason */}
+              {restaurant.account_status_reason && (
+                <div className="flex items-start gap-3">
+                  <span className="text-gray-600 font-medium">Reason:</span>
+                  <span className="text-gray-700">{restaurant.account_status_reason}</span>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Status History */}
+              {statusHistory.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3">Status History</h3>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {statusHistory.map((history, idx) => (
+                      <div key={idx} className="border-l-4 border-[#F9832B] pl-4 py-2 bg-gray-50 rounded">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(history.status)}`}>
+                            {history.status?.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(history.changedAt).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short'
+                            })}
+                          </span>
+                        </div>
+                        {history.reason && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-medium">Reason:</span> {history.reason}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Additional Info Section */}
-        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">
-            Additional Info
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
-            <p className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
-              {restaurant.lastMenuUpdated
-                ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
-                : "N/A"}
-            </p>
-            <button
-              onClick={handleGenerateReport}
-              className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer ml-7  font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300"
-            >
-              Generate Report
-            </button>
+        {!restaurant.isDeleted && (
+          <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">
+              Additional Info
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
+              <p className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
+                {restaurant.lastMenuUpdated
+                  ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
+                  : "N/A"}
+              </p>
+              <button
+                onClick={handleGenerateReport}
+                className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer ml-7  font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300"
+              >
+                Generate Report
+              </button>
 
 
 
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Status Change Modal */}

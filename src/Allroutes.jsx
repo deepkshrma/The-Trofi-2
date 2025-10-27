@@ -69,6 +69,8 @@ import PermissionAssignRestro from "./Pages/Permission/PermissionAssignRestro";
 import CreateGroup from "./Pages/Restaurant/CreateGroup";
 import RestroGroup from "./Pages/Restaurant/RestroGroup";
 import RestroGroupDetail from "./Pages/Restaurant/RestroGroupDetail";
+import DeletedUserList from "./Pages/User/DeletedUserList";
+import DeletedUserDetails from "./Pages/User/DeletedUserDetails";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -100,6 +102,8 @@ const Allroutes = () => {
               <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />
               <Route path="/AdminList" element={<AdminList />} />
               <Route path="/UserList" element={<UserList />} />
+              <Route path="/DeletedUserList" element={<DeletedUserList />} />
+              <Route path="/DeletedUserDetails/:id" element={<DeletedUserDetails />} />
               <Route path="/RestroAdd" element={<RestroAdd />} />
               <Route path="/RestroList" element={<RestroList />} />
               <Route path="/UserProfile" element={<UserProfile />} />
