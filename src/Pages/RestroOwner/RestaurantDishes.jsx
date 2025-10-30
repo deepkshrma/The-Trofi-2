@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useState, useEffect, useRef } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { PlusCircle } from "lucide-react";
@@ -11,7 +10,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 import { MdEdit } from "react-icons/md";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
-import { FaUtensils, FaCheckCircle, FaHourglassHalf, FaTrashAlt } from "react-icons/fa";
+import { FaUtensils, FaCheckCircle, FaHourglassHalf, FaTrashAlt, FaCommentDots } from "react-icons/fa";
 import { FiFilter } from "react-icons/fi";
 import guest from "../../assets/images/guest.png";
 import { STAR_RATINGS } from "../../config/hashtagconfig";
@@ -260,90 +259,96 @@ function RestaurantDishes() {
             {/* Table */}
             <div className="bg-white shadow-md rounded-xl border border-gray-200 overflow-x-auto pb-3">
 
-  {/* Loading State */}
-  {loading ? (
-    <div className="flex flex-col items-center justify-center py-20">
-      <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-700 font-medium text-lg">Loading restaurant dishes...</p>
-    </div>
-  ) : filteredDishes.length === 0 ? (
-    /* No Dishes Found State */
-    <div className="flex flex-col items-center justify-center py-20 text-gray-500 italic">
-      No dishes found.
-    </div>
-  ) : (
-    /* Table with Dishes */
-    <table className="w-full border-collapse">
-      <thead>
-        <tr className="bg-gray-200 text-left text-gray-700">
-          <th className="p-3 border-b border-gray-300">S.No.</th>
-          <th className="p-3 border-b border-gray-300">Image</th>
-          <th className="p-3 border-b border-gray-300">Dish Name</th>
-          <th className="p-3 border-b border-gray-300">Category</th>
-          <th className="p-3 border-b border-gray-300">Type</th>
-          <th className="p-3 border-b border-gray-300">Price (₹)</th>
-          <th className="p-3 border-b border-gray-300">Rating</th>
-          <th className="p-3 border-b border-gray-300">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {filteredDishes.map((dish, index) => (
-          <tr key={dish._id} className="hover:bg-gray-50 transition text-gray-700">
-            <td className="p-3 border-b border-gray-200">
-              {(pagination.currentPage - 1) * pagination.pageSize + (index + 1)}
-            </td>
-            <td className="p-3 border-b border-gray-200">
-              <img
-                src={`${IMAGE_URL}/${dish.dish_images?.[0] || ""}`}
-                alt={dish.dish_name}
-                className="w-12 h-12 rounded-md object-cover"
-                onError={(e) => (e.target.src = guest)}
-              />
-            </td>
-            <td className="p-3 border-b border-gray-200 font-medium">{dish.dish_name}</td>
-            <td className="p-3 border-b border-gray-200">{dish.dish_category.category_name}</td>
-            <td className="p-3 border-b border-gray-200">{dish.dish_type.name}</td>
-            <td className="p-3 border-b border-gray-200">₹{dish.price}</td>
-            <td className="p-3 border-b border-gray-200">
-              <img
-                src={STAR_RATINGS[Math.round(dish.avgRating) - 1]?.img || starDefault}
-                alt={STAR_RATINGS[Math.round(dish.avgRating) - 1]?.label || "star"}
-                className="w-6 h-6 md:w-8 md:h-8"
-              />
-            </td>
-            <td className="p-3 border-b border-gray-200 flex items-center gap-2">
-              <button
-                className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-500 text-white hover:bg-green-600"
-                onClick={() => navigate(`/UpdateDishes/${dish._id}`)}
-              >
-                <MdEdit size={16} />
-              </button>
-              <button
-                className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white hover:bg-orange-600"
-                onClick={() => navigate(`/SingleDishReview/${dish._id}`)}
-                title="View Reviews"
-              >
-                <FaUtensils size={14} />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )}
+                {/* Loading State */}
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                        <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+                        <p className="mt-4 text-gray-700 font-medium text-lg">Loading restaurant dishes...</p>
+                    </div>
+                ) : filteredDishes.length === 0 ? (
+                    /* No Dishes Found State */
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-500 italic">
+                        No dishes found.
+                    </div>
+                ) : (
+                    /* Table with Dishes */
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-gray-200 text-left text-gray-700">
+                                <th className="p-3 border-b border-gray-300">S.No.</th>
+                                <th className="p-3 border-b border-gray-300">Image</th>
+                                <th className="p-3 border-b border-gray-300">Dish Name</th>
+                                <th className="p-3 border-b border-gray-300">Category</th>
+                                <th className="p-3 border-b border-gray-300">Type</th>
+                                <th className="p-3 border-b border-gray-300">Price (₹)</th>
+                                <th className="p-3 border-b border-gray-300">Rating</th>
+                                <th className="p-3 border-b border-gray-300">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredDishes.map((dish, index) => (
+                                <tr key={dish._id} className="hover:bg-gray-50 transition text-gray-700">
+                                    <td className="p-3 border-b border-gray-200">
+                                        {(pagination.currentPage - 1) * pagination.pageSize + (index + 1)}
+                                    </td>
+                                    <td className="p-3 border-b border-gray-200">
+                                        <img
+                                            src={`${IMAGE_URL}/${dish.dish_images?.[0] || ""}`}
+                                            alt={dish.dish_name}
+                                            className="w-12 h-12 rounded-md object-cover"
+                                            onError={(e) => (e.target.src = guest)}
+                                        />
+                                    </td>
+                                    <td
+                                        className="p-3 border-b border-gray-200 font-medium text-[#F9832B] hover:underline cursor-pointer"
+                                        onClick={() => navigate(`/RestroDishDetails/${dish._id}`)}
+                                    >
+                                        {dish.dish_name}
+                                    </td>
 
-  {/* Pagination */}
-  {!loading && filteredDishes.length > 0 && (
-    <Pagination
-      currentPage={pagination.currentPage}
-      totalItems={pagination.totalRecords}
-      itemsPerPage={pagination.pageSize}
-      onPageChange={fetchDishes}
-      totalPages={pagination.totalPages}
-      type="backend"
-    />
-  )}
-</div>
+                                    <td className="p-3 border-b border-gray-200">{dish.dish_category.category_name}</td>
+                                    <td className="p-3 border-b border-gray-200">{dish.dish_type.name}</td>
+                                    <td className="p-3 border-b border-gray-200">₹{dish.price}</td>
+                                    <td className="p-3 border-b border-gray-200">
+                                        <img
+                                            src={STAR_RATINGS[Math.round(dish.avgRating) - 1]?.img || starDefault}
+                                            alt={STAR_RATINGS[Math.round(dish.avgRating) - 1]?.label || "star"}
+                                            className="w-6 h-6 md:w-8 md:h-8"
+                                        />
+                                    </td>
+                                    <td className="p-3 border-b border-gray-200 flex items-center gap-2">
+                                        <button
+                                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600"
+                                            onClick={() => navigate(`/UpdateDishes/${dish._id}`)}
+                                        >
+                                            <MdEdit size={16} />
+                                        </button>
+                                        <button
+                                            className="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white cursor-pointer hover:bg-orange-600"
+                                            onClick={() => navigate(`/SingleDishReview/${dish._id}`)}
+                                            title="View Reviews"
+                                        >
+                                            <FaCommentDots size={14} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+
+                {/* Pagination */}
+                {!loading && filteredDishes.length > 0 && (
+                    <Pagination
+                        currentPage={pagination.currentPage}
+                        totalItems={pagination.totalRecords}
+                        itemsPerPage={pagination.pageSize}
+                        onPageChange={fetchDishes}
+                        totalPages={pagination.totalPages}
+                        type="backend"
+                    />
+                )}
+            </div>
 
         </div>
     );

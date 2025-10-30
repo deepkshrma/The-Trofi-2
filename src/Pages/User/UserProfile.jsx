@@ -5,7 +5,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
-import guest from "../../assets/images/guest.png"
+import guest from "../../assets/images/guest.png";
+import UserUpdateStatus from "../../components/UserUpdateStatus/UserUpdateStatus";
 
 function UserProfile() {
   const [user, setUser] = useState(null);
@@ -18,12 +19,27 @@ function UserProfile() {
   const [checkinSearch, setCheckinSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [isLoadingDishes, setIsLoadingDishes] = useState(false);
-
+  const [showStatusModal, setShowStatusModal] = useState(false);
 
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [userAddress, setUserAddress] = useState([]);
   const { id } = useParams();
   const tierTableRef = useRef(null);
+
+  // Tier-based gradient configuration
+  const getTierGradient = (tier) => {
+    const gradients = {
+      Sapphire: "linear-gradient(135deg, #E67300 0%, #F39324 25%, #FFB347 50%, #E67300 100%)",
+      Gold: "linear-gradient(135deg, #C1A875 0%, #A78B3F 20%, #BDA452 40%, #F4E683 60%, #BDA452 80%, #A78B3F 100%)",
+      Silver: "linear-gradient(135deg, #7A96AC 0%, #EAEFF3 15%, #C2D4E1 30%, #FFFFFF 50%, #D4DEE5 70%, #C0CED7 85%, #BCCAD7 100%)",
+      White: "linear-gradient(135deg, #D1D2D2 0%, #FFFFFF 50%, #D1D2D2 100%)",
+      Red: "linear-gradient(135deg, #DC2626 0%, #EF4444 25%, #FCA5A5 50%, #DC2626 100%)",
+    };
+    return gradients[tier] || gradients.White;
+  };
+
+  const userTier = user?.tier?.tier || "White";
+  const tierGradient = getTierGradient(userTier);
 
   // Filter restaurants
   const filteredRestaurants = useMemo(() => {
@@ -122,66 +138,131 @@ function UserProfile() {
 
       {/* Profile + Tier Summary */}
       <div className="bg-white rounded-xl shadow-md p-6 mt-5 flex flex-col lg:flex-row gap-6 items-center lg:items-start animate-fadeIn">
-        {/* Left: Profile */}
-        <div className="flex flex-col lg:flex-row place-items-center mt-8 lg:items-start gap-10 w-full lg:w-1/2 lg:pr-6">
+        {/* Profile + Status Card */}
+        <div className="flex flex-col lg:flex-row place-items-center lg:items-start gap-6 w-full lg:w-1/2 lg:pr-6">
           {/* Profile Image */}
+
+
           <div
-            className="w-50 h-50 rounded-full border-4 border-[#F9832B] shadow-md flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 overflow-hidden transition-transform duration-300 hover:scale-105 relative cursor-pointer"
+            className="relative w-32 h-32 rounded-full flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-105"
             onClick={openImageModal}
           >
-            {user.profile_picture ? (
-              <img
-                src={user.profile_picture ? `${IMAGE_URL}/${user.profile_picture}` : guest}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-
-            ) : (
-              initials
-            )}
-            {/* Hover overlay */}
-            {user.profile_picture && (
-              <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center text-white text-sm font-medium transition-opacity">
-                Click to see profile
+            {/* Gradient Border Layer */}
+            <div
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: tierGradient,
+                padding: "4px", // This creates the border thickness
+              }}
+            >
+              {/* Inner Content Container */}
+              <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 relative">
+                {user.profile_picture ? (
+                  <img
+                    src={user.profile_picture ? `${IMAGE_URL}/${user.profile_picture}` : guest}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+                {user.profile_picture && (
+                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center text-white text-sm font-medium transition-opacity">
+                    View Profile
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
+          {/* Profile Info + Status */}
+          <div className="flex-1 w-full">
+            {/* Basic Info */}
+            <div className="text-center lg:text-left mb-4">
+              <h2 className="text-2xl font-semibold flex flex-wrap items-center gap-2 justify-center lg:justify-start">
+                {user.name}
+                {user.isSpam && (
+                  <span className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded">
+                    Spam User
+                  </span>
+                )}
+                {user.isDeleted && (
+                  <span className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">
+                    Deleted Account
+                  </span>
+                )}
+              </h2>
+              <p className="text-gray-600 mt-1">{user.email}</p>
+              <p className="text-gray-500">
+                {user.country_code} {user.phone}
+              </p>
+            </div>
 
-          {/* Profile Info */}
-          <div className="text-center mt-8 lg:text-left">
-            <h2 className="text-2xl font-semibold flex flex-wrap items-center gap-2 justify-center lg:justify-start">
-              {user.name}
-              {user.isSpam && (
-                <span className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded">
-                  Spam User
-                </span>
-              )}
-              {user.isDeleted && (
-                <span className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">
-                  Deleted Account
-                </span>
-              )}
-            </h2>
-            <p className="text-gray-600">{user.email}</p>
-            <p className="text-gray-500">
-              {user.country_code} {user.phone}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              Status:{" "}
-              <span
-                className={`font-medium px-2 py-1 rounded ${user.account_status === "active"
-                  ? "bg-green-100 text-green-600"
-                  : user.account_status === "suspended"
-                    ? "bg-yellow-100 text-yellow-600"
-                    : "bg-red-100 text-red-600"
-                  }`}
-              >
-                {user.account_status}
-              </span>
-            </p>
+            {/* Account Status Control Panel */}
+            <div className="rounded-xl p-4  shadow-lg relative overflow-hidden"
+
+            >
+              {/* Gradient overlay on left side */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-1 opacity-80"
+                style={{ background: tierGradient }}
+              ></div>
+
+              <div className="flex items-center justify-between mb-3 relative z-10">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-gray-700">Account Status</h4>
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full font-medium text-black shadow-sm"
+                    style={{ background: tierGradient }}
+                  >
+                    {userTier} Tier
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowStatusModal(true)}
+                  className="text-xs font-medium underline cursor-pointer transition-colors"
+                  style={{ color: "#F9832B" }}
+                  onMouseEnter={(e) => e.target.style.color = "#e67600"}
+                  onMouseLeave={(e) => e.target.style.color = "#F9832B"}
+                >
+                  Change Status
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 relative z-10">
+                <div
+                  onClick={() => setShowStatusModal(true)}
+                  className={`cursor-pointer px-4 py-2 inline-flex justify-center items-center text-sm font-semibold rounded-lg hover:opacity-90 transition shadow-sm ${user.account_status === "active"
+                    ? "bg-green-500 text-white"
+                    : user.account_status === "suspended"
+                      ? "bg-yellow-500 text-white"
+                      : user.account_status === "spam"
+                        ? "bg-orange-500 text-white"
+                        : "bg-red-500 text-white"
+                    }`}
+                  title="Click to change status"
+                >
+                  {user.account_status.toUpperCase()}
+                </div>
+
+                {user.status_reason && (
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500 mb-1">Reason:</p>
+                    <p className="text-xs text-gray-700 bg-white px-3 py-1.5 rounded-lg border border-gray-200 line-clamp-2">
+                      {user.status_reason}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Action Hint */}
+              <p className="text-xs text-gray-400 mt-3 italic relative z-10">
+                Click status badge or "Change Status" to suspend, ban, or activate user
+              </p>
+            </div>
           </div>
         </div>
+
 
 
         {/* Right: Tier Summary */}
@@ -848,30 +929,47 @@ function UserProfile() {
         )}
       </div>
 
+      {/* Status Update Modal */}
+      {showStatusModal && user && (
+        <UserUpdateStatus
+          userId={user._id}
+          status={user.account_status}
+          reason={user.status_reason || ""}
+          onClose={() => setShowStatusModal(false)}
+          onSuccess={() => {
+            // Refresh user data after status update
+            window.location.reload(); // Simple way, or call fetchUser() if you extract it
+            setShowStatusModal(false);
+          }}
+        />
+      )}
+
       {isImageModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50 p-4">
           {/* Blurred Background */}
           <div
-            className="absolute inset-0 bg-opacity-50 bg-opacity-50 backdrop-blur-sm"
-            onClick={closeImageModal} // Clicking on background closes modal
+            className="absolute inset-0 backdrop-blur-sm"
+            onClick={closeImageModal}
           ></div>
 
           {/* Modal Content */}
-          <div className="relative bg-white rounded-xl shadow-lg max-w-md w-11/12 p-4 z-10">
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-4xl max-h-[90vh] w-auto z-10 overflow-hidden">
             {/* Close Button */}
             <button
               onClick={closeImageModal}
-              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+              className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-red-600 hover:text-white text-gray-700 rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold shadow-lg transition-colors"
             >
               ✕
             </button>
 
-            {/* Image */}
-            <img
-              src={`${IMAGE_URL}/${user.profile_picture}`}
-              alt="Profile"
-              className="w-100 h-100  object-contain"
-            />
+            {/* Image Container */}
+            <div className="flex items-center justify-center p-4 max-h-[90vh]">
+              <img
+                src={`${IMAGE_URL}/${user.profile_picture}`}
+                alt="Profile"
+                className="max-w-full max-h-[85vh] w-auto h-auto object-contain"
+              />
+            </div>
           </div>
         </div>
       )}

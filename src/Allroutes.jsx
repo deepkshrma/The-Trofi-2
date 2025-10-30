@@ -71,6 +71,8 @@ import RestroGroup from "./Pages/Restaurant/RestroGroup";
 import RestroGroupDetail from "./Pages/Restaurant/RestroGroupDetail";
 import DeletedUserList from "./Pages/User/DeletedUserList";
 import DeletedUserDetails from "./Pages/User/DeletedUserDetails";
+import RestroDishDetails from "./Pages/RestroOwner/RestroDishDetails";
+import ReviewDetails from "./Pages/RestroOwner/ReviewDetails";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -205,7 +207,9 @@ const Allroutes = () => {
               <Route path="/RestaurantProfile" element={<RestaurantProfile />} />
               <Route path="/RestaurantDishes" element={<RestaurantDishes />} />
               <Route path="/RestaurantReviews" element={<RestaurantReviews />} />
+              <Route path="/ReviewDetails/:reviewId" element={<ReviewDetails />} />
               <Route path="/SingleDishReview/:id" element={<SingleDishReview />} />
+              <Route path="/RestroDishDetails/:id" element={<RestroDishDetails />} />
             </Route>
           </Route>
 

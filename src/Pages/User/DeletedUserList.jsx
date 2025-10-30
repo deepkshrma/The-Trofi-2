@@ -259,7 +259,7 @@ function DeletedUserList() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto bg-white rounded-xl border border-gray-200 mt-3 mb-0 shadow-sm">
+            <div className="overflow-x-auto bg-white rounded-xl border border-gray-200 mt-3 shadow-sm">
                 <table className="w-full border-collapse text-sm  md:text-base">
                     <thead className="bg-gray-100">
                         <tr className="text-gray-700">
@@ -315,17 +315,17 @@ function DeletedUserList() {
                         )}
                     </tbody>
                 </table>
-
+                <Pagination
+                    currentPage={pagination.currentPage}
+                    totalItems={pagination.totalUsers}
+                    itemsPerPage={10}
+                    onPageChange={(page) => fetchDeletedUsers(page)}
+                    totalPages={pagination.totalPages}
+                    type="backend"
+                />
 
             </div>
-            <Pagination
-                currentPage={pagination.currentPage}
-                totalItems={pagination.totalUsers}
-                itemsPerPage={10}
-                onPageChange={(page) => fetchDeletedUsers(page)}
-                totalPages={pagination.totalPages}
-                type="backend"
-            />
+
 
             {/* Image Modal */}
             {isImageModalOpen && selectedImage && (
@@ -370,7 +370,7 @@ function DeletedUserList() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 {/* Country */}
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                                     <select
                                         value={country}
@@ -384,10 +384,10 @@ function DeletedUserList() {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </div> */}
 
                                 {/* State */}
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
                                     <select
                                         value={stateName}
@@ -402,10 +402,10 @@ function DeletedUserList() {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </div> */}
 
                                 {/* City */}
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
                                     <select
                                         value={city}
@@ -420,7 +420,7 @@ function DeletedUserList() {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </div> */}
 
                                 {/* Deleted From */}
                                 <div>

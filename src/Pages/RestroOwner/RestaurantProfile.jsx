@@ -9,11 +9,15 @@ import axios from "axios";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import AVATAR_PLACEHOLDER from "../../assets/images/guest.png";
 import PLACEHOLDER_IMG from "../../assets/images/logo.jpg";
+import { useNavigate } from "react-router-dom";
+
 
 function RestaurantProfile() {
   const { isToggle } = useContext(LayoutContext);
   const [loading, setLoading] = useState(true);
   const [restaurant, setRestaurant] = useState(null);
+  const navigate = useNavigate();
+
 
   const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
   if (!token) return <div>Please login first</div>;
@@ -269,8 +273,16 @@ function RestaurantProfile() {
             <div className="bg-white rounded-xl shadow-md p-5">
               <ul className="divide-y divide-gray-200">
                 {restaurant.topDishes.map((dish, i) => (
-                  <li key={dish._id || i} className="flex justify-between items-center py-3">
-                    <span className="text-gray-700 font-medium">{dish.dish_name || "Untitled"}</span>
+                  <li
+                    key={dish._id || i}
+                    className="flex justify-between items-center py-3 cursor-pointer hover:bg-gray-50 transition"
+                  >
+                    <span
+                      onClick={() => navigate(`/RestroDishDetails/${dish._id}`)}
+                      className="p-3 border-b border-gray-200 font-medium text-[#F9832B] hover:underline cursor-pointer"
+                    >
+                      {dish.dish_name || "Untitled"}
+                    </span>
                     <span className="text-[#F9832B] font-bold">{formatPrice(dish.price)}</span>
                   </li>
                 ))}
@@ -278,6 +290,7 @@ function RestaurantProfile() {
             </div>
           </div>
         )}
+
 
         {/* Menu Images */}
         {Array.isArray(menuImages) && menuImages.length > 0 && (
