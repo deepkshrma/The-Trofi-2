@@ -11,6 +11,7 @@ import { STAR_RATINGS } from "../../../config/hashtagconfig";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import Pagination from "../../../components/common/Pagination/Pagination";
+import guest from "../../../assets/images/guest.png";
 
 import {
   FaStar,
@@ -39,6 +40,7 @@ export default function RestaurantReviewList() {
   const [country, setCountry] = useState("");
   const [stateName, setStateName] = useState("");
   const [city, setCity] = useState("");
+  const [isAdminReview, setIsAdminReview] = useState("");
 
 
   const [pagination, setPagination] = useState({
@@ -113,6 +115,7 @@ export default function RestaurantReviewList() {
     countryName = "",
     stateNameParam = "",
     cityName = "",
+    adminReview = isAdminReview,
   ) => {
     try {
       setLoading(true);
@@ -135,7 +138,7 @@ export default function RestaurantReviewList() {
       if (countryName) url += `&country=${countryName}`;
       if (stateNameParam) url += `&state=${stateNameParam}`;
       if (cityName) url += `&city=${cityName}`;
-
+      if (adminReview !== "") url += `&isAdminReview=${adminReview}`;
 
       const res = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -170,12 +173,15 @@ export default function RestaurantReviewList() {
   const handleExport = () => {
     const exportData = reviews.map((rev, index) => ({
       "S.No.": (pagination.currentPage - 1) * pagination.pageSize + index + 1,
-      "User Name": rev.userId?.name || "Anonymous",
+      "User Name": rev.is_admin_review
+        ? (rev.displayName || "Admin Review")
+        : (rev.userId?.name || "Anonymous"), // ✅ Updated
       "Restaurant Name": rev.typeId?.restro_name || "-",
       "Rating Label": STAR_RATINGS[rev.star_value - 1]?.label || rev.rating_label,
       Stars: rev.star_value,
       Comment: rev.reviewComment || "N/A",
       Status: rev.status,
+      "Review Type": rev.is_admin_review ? "Admin" : "User", // ✅ Add this
       "Created At": new Date(rev.createdAt).toLocaleString(),
     }));
 
@@ -199,10 +205,11 @@ export default function RestaurantReviewList() {
     setStartDate("");
     setEndDate("");
     setShowFilterModal(false);
-    fetchReviews(1, "", "", "", "", "", "");
+    fetchReviews(1, "", "", "", "", "", "", "", "", "", "");
     setCountry("");
     setStateName("");
     setCity("");
+    setIsAdminReview("");
   };
 
   const applyFilters = () => {
@@ -223,6 +230,7 @@ export default function RestaurantReviewList() {
       selectedCountryName,
       selectedStateName,
       selectedCityName,
+      isAdminReview,
 
     );
   };
@@ -236,9 +244,10 @@ export default function RestaurantReviewList() {
     if (maxRating) count++;
     if (startDate) count++;
     if (endDate) count++;
-    if (country) count++;      // ✅ ADD
-    if (stateName) count++;    // ✅ ADD
+    if (country) count++;
+    if (stateName) count++;
     if (city) count++;
+    if (isAdminReview !== "") count++;
     return count;
   };
 
@@ -382,24 +391,65 @@ export default function RestaurantReviewList() {
                   <td className="p-3 whitespace-nowrap">
                     {(pagination.currentPage - 1) * pagination.pageSize + (idx + 1)}
                   </td>
-                  {/* ✅ User Name (Clickable) */}
+
+
+                  {/* ✅ User Name / Admin Name (Clickable) */}
                   <td
-                    className={`p-3 whitespace-nowrap ${rev.userId?._id
+                    className={`p-3 whitespace-nowrap ${rev.is_admin_review && rev.adminId?._id
                         ? "text-[#F9832B] cursor-pointer hover:underline"
-                        : "text-gray-500"
+                        : rev.userId?._id
+                          ? "text-[#F9832B] cursor-pointer hover:underline"
+                          : "text-gray-700"
                       }`}
                     onClick={() => {
-                      if (rev.userId?._id) navigate(`/UserProfile/${rev.userId._id}`);
+                      if (rev.is_admin_review && rev.adminId?._id) {
+                        navigate(`/AdminProfileView/${rev.adminId._id}`);
+                      } else if (rev.userId?._id) {
+                        navigate(`/UserProfile/${rev.userId._id}`);
+                      }
                     }}
                   >
-                    {rev.userId?.name || "Anonymous"}
+                    {rev.is_admin_review ? (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={
+                            rev.adminId?.profile_picture
+                              ? `${IMAGE_URL}/${rev.adminId.profile_picture}`
+                              : guest
+                          }
+                          alt={rev.adminId?.name || "Admin"}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-purple-500"
+                        />
+                        <span className="font-medium">
+                          {rev.adminId?.name || "Admin Review"}
+                        </span>
+                        <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full border border-purple-300">
+                          Admin
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {/* ✅ Existing user logic */}
+                        <img
+                          src={
+                            rev.userId?.profile_picture
+                              ? `${IMAGE_URL}/${rev.userId.profile_picture}`
+                              : guest
+                          }
+                          alt={rev.userId?.name || "User"}
+                          className="w-8 h-8 rounded-full object-cover border-2 border-orange-500"
+                        />
+                        <span>{rev.userId?.name || "Anonymous"}</span>
+                      </div>
+                    )}
                   </td>
+
 
                   {/* ✅ Restaurant Name (Clickable) */}
                   <td
                     className={`p-3 whitespace-nowrap ${rev.typeId?._id
-                        ? "text-[#F9832B] cursor-pointer hover:underline"
-                        : "text-gray-500"
+                      ? "text-[#F9832B] cursor-pointer hover:underline"
+                      : "text-gray-500"
                       }`}
                     onClick={() => {
                       if (rev.typeId?._id) navigate(`/RestroProfile/${rev.typeId._id}`);
@@ -642,6 +692,22 @@ export default function RestaurantReviewList() {
                     <option value="rejected">Rejected</option>
                   </select>
                 </div>
+
+                {/* Review Type Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Review Type
+                  </label>
+                  <select
+                    value={isAdminReview}
+                    onChange={(e) => setIsAdminReview(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                  >
+                    <option value="">All Reviews</option>
+                    <option value="true">Admin Reviews Only</option>
+                    <option value="false">User Reviews Only</option>
+                  </select>
+                </div>
               </div>
 
               {/* Active Filters Display */}
@@ -697,6 +763,14 @@ export default function RestaurantReviewList() {
                         Search: {searchTerm}
                       </span>
                     )}
+
+                    {isAdminReview !== "" && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        Type: {isAdminReview === "true" ? "Admin Reviews" : "User Reviews"}
+                      </span>
+                    )}
+
+
                   </div>
                 </div>
               )}

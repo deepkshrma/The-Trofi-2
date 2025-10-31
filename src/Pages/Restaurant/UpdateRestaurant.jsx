@@ -12,6 +12,7 @@ import Breadcrumbs from "@mui/material/Breadcrumbs";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
+import { STAR_RATINGS } from "../../config/hashtagconfig.js";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -45,6 +46,7 @@ function UpdateRestaurant() {
     cuisines: [],
     amenities: [],
     is_best_seller: false,
+    avgRating: 0,
   });
 
   // dropdown options
@@ -327,7 +329,7 @@ function UpdateRestaurant() {
           longDescription: data.long_description || "",
           hygieneStatus: data.hygiene_status || "general",
           is_best_seller: data.is_best_seller || false,
-
+          avgRating: data.avgRating ?? 0,
           closingTime: parseTimeToInput(data.time),
           openDays: parseDaysToFullNames(data.days),
           dish_type: normalizeIdArray(data.dish_type),
@@ -338,7 +340,7 @@ function UpdateRestaurant() {
           role_id: data.role_id || prev.role_id || "",
         }));
 
-         setGroupId(data.group_id?._id || null);
+        setGroupId(data.group_id?._id || null);
 
         setExistingMenus(
           (data.restaurant_menu_images || []).map((img) => ({
@@ -440,6 +442,7 @@ function UpdateRestaurant() {
       formData.append("longitude", restaurantData.longitude || "");
       formData.append("food_type", restaurantData.food_type || "both");
       formData.append("is_best_seller", restaurantData.is_best_seller);
+      formData.append("avgRating", restaurantData.avgRating || 0);
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
@@ -512,6 +515,91 @@ function UpdateRestaurant() {
         ]}
       />
       <PageTitle title={"Update Restaurant"} />
+
+      {/* ================== Average Rating Section ================== */}
+      <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl shadow-lg mb-4 mt-4 border-2 border-orange-200">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          {/* Left Side - Title & Description */}
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+              <span className="text-3xl">⭐</span>
+              Average Rating
+            </h2>
+            <p className="text-sm text-gray-600 mb-2">
+              Click on a star to set the restaurant's rating
+            </p>
+
+            {/* Selected Rating with Icon */}
+            {restaurantData.avgRating > 0 && restaurantData.avgRating <= 5 ? (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-600">Selected Rating:</span>
+                <img
+                  src={STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.img}
+                  alt={STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.label}
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="font-bold text-orange-600 text-base">
+                  {STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.label}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500">No rating set</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side - Star Selection Row */}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Star Images Row - Click to Select */}
+            <div className="flex items-center gap-2">
+              {STAR_RATINGS.map((rating, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setRestaurantData((prev) => ({ ...prev, avgRating: index + 1 }));
+                  }}
+                  className={`cursor-pointer transition-all duration-200 p-2 rounded-lg ${Math.round(restaurantData.avgRating) === index + 1
+                    ? "bg-orange-200 shadow-md scale-110"
+                    : "hover:bg-orange-100 hover:scale-105"
+                    }`}
+                  title={rating.label}
+                >
+                  <img
+                    src={rating.img}
+                    alt={rating.label}
+                    className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Rating Display Badge - Editable Input */}
+            <div className="relative">
+              <input
+                type="number"
+                name="avgRating"
+                value={restaurantData.avgRating || 0}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0 && val <= 5) {
+                    setRestaurantData((prev) => ({ ...prev, avgRating: val }));
+                  }
+                }}
+                step="0.1"
+                min="0"
+                max="5"
+                className="w-24 px-3 py-2 bg-white rounded-full shadow-md border-2 border-orange-200 text-center text-lg font-bold text-orange-600 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                placeholder="0.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs pointer-events-none">
+                ★
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/*  Basic Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200 mt-5">
         <h2

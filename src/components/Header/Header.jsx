@@ -40,7 +40,7 @@ function Header({ setIs_Toggle, isToggle }) {
 
   return (
     <>
-      <div className="header header_top_menu fixed top-0 left-0 z-10 flex w-full py-2 items-center justify-between bg-white p-4 shadow-sm">
+      <div className="header header_top_menu fixed top-0 left-0 z-12 flex w-full py-2 items-center justify-between bg-white p-4 shadow-sm">
         <span
           className={`${
             isToggle ? "translate-x-[315px] duration-900" : "duration-900"

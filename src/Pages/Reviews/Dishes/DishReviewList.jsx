@@ -12,6 +12,8 @@ import { BASE_URL, IMAGE_URL } from "../../../config/Config";
 import { FaCheckCircle, FaHourglassHalf, FaRegEye, FaStar, FaTimesCircle } from "react-icons/fa";
 import { STAR_RATINGS } from "../../../config/hashtagconfig";
 import Pagination from "../../../components/common/Pagination/Pagination";
+import guest from "../../../assets/images/guest.png";
+
 
 function DishReviewList() {
   const navigate = useNavigate();
@@ -19,6 +21,9 @@ function DishReviewList() {
   const [reviews, setReviews] = useState([]);
   const [restaurants, setRestaurants] = useState([]);
   const [showFilterModal, setShowFilterModal] = useState(false);
+
+  const [isAdminReview, setIsAdminReview] = useState("");
+
 
   // Add these new state variables after existing filter states:
   const [country, setCountry] = useState("");
@@ -115,7 +120,7 @@ function DishReviewList() {
     if (maxRating) params.maxRating = maxRating;
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-
+    if (isAdminReview !== "") params.isAdminReview = isAdminReview;
     if (!restaurantFilter) {
       if (country) {
         const selectedCountryName = Country.getCountryByCode(country)?.name || "";
@@ -177,13 +182,17 @@ function DishReviewList() {
     const exportData = reviews.map((review, index) => ({
       SL: (pagination.currentPage - 1) * 10 + index + 1,
       Dish_Name: review.typeId?.dish_name || "N/A",
-      User_Name: review.userId?.name || "N/A",
+      User_Name: review.is_admin_review
+        ? (review.displayName || "Admin Review")
+        : (review.userId?.name || "Anonymous"), // ✅ UPDATED
       Rating: review.star_value,
       Rating_Label: review.rating_label || "N/A",
       Comment: review.reviewComment || "N/A",
       Status: review.status,
+      "Review Type": review.is_admin_review ? "Admin" : "User", // ✅ ADD THIS
       Created_At: new Date(review.createdAt).toLocaleString(),
     }));
+
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
@@ -212,6 +221,7 @@ function DishReviewList() {
     setCountry("");        // ✅ ADD
     setStateName("");      // ✅ ADD
     setCity("");
+    setIsAdminReview("");
   };
 
   const applyFilters = () => {
@@ -231,6 +241,7 @@ function DishReviewList() {
     if (country && !restaurantFilter) count++;     // ✅ ADD
     if (stateName && !restaurantFilter) count++;   // ✅ ADD
     if (city && !restaurantFilter) count++;
+    if (isAdminReview !== "") count++;
     return count;
   };
 
@@ -411,16 +422,56 @@ function DishReviewList() {
                     </td>
 
                     <td
-                      className={`px-4 py-3 whitespace-nowrap ${review.userId?._id
-                        ? "text-[#F9832B] cursor-pointer hover:underline"
-                        : "text-gray-500"
+                      className={`px-4 py-3 whitespace-nowrap ${review.is_admin_review && review.adminId?._id
+                          ? "text-[#F9832B] cursor-pointer hover:underline"
+                          : review.userId?._id
+                            ? "text-[#F9832B] cursor-pointer hover:underline"
+                            : "text-gray-700"
                         }`}
                       onClick={() => {
-                        if (review.userId?._id) navigate(`/UserProfile/${review.userId._id}`);
+                        if (review.is_admin_review && review.adminId?._id) {
+                          navigate(`/AdminProfileView/${review.adminId._id}`);
+                        } else if (review.userId?._id) {
+                          navigate(`/UserProfile/${review.userId._id}`);
+                        }
                       }}
                     >
-                      {review.userId?.name || "Anonymous"}
+                      {review.is_admin_review ? (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={
+                              review.adminId?.profile_picture
+                                ? `${IMAGE_URL}/${review.adminId.profile_picture}`
+                                : guest
+                            }
+                            alt={review.adminId?.name || "Admin User"}
+                            className="w-8 h-8 rounded-full object-cover border-2 border-purple-500"
+                            onError={(e) => (e.target.src = guest)}
+                          />
+                          <span className="font-medium">{review.adminId?.name || "Admin"}</span>
+
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full border border-purple-300">
+                            Admin
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={
+                              review.userId?.profile_picture
+                                ? `${IMAGE_URL}/${review.userId.profile_picture}`
+                                : guest
+                            }
+                            alt={review.userId?.name || "User"}
+                            className="w-8 h-8 rounded-full object-cover border-2 border-orange-500"
+                            onError={(e) => (e.target.src = guest)}
+                          />
+                          <span>{review.userId?.name || "Anonymous"}</span>
+                        </div>
+                      )}
                     </td>
+
+
                     <td className="p-3">
                       <img
                         src={STAR_RATINGS[review.star_value - 1]?.img}
@@ -667,6 +718,22 @@ function DishReviewList() {
                     <option value="rejected">Rejected</option>
                   </select>
                 </div>
+
+                {/* ✅ ADD THIS - Review Type Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Review Type
+                  </label>
+                  <select
+                    value={isAdminReview}
+                    onChange={(e) => setIsAdminReview(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
+                  >
+                    <option value="">All Reviews</option>
+                    <option value="true">Admin Reviews Only</option>
+                    <option value="false">User Reviews Only</option>
+                  </select>
+                </div>
               </div>
 
               {/* Active Filters Display */}
@@ -705,6 +772,28 @@ function DishReviewList() {
                     {statusFilter && (
                       <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
                         Status: {statusFilter}
+                      </span>
+                    )}
+                    {country && !restaurantFilter && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        Country: {Country.getCountryByCode(country)?.name}
+                      </span>
+                    )}
+                    {stateName && !restaurantFilter && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        State: {State.getStateByCodeAndCountry(stateName, country)?.name}
+                      </span>
+                    )}
+                    {city && !restaurantFilter && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        City: {city}
+                      </span>
+                    )}
+
+                    {/* ✅ ADD THIS */}
+                    {isAdminReview !== "" && (
+                      <span className="px-2 py-1 bg-white rounded-full text-xs border border-gray-300">
+                        Type: {isAdminReview === "true" ? "Admin Reviews" : "User Reviews"}
                       </span>
                     )}
                   </div>

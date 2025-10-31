@@ -270,7 +270,7 @@ function Sidebar({ setIs_Toggle, isToggle }) {
                 name: "Feedback",
                 link: "#",
                 dropdown: true,
-                subItems: [
+                subItems: [{ name: "Add Review", link: "CreateReview", dropdown: false },
                   { name: "Restaurants Review", link: "RestaurantReviewList", dropdown: false },
                   {
                     name: "Dishes Review",

@@ -73,6 +73,11 @@ import DeletedUserList from "./Pages/User/DeletedUserList";
 import DeletedUserDetails from "./Pages/User/DeletedUserDetails";
 import RestroDishDetails from "./Pages/RestroOwner/RestroDishDetails";
 import ReviewDetails from "./Pages/RestroOwner/ReviewDetails";
+import CreateReview from "./Pages/Reviews/Admin/CreateReview";
+import AdminReview from "./Pages/Reviews/Admin/AdminReview";
+import AdminProfileView from "./Pages/Admin/AdminProfileView";
+import { Create } from "@mui/icons-material";
+import CreateRestroDish from "./Pages/RestroOwner/CreateRestroDish";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
@@ -190,7 +195,9 @@ const Allroutes = () => {
               <Route path="/UpdateGroup/:id" element={<CreateGroup />} />
               <Route path="/RestroGroup" element={<RestroGroup />} />
               <Route path="/GroupInDetail/:id" element={<RestroGroupDetail />} />
-
+              <Route path="/CreateReview" element={<CreateReview />} />
+              <Route path="/AdminReview" element={<AdminReview />} />
+              <Route path="/AdminProfileView/:id" element={<AdminProfileView />} />
             </Route>
           </Route>
 
@@ -210,6 +217,7 @@ const Allroutes = () => {
               <Route path="/ReviewDetails/:reviewId" element={<ReviewDetails />} />
               <Route path="/SingleDishReview/:id" element={<SingleDishReview />} />
               <Route path="/RestroDishDetails/:id" element={<RestroDishDetails />} />
+              <Route path="/AddDishesRestro" element={<CreateRestroDish />} />
             </Route>
           </Route>
 

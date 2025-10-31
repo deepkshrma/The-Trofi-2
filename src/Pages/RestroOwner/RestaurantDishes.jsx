@@ -210,7 +210,7 @@ function RestaurantDishes() {
                 <button
                     className="flex items-center gap-2 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer"
                     style={{ backgroundColor: "#F9832B" }}
-                    onClick={() => navigate("/AddDishes")}
+                    onClick={() => navigate(`/AddDishesRestro`)}
                 >
                     <PlusCircle size={18} /> Add Dish
                 </button>

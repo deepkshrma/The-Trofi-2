@@ -4,6 +4,7 @@ import {
   FaCaretDown,
   FaCaretLeft,
   FaCaretRight,
+  FaEye,
 } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import guestImg from "../../assets/images/guest.png";
@@ -237,6 +238,13 @@ const AdminList = () => {
           const admin = row.original;
           return (
             <div className="flex items-center justify-center gap-2 h-full">
+              <button
+                className="flex items-center justify-center w-8 h-8 cursor-pointer rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                onClick={() => navigate(`/AdminProfileView/${admin.empId}`)}
+                title="View Profile"
+              >
+                <FaEye size={16} />
+              </button>
               <button
                 className="flex items-center justify-center w-8 h-8 cursor-pointer rounded-lg bg-green-500 text-white hover:bg-green-600"
                 onClick={() =>

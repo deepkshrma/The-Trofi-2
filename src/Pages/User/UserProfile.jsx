@@ -15,16 +15,89 @@ function UserProfile() {
   const [favSearchDishes, setFavSearchDishes] = useState("");
   const [ratingSearchRestaurants, setRatingSearchRestaurants] = useState("");
   const [ratingSearchDishes, setRatingSearchDishes] = useState("");
-
+  const [bannedList, setBannedList] = useState([]);
   const [checkinSearch, setCheckinSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [isLoadingDishes, setIsLoadingDishes] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [banReason, setBanReason] = useState("");
+  const [isBanAction, setIsBanAction] = useState(true); // true = Ban, false = Unban
+
+
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [userAddress, setUserAddress] = useState([]);
   const { id } = useParams();
   const tierTableRef = useRef(null);
+
+
+
+  const handleBanToggle = async (addr) => {
+    const { postalCode, country, address, city, state, reason } = addr;
+
+    // ✅ Fix: Compare with user_id._id (it's an object in response)
+    const isAlreadyBanned = bannedList.some(
+      (b) =>
+        (b.user_id?._id || b.user_id) === user._id && // ✅ Handle both object and string
+        b.postalCode === postalCode &&
+        b.country === country &&
+        !b.isDeleted
+    );
+
+    try {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) return toast.error("Please login first");
+
+      let res;
+      if (isAlreadyBanned) {
+        // UNBAN
+        res = await axios.post(
+          `${BASE_URL}/admin/unban-location`,
+          {
+            userId: user._id,
+            postalCode,
+            country
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        // BAN
+        res = await axios.post(
+          `${BASE_URL}/admin/ban-location`,
+          {
+            userId: user._id,
+            postalCode,
+            country,
+            address,
+            city,
+            state,
+            reason
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      if (res.data.success) {
+        toast.success(res.data.message);
+        // ✅ Refresh ban list filtered by this user
+        const updated = await axios.get(
+          `${BASE_URL}/admin/banned-locations?userId=${user._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setBannedList(updated.data.data || []);
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
+
 
   // Tier-based gradient configuration
   const getTierGradient = (tier) => {
@@ -61,6 +134,31 @@ function UserProfile() {
 
   const openImageModal = () => setIsImageModalOpen(true);
   const closeImageModal = () => setIsImageModalOpen(false);
+
+
+  useEffect(() => {
+    const fetchBannedList = async () => {
+      try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+        if (!token || !user?._id) return; // ✅ Wait for user to load
+
+        // ✅ Fetch bans only for this specific user
+        const res = await axios.get(
+          `${BASE_URL}/admin/banned-locations?userId=${user._id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (res.data.success) setBannedList(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch banned list:", err);
+      }
+    };
+
+    if (user?._id) {
+      fetchBannedList(); // ✅ Only fetch when user is loaded
+    }
+  }, [user?._id]); // ✅ Add user._id as dependency
 
 
   useEffect(() => {
@@ -156,7 +254,7 @@ function UserProfile() {
               }}
             >
               {/* Inner Content Container */}
-              <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 relative">
+              <div className="w-full h-full rounded-full overflow-hidden  flex items-center justify-center text-3xl font-bold bg-gray-100 text-gray-600 relative">
                 {user.profile_picture ? (
                   <img
                     src={user.profile_picture ? `${IMAGE_URL}/${user.profile_picture}` : guest}
@@ -362,6 +460,56 @@ function UserProfile() {
                     📍 Lat: {addr.latitude}, Lng: {addr.longitude}
                   </p>
                 )}
+
+                {/* Ban / Unban Controls */}
+                {(() => {
+                  // ✅ Fix: Compare with user_id._id (it's an object in response)
+                  const ban = bannedList.find(
+                    (b) =>
+                      (b.user_id?._id || b.user_id) === user._id &&  // ✅ Handle both object and string
+                      b.postalCode === addr.postalCode &&
+                      b.country === addr.country &&
+                      !b.isDeleted
+                  );
+
+                  if (ban) {
+                    return (
+                      <div className="mt-3 bg-red-50 border border-red-300 p-3 rounded-lg text-sm text-red-700">
+                        <p className="font-semibold">🚫 Location Banned for This User</p>
+                        <p>Reason: {ban.reason || "—"}</p>
+                        <p>Banned By: {ban.bannedBy?.name || "Admin"}</p>
+                        <p>Banned At: {new Date(ban.bannedAt).toLocaleString()}</p>
+                        <button
+                          onClick={() => {
+                            setSelectedAddress(addr);
+                            setIsBanAction(false);
+                            setShowBanModal(true);
+                          }}
+                          className="mt-2 px-3 py-1 bg-green-600 text-white cursor-pointer rounded hover:bg-green-700"
+                        >
+                          ✅ Unban
+                        </button>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <button
+                        onClick={() => {
+                          setSelectedAddress(addr);
+                          setIsBanAction(true);
+                          setBanReason("");
+                          setShowBanModal(true);
+                        }}
+                        className="mt-3 px-4 py-2 text-sm bg-red-500 text-white cursor-pointer rounded-lg hover:bg-red-600 transition"
+                      >
+                        🚫 Ban this Location for This User
+                      </button>
+                    );
+                  }
+                })()}
+
+
+
               </div>
             ))}
           </div>
@@ -928,6 +1076,80 @@ function UserProfile() {
           <p className="text-gray-500">No status changes recorded</p>
         )}
       </div>
+
+      {/* Ban / Unban Modal */}
+      {showBanModal && selectedAddress && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 relative animate-fadeIn">
+            {/* Close */}
+            <button
+              onClick={() => setShowBanModal(false)}
+              className="absolute top-3 right-3 text-gray-600 cursor-pointer hover:text-red-600 text-xl font-bold"
+            >
+              ×
+            </button>
+
+            <h2 className="text-xl font-semibold mb-2 text-gray-800">
+              {isBanAction ? "Ban this Location" : "Unban this Location"}
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Postal Code: <span className="font-medium">{selectedAddress.postalCode}</span> <br />
+              Country: <span className="font-medium">{selectedAddress.country}</span> <br />
+              Address: <span className="font-medium">{selectedAddress.address}</span>
+            </p>
+
+            {isBanAction && (
+              <div className="mb-4">
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Reason for Ban
+                </label>
+                <textarea
+                  rows={3}
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="Enter reason (optional)"
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-4">
+              <button
+                onClick={() => setShowBanModal(false)}
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg border  border-gray-300 text-gray-600 cursor-pointer hover:bg-gray-100 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  await handleBanToggle({
+                    ...selectedAddress,
+                    reason: isBanAction ? (banReason.trim() || "Manual action by admin") : selectedAddress.reason,
+                  });
+                  setShowBanModal(false);
+                }}
+                className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-white cursor-pointer font-medium transition ${isBanAction ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
+                  }`}
+              >
+                {isBanAction ? "Confirm Ban" : "Confirm Unban"}
+              </button>
+            </div>
+          </div>
+
+          {/* Fade-in animation */}
+          <style>{`
+      .animate-fadeIn {
+        animation: fadeInModal 0.3s ease-in-out;
+      }
+      @keyframes fadeInModal {
+        from {opacity:0; transform: translateY(-10px);}
+        to {opacity:1; transform: translateY(0);}
+      }
+    `}</style>
+        </div>
+      )}
+
 
       {/* Status Update Modal */}
       {showStatusModal && user && (

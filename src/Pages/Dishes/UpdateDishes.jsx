@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
+import { STAR_RATINGS } from "../../config/hashtagconfig";
 
 function UpdateDishes() {
   const { id } = useParams(); // dish ID from URL
@@ -14,7 +15,9 @@ function UpdateDishes() {
   const [restaurantId, setRestaurantId] = useState(null);
 
   // Form states
-  const [dishData, setDishData] = useState(null);
+  const [dishData, setDishData] = useState({
+    avgRating: 0, // ✅ Add this
+  });
 
   const [ingredient, setIngredient] = useState("");
   const [ingredientIcon, setIngredientIcon] = useState(null);
@@ -59,7 +62,10 @@ function UpdateDishes() {
         const resDish = await axios.get(`${BASE_URL}/dishes/get-admin-dish-by-id/${id}`, config);
         if (resDish.data.success) {
           const d = resDish.data.data;
-          setDishData(d);
+          setDishData({
+            ...d,
+            avgRating: d.avgRating ?? 0, // ✅ Add this (null becomes 0)
+          });
           setRestaurantId(d.restaurantId?._id);
           setSelectedRestaurant({
             value: d.restaurantId._id,
@@ -128,7 +134,8 @@ function UpdateDishes() {
   // Set dish types after both dishData and restaurants are loaded
   // -------------------------
   useEffect(() => {
-    if (dishData && restaurants.length > 0) {
+    // ✅ Add additional checks for restaurantId and dish_type
+    if (dishData && dishData.restaurantId && dishData.dish_type && restaurants.length > 0) {
       const selectedRestro = restaurants.find(
         (r) => r._id === dishData.restaurantId._id
       );
@@ -183,67 +190,6 @@ function UpdateDishes() {
     }
   };
 
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //   const formData = new FormData();
-
-  //   formData.append("restaurantId", selectedRestaurant?.value);
-  //   formData.append("dish_category", selectedDishCategory?.value);
-  //   formData.append("dish_sub_category", selectedDishSubCategory?.value);
-  //   formData.append("dish_type", selectedDishType?.value);
-  //   formData.append("cuisines[0]", selectedCuisine?.value);
-  //   formData.append("dish_name", e.target.dish_name.value);
-  //   formData.append("price", e.target.price.value);
-  //   formData.append("description", e.target.description.value);
-  //   formData.append("isAvailable", e.target.isAvailable.checked);
-
-  //   // ✅ Dish images (old + new)
-  //   images.forEach((img) => {
-  //     if (img instanceof File) {
-  //       formData.append("dish_images", img); // new uploads
-  //     } else if (img.url) {
-  //       formData.append("existing_dish_images", img.url.replace(IMAGE_URL + "/", "")); // keep old ones
-  //     }
-  //   });
-
-  //   const ingredientsData = ingredients.map((ing) => {
-  //     if (ing.icon instanceof File) {
-  //       // new upload — backend will get via ingredient_icons[]
-  //       return { name: ing.name, icon: "" };
-  //     } else if (ing.icon?.url) {
-  //       // existing icon — keep its relative path
-  //       return { name: ing.name, icon: ing.icon.url.replace(IMAGE_URL + "/", "") };
-  //     } else {
-  //       return { name: ing.name, icon: "" };
-  //     }
-  //   });
-
-
-
-  //   formData.append("dish_ingredients", JSON.stringify(ingredientsData));
-
-  //   ingredients.forEach((ing) => {
-  //     if (ing.icon instanceof File) {
-  //       formData.append("ingredient_icons", ing.icon);
-  //     } else {
-  //       formData.append("ingredient_icons", "");
-  //     }
-  //   });
-
-
-
-  //   axios
-  //     .patch(`${BASE_URL}/dishes/update-dish/${id}`, formData, config)
-  //     .then(() => {
-  //       toast.success("Dish updated successfully!");
-  //       navigate(`/DishesList/${restaurantId}`);
-  //     })
-  //     .catch((err) => {
-  //       console.error(err);
-  //       toast.error("Failed to update dish. Please try again.");
-  //     });
-  // };
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -257,6 +203,7 @@ function UpdateDishes() {
     formData.append("price", e.target.price.value);
     formData.append("description", e.target.description.value);
     formData.append("isAvailable", e.target.isAvailable.checked);
+    formData.append("avgRating", dishData.avgRating || 0);
 
     // ✅ Dish images (old + new)
     images.forEach((img) => {
@@ -348,6 +295,92 @@ function UpdateDishes() {
               className="w-full border border-gray-200 rounded-xl px-4 py-2 focus:outline-none"
               required
             />
+          </div>
+
+          {/* Average Rating Section */}
+          <div className="md:col-span-2">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-4 rounded-xl shadow-sm border-2 border-orange-200">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                {/* Left Side - Title & Description */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-800 mb-1 flex items-center gap-2">
+                    <span className="text-xl">⭐</span>
+                    Average Rating
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-2">
+                    Click on a star to set the dish rating
+                  </p>
+
+                  {/* Selected Rating with Icon */}
+                  {dishData.avgRating > 0 && dishData.avgRating <= 5 ? (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-gray-600">Selected:</span>
+                      <img
+                        src={STAR_RATINGS[Math.round(dishData.avgRating) - 1]?.img}
+                        alt={STAR_RATINGS[Math.round(dishData.avgRating) - 1]?.label}
+                        className="w-6 h-6 object-contain"
+                      />
+                      <span className="font-bold text-orange-600 text-sm">
+                        {STAR_RATINGS[Math.round(dishData.avgRating) - 1]?.label}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-gray-500">No rating set</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Side - Star Selection Row */}
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  {/* Star Images Row */}
+                  <div className="flex items-center gap-2">
+                    {STAR_RATINGS.map((rating, index) => (
+                      <div
+                        key={index}
+                        onClick={() => {
+                          setDishData((prev) => ({ ...prev, avgRating: index + 1 }));
+                        }}
+                        className={`cursor-pointer transition-all duration-200 p-1.5 rounded-lg ${Math.round(dishData.avgRating) === index + 1
+                          ? "bg-orange-200 shadow-md scale-110"
+                          : "hover:bg-orange-100 hover:scale-105"
+                          }`}
+                        title={rating.label}
+                      >
+                        <img
+                          src={rating.img}
+                          alt={rating.label}
+                          className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Editable Rating Input */}
+                  <div className="relative">
+                    <input
+                      type="number"
+                      name="avgRating"
+                      value={dishData.avgRating || 0}
+                      onChange={(e) => {
+                        const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                        if (!isNaN(val) && val >= 0 && val <= 5) {
+                          setDishData((prev) => ({ ...prev, avgRating: val }));
+                        }
+                      }}
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      className="w-20 px-3 py-2 bg-white rounded-full shadow-md border-2 border-orange-200 text-center text-base font-bold text-orange-600 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                      placeholder="0.0"
+                    />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 text-xs pointer-events-none">
+                      ★
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="md:col-span-2">
@@ -597,8 +630,12 @@ function UpdateDishes() {
               type="checkbox"
               name="isAvailable"
               id="isAvailable"
-              defaultChecked={dishData.isAvailable}
-              onChange={handleAvailabilityToggle}
+              checked={dishData.isAvailable || false}  // ✅ Change defaultChecked to checked
+              onChange={(e) => {
+                handleAvailabilityToggle(e);
+                // ✅ Also update the state
+                setDishData((prev) => ({ ...prev, isAvailable: e.target.checked }));
+              }}
               className="h-5 w-5 appearance-none rounded-md border border-gray-300 checked:bg-orange-500 checked:before:content-['✔'] checked:before:text-white checked:before:block checked:before:text-center"
             />
 

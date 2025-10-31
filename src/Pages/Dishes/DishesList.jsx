@@ -848,7 +848,7 @@ function DishesList() {
                     step="0.1"
                     className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none"
                   />
-                </div>
+                </div>   
                 
                 {/* Show Deleted Dishes */}
                 <div>
