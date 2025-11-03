@@ -185,7 +185,7 @@ function CreateReview() {
                     ? "restro/get-restaurant-dropdown"
                     : "restro/get-dish-dropdown";
 
-            // ✅ even if query is empty, pass it — backend should handle it gracefully
+            
             const res = await axios.get(`${BASE_URL}/${endpoint}?search=${query}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
