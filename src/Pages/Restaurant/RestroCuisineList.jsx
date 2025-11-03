@@ -3,18 +3,17 @@ import { useNavigate } from "react-router-dom";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import Pagination from "../../components/common/Pagination/Pagination";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
-import { Label } from "recharts";
 import { MdEdit } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { PlusCircle } from "lucide-react";
+import axios from "axios";
+import { BASE_URL } from "../../config/Config";
+import { toast } from "react-toastify";
 
 function RestroCuisineList() {
-  const API_BASE = "http://trofi-backend.apponedemo.top/api/";
   const PAGE_SIZE = 10;
   const navigate = useNavigate();
 
@@ -30,39 +29,53 @@ function RestroCuisineList() {
     totalRecords: 0,
   });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
-    // setSelectedAdmin(null);
-  };
 
-  const confirmDelete = async () => {};
+  const closeDeleteModal = () => setShowDeleteModal(false);
+
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
+
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
   // Fetch cuisines
   useEffect(() => {
     fetchCuisines();
   }, []);
 
-  async function fetchCuisines() {
+  const fetchCuisines = async () => {
     setLoading(true);
     setError(null);
+    if (!token) {
+      toast.error("Please login first");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}restro/get-cusine`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (!json?.success) throw new Error(json.message || "API Error");
-
-      const normalized = json.data.map((item) => ({
-        id: item._id,
-        name: item.name,
-      }));
-
-      setCuisines(normalized);
+      const res = await axios.get(`${BASE_URL}/restro/get-cusine`, axiosConfig);
+      if (res.data?.success) {
+        const normalized = res.data.data.map((item) => ({
+          id: item._id,
+          name: item.name,
+        }));
+        setCuisines(normalized);
+      } else {
+        throw new Error(res.data?.message || "Failed to fetch cuisines");
+      }
     } catch (err) {
-      setError(err.message || "Failed to fetch data");
+      console.error(err);
+      const msg =
+        err.response?.data?.message || err.message || "Server error while fetching cuisines";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   // Filter by search
   const filtered = useMemo(() => {
@@ -113,9 +126,7 @@ function RestroCuisineList() {
     <>
       <div className="main main_page p-6 w-full h-screen duration-900">
         <BreadcrumbsNav
-          customTrail={[
-            { label: "Restaurant - Cuisines", path: "/RestroCuisineList" },
-          ]}
+          customTrail={[{ label: "Restaurant - Cuisines", path: "/RestroCuisineList" }]}
         />
         <div className="flex justify-between items-center mb-3">
           <PageTitle title={"Restaurant Cuisines"} />
@@ -127,11 +138,10 @@ function RestroCuisineList() {
             <PlusCircle size={18} /> Add Cuisines
           </button>
         </div>
-        
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
-            {/* Search */}
+            {/* Search + Export */}
             <div className="flex justify-between items-center m-3">
               <input
                 type="text"
@@ -143,10 +153,8 @@ function RestroCuisineList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
-              {/* Export button (right) */}
               <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 cursor-pointer text-gray-600 hover:shadow-lg"
-                // style={{ backgroundColor: "#F9832B" }}
                 onClick={handleExport}
               >
                 <CiExport size={20} /> Export
@@ -157,9 +165,7 @@ function RestroCuisineList() {
             {loading ? (
               <div className="text-center py-6">Loading...</div>
             ) : error ? (
-              <div className="text-center py-6 text-red-500">
-                Error: {error}
-              </div>
+              <div className="text-center py-6 text-red-500">{error}</div>
             ) : (
               <>
                 <table className="w-full border border-gray-200 overflow-hidden">
@@ -182,7 +188,7 @@ function RestroCuisineList() {
                           >
                             <td className="px-4 py-2">{serial}</td>
                             <td className="px-2 py-2">
-                              <span className=" font-bold text-gray-700 px-3 py-1 rounded-full text-md">
+                              <span className="font-bold text-gray-700 px-3 py-1 rounded-full text-md">
                                 {item.name}
                               </span>
                             </td>
@@ -194,16 +200,10 @@ function RestroCuisineList() {
                                       state: { name: item.name },
                                     })
                                   }
-                                  className="flex justify-center items-center bg-green-500 hover:bg-green-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600 whitespace-nowrap"
                                 >
                                   <MdEdit size={18} />
                                 </button>
-                                {/* <button
-                                  onClick={() => setShowDeleteModal(true)}
-                                  className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
-                                >
-                                  <MdDelete size={18} />
-                                </button> */}
                               </div>
                             </td>
                           </tr>
@@ -222,7 +222,6 @@ function RestroCuisineList() {
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 <div className="mt-3 px-3">
                   <Pagination
                     currentPage={pagination.currentPage}
@@ -240,10 +239,11 @@ function RestroCuisineList() {
           </div>
         </div>
       </div>
+
       <DeleteModel
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}
-        onConfirm={confirmDelete}
+        onConfirm={() => {}}
         redbutton="Confirm"
         para="Do you really want to delete? This action cannot be undone."
       />

@@ -4,7 +4,6 @@ import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroDishCategory() {
@@ -17,7 +16,7 @@ function RestroDishCategory() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const editCategory = location.state?.category; 
+  const editCategory = location.state?.category;
 
   // Prefill if editing
   useEffect(() => {
@@ -44,6 +43,14 @@ function RestroDishCategory() {
   // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
 
     if (!categoryName || !description || (!file && !editCategory)) {
       toast.error("Please provide category name, description and icon");
@@ -53,9 +60,7 @@ function RestroDishCategory() {
     const formData = new FormData();
     formData.append("category_name", categoryName);
     formData.append("description", description);
-    if (file) {
-      formData.append("category_icon", file);
-    }
+    if (file) formData.append("category_icon", file);
 
     try {
       let res;
@@ -63,11 +68,16 @@ function RestroDishCategory() {
         res = await axios.patch(
           `${BASE_URL}/restro/edit-dish-category/${editCategory._id}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         if (res.data?.success) {
-          toast.success(res.data?.message || "Category updated successfully");
+          toast.success(res.data.message || "Category updated successfully");
           navigate("/RestroDishCategoryList");
         } else {
           toast.error(res.data?.message || "Failed to update category");
@@ -76,21 +86,30 @@ function RestroDishCategory() {
         res = await axios.post(
           `${BASE_URL}/restro/create-dish-category`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        if (res.data?.status) {
-          toast.success(res.data?.message || "Category created successfully");
+        if (res.data?.status===true) {
+          toast.success(res.data.message || "Category created successfully");
           navigate("/RestroDishCategoryList");
         } else {
           toast.error(res.data?.message || "Failed to create category");
         }
       }
+
     } catch (err) {
-      console.error(err);
-      toast.error("Error while saving dish category");
+      console.error("Server Error:", err);
+      toast.error(
+        err.response?.data?.message || "Server error while saving category"
+      );
     }
   };
+
 
   return (
     <div className="main main_page p-6 w-full h-screen duration-900">

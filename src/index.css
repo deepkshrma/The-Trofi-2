@@ -32,3 +32,15 @@
     background-color: rgba(255, 255, 255, 0.8);
   }
 }
+
+.mapbox-search-control {
+  margin-top: 50px !important;
+}
+.leaflet-top .leaflet-left {
+  margin-top: 12px !important;
+}
+
+/* Push search bar down so zoom buttons stay on top */
+.leaflet-top.leaflet-left {
+  margin-top: 60px !important;
+}

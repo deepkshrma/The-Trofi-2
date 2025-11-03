@@ -4,7 +4,6 @@ import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function RestroDishType() {
@@ -18,7 +17,17 @@ function RestroDishType() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check if edit mode (id passed via state from list page)
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
+
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  };
+
+  // Check if edit mode
   useEffect(() => {
     if (location.state?.dish) {
       const { _id, name, description, icon } = location.state.dish;
@@ -31,7 +40,6 @@ function RestroDishType() {
     }
   }, [location.state]);
 
-  // Handle file input change
   const handleFileChange = (e) => {
     const f = e.target.files[0];
     if (f) {
@@ -40,12 +48,16 @@ function RestroDishType() {
     }
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name || !description) {
       toast.error("Please provide name and description");
+      return;
+    }
+
+    if (!token) {
+      toast.error("Please login first");
       return;
     }
 
@@ -60,19 +72,17 @@ function RestroDishType() {
         res = await axios.patch(
           `${BASE_URL}/restro/edit-dish-type/${editId}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          axiosConfig
         );
       } else {
         res = await axios.post(
           `${BASE_URL}/restro/create-dish-type`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          axiosConfig
         );
       }
 
-      console.log("API RESPONSE:", res);
-
-      if ([200, 201].includes(res.status)) {
+      if ([200, 201].includes(res.status) && res.data?.success) {
         toast.success(res.data?.message || "Dish Type saved successfully");
         navigate("/RestroDishTypeList");
 
@@ -84,13 +94,13 @@ function RestroDishType() {
           if (fileInputRef.current) fileInputRef.current.value = "";
         }
       } else {
-        toast.error(res.data?.message || "Something went wrong");
+        throw new Error(res.data?.message || "Server error while saving dish type");
       }
     } catch (err) {
       console.error("API ERROR:", err);
-      toast.error(
-        err.response?.data?.message || "Error while saving dish type"
-      );
+      const msg =
+        err.response?.data?.message || err.message || "Error while saving dish type";
+      toast.error(msg);
     }
   };
 

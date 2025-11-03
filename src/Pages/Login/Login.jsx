@@ -6,6 +6,7 @@ import loginleftbg from "../../assets/images/loginleftbg.jpg";
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { BASE_URL } from "../../config/Config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,7 +15,50 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const BASE_URL = "http://trofi-backend.apponedemo.top/api";
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await axios.post(`${BASE_URL}/admin/admin-login`, {
+  //       email,
+  //       password,
+  //     });
+
+  //     if (res.data.success) {
+  //       toast.success(res.data.message || "Login successful");
+
+  //       // Extract role and details
+  //       const { token } = res.data;
+  //       const role = res.data.admin?.role || res.data.restaurant?.role;
+
+  //       const userData = {
+  //         token,
+  //         role,
+  //         name: res.data.admin?.name || res.data.restaurant?.name,
+  //         email: res.data.admin?.email || res.data.restaurant?.email,
+  //         profile_picture: res.data.restaurant?.profile_picture || null,
+  //       };
+
+  //       localStorage.setItem("trofi_user", JSON.stringify(userData));
+
+  //       // Redirect based on role
+  //       if (role === "restaurant_owner") {
+  //         navigate("/RestroOwnerDashboard");
+  //       } else {
+  //         navigate("/Dashboard");
+  //       }
+  //     } else {
+  //       toast.error(res.data.message || "Login failed");
+  //     }
+  //   } catch (err) {
+  //     toast.error(
+  //       err.response?.data?.message || "Something went wrong. Try again."
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,18 +73,33 @@ export default function Login() {
       if (res.data.success) {
         toast.success(res.data.message || "Login successful");
 
-        // Save token, name, email
-        const { token, admin } = res.data;
+        // Extract role and details
+        const { token } = res.data;
+        const role = res.data.admin?.role || res.data.restaurant?.role;
+
+        // Build userData object
         const userData = {
           token,
-          name: admin.name,
-          email: admin.email,
+          role,
+          name: res.data.admin?.name || res.data.restaurant?.name,
+          email: res.data.admin?.email || res.data.restaurant?.email,
+          profile_picture: res.data.admin?.profile_picture || res.data.restaurant?.profile_picture || null,
         };
 
-        // remember → localStorage, else sessionStorage
+
+        // ✅ Add restaurant.restroId only if restaurant_owner
+        if (role === "restaurant_owner" && res.data.restaurant?.id) {
+          userData.restaurant = { restroId: res.data.restaurant.id };
+        }
+
         localStorage.setItem("trofi_user", JSON.stringify(userData));
 
-        navigate("/Dashboard");
+        // Redirect based on role
+        if (role === "restaurant_owner") {
+          navigate("/RestroOwnerDashboard");
+        } else {
+          navigate("/Dashboard");
+        }
       } else {
         toast.error(res.data.message || "Login failed");
       }
@@ -52,6 +111,9 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+
+
 
   return (
     <div

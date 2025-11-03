@@ -77,7 +77,7 @@ function UpdateAdmin() {
   return (
     <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
       <BreadcrumbsNav
-        customTrail={[{ label: "Update Admin", path: `/UpdateAdmin/${id}` }]}
+        customTrail={[{ label: "Admin List", path: "/AdminList" }, { label: "Update Admin", path: `/UpdateAdmin/${id}` }]}
       />
       <div className="bg-white shadow-lg rounded-2xl p-10">
         <PageTittle title={"Update Admin"} />
@@ -102,7 +102,7 @@ function UpdateAdmin() {
           </div>
 
           {/* Role dropdown */}
-          <div>
+          {/* <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
             <Listbox value={selectedRole} onChange={setSelectedRole}>
               {({ open }) => (
@@ -128,10 +128,9 @@ function UpdateAdmin() {
                           key={role.id}
                           value={role}
                           className={({ active }) =>
-                            `cursor-pointer select-none px-4 py-2 rounded-xl ${
-                              active
-                                ? "bg-orange-100 text-orange-700"
-                                : "text-gray-900"
+                            `cursor-pointer select-none px-4 py-2 rounded-xl ${active
+                              ? "bg-orange-100 text-orange-700"
+                              : "text-gray-900"
                             }`
                           }
                         >
@@ -150,7 +149,20 @@ function UpdateAdmin() {
                 </div>
               )}
             </Listbox>
+          </div> */}
+
+          {/* Role dropdown (read-only view) */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">Role</label>
+            <div
+              className="w-full cursor-not-allowed rounded-xl border border-gray-300
+      bg-gray-100 px-4 py-3 text-left text-gray-600 relative"
+            >
+              <span>{selectedRole ? selectedRole.name : "Select role"}</span>
+              <ChevronUpDownIcon className="absolute right-3 top-3 h-5 w-5 text-gray-400" />
+            </div>
           </div>
+
 
           <div>
             <label className="block text-gray-600 font-medium mb-2">

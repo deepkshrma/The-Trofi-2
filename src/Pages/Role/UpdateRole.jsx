@@ -85,7 +85,7 @@ function UpdateRole() {
     <div className="main main_page w-full h-full font-Montserrat space-y-4 duration-900">
       <BreadcrumbsNav
         customTrail={[
-          { label: "Role List", path: "/Roles" },
+          { label: "Role List", path: "/RoleList" },
           { label: "Update Role", path: `/RoleUpdate/${id}` },
         ]}
       />

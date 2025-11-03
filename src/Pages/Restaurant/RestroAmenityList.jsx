@@ -11,12 +11,17 @@ import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNa
 import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { BASE_URL } from "../../config/Config";
+import axios from "axios";
+import { toast } from "react-toastify";
+
 
 function RestroAmenityList() {
-  const API_BASE = "http://trofi-backend.apponedemo.top/api/";
-  const FILE_BASE = API_BASE.replace(/\/api\/?$/, "/");
+  const FILE_BASE = BASE_URL.replace(/\/api\/?$/, "/");
   const PAGE_SIZE = 10;
   const navigate = useNavigate();
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
 
   const [amenities, setAmenities] = useState([]);
   const [search, setSearch] = useState("");
@@ -34,7 +39,7 @@ function RestroAmenityList() {
     setShowDeleteModal(false);
   };
 
-  const confirmDelete = async () => {};
+  const confirmDelete = async () => { };
 
   useEffect(() => {
     fetchAmenities();
@@ -43,15 +48,31 @@ function RestroAmenityList() {
   async function fetchAmenities() {
     setLoading(true);
     setError(null);
+
+    if (!token) {
+      toast.error("Please login first");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}restro/get-amenity`);
-      if (!res.ok) throw new Error(`${res.status}`);
-      const json = await res.json();
-      if (!json || !Array.isArray(json.data)) {
-        throw new Error(json?.message || "Invalid response from API");
+      const res = await axios.get(`${BASE_URL}/restro/get-amenity`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data?.success === false || res.data?.sucess === false) {
+        toast.error(res.data?.message || "Permission denied");
+        setAmenities([]);
+        return;
       }
 
-      const normalized = json.data.map((it) => ({
+      if (!res.data || !Array.isArray(res.data.data)) {
+        throw new Error(res.data?.message || "Invalid response from API");
+      }
+
+      const normalized = res.data.data.map((it) => ({
         id: it._id,
         name: it.amenity_name ?? "—",
         icon: it.amenity_icon ?? null,
@@ -59,12 +80,13 @@ function RestroAmenityList() {
 
       setAmenities(normalized);
     } catch (err) {
-      setError(err.message || "Failed to fetch amenities");
-      toast.error(err.message || "Failed to fetch amenities");
+      toast.error(err.response?.data?.message || err.message || "Failed to fetch amenities");
     } finally {
       setLoading(false);
     }
+
   }
+
 
   const filteredAmenities = useMemo(() => {
     const q = search.trim().toLowerCase();

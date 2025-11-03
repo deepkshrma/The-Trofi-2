@@ -3,25 +3,29 @@ import PageTitle from "../../components/PageTitle/PageTitle";
 import Pagination from "../../components/common/Pagination/Pagination";
 import { useNavigate } from "react-router-dom";
 import DeleteModel from "../../components/common/DeleteModel/DeleteModel";
-import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import { CiExport } from "react-icons/ci";
+import { PlusCircle } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import {  PlusCircle } from "lucide-react";
+import { BASE_URL } from "../../config/Config";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function RestroGoodForList() {
-  const API_BASE = "http://trofi-backend.apponedemo.top/api/";
-  const FILE_BASE = "http://trofi-backend.apponedemo.top/";
+  const FILE_BASE = BASE_URL.replace(/\/api\/?$/, "/");
   const PAGE_SIZE = 10;
   const navigate = useNavigate();
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
 
   const [goodForList, setGoodForList] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -29,11 +33,11 @@ function RestroGoodForList() {
     totalPages: 1,
     totalRecords: 0,
   });
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const closeDeleteModal = () => {
     setShowDeleteModal(false);
-    // setSelectedAdmin(null);
   };
+
   const confirmDelete = () => {};
 
   useEffect(() => {
@@ -43,13 +47,32 @@ function RestroGoodForList() {
   async function fetchGoodFor() {
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(`${API_BASE}restro/get-good-for`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (!json?.success) throw new Error(json.message || "API Error");
 
-      const normalized = json.data.map((item) => ({
+    if (!token) {
+      toast.error("Please login first");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${BASE_URL}/restro/get-good-for`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // ✅ Handle permission denied
+      if (res.data?.success === false || res.data?.sucess === false) {
+        toast.error(res.data?.message || "Permission denied");
+        setGoodForList([]);
+        return;
+      }
+
+      if (!res.data?.data || !Array.isArray(res.data.data)) {
+        throw new Error(res.data?.message || "Invalid response from API");
+      }
+
+      const normalized = res.data.data.map((item) => ({
         id: item._id,
         name: item.name,
         icon: item.icon ? `${FILE_BASE}${item.icon}` : null,
@@ -58,6 +81,8 @@ function RestroGoodForList() {
 
       setGoodForList(normalized);
     } catch (err) {
+      console.error("Fetch error:", err);
+      toast.error(err.response?.data?.message || err.message || "Failed to fetch data");
       setError(err.message || "Failed to fetch data");
     } finally {
       setLoading(false);
@@ -125,7 +150,6 @@ function RestroGoodForList() {
             <PlusCircle size={18} /> Add Good For
           </button>
         </div>
-        
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="overflow-x-auto pb-3">
@@ -141,10 +165,8 @@ function RestroGoodForList() {
                 }}
                 className="border border-gray-300 bg-white p-2 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] outline-none w-64"
               />
-              {/* Export button (right) */}
               <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg shadow-md border border-gray-300 cursor-pointer text-gray-600 hover:shadow-lg"
-                // style={{ backgroundColor: "#F9832B" }}
                 onClick={handleExport}
               >
                 <CiExport size={20} /> Export
@@ -155,9 +177,7 @@ function RestroGoodForList() {
             {loading ? (
               <div className="text-center py-6">Loading...</div>
             ) : error ? (
-              <div className="text-center py-6 text-red-500">
-                Error: {error}
-              </div>
+              <div className="text-center py-6 text-red-500">Error: {error}</div>
             ) : (
               <>
                 <table className="w-full border border-gray-200 overflow-hidden">
@@ -185,7 +205,7 @@ function RestroGoodForList() {
                                 <img
                                   src={item.icon}
                                   alt={item.name}
-                                  className="w-10 h-10 object-cover rounded-full shadow-lg "
+                                  className="w-10 h-10 object-cover rounded-full shadow-lg"
                                 />
                               ) : (
                                 <span className="text-gray-400 italic">
@@ -193,11 +213,7 @@ function RestroGoodForList() {
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-2">
-                              <span className="text-gray-700 px-3 py-1 rounded-full text-md">
-                                {item.name}
-                              </span>
-                            </td>
+                            <td className="px-4 py-2 text-gray-700">{item.name}</td>
                             <td className="px-4 py-2">
                               <div className="flex gap-3">
                                 <button
@@ -210,16 +226,10 @@ function RestroGoodForList() {
                                       },
                                     })
                                   }
-                                  className="flex justify-center items-center bg-green-500 hover:bg-green-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
+                                  className="flex items-center gap-1 justify-center w-8 h-8 rounded-lg bg-green-500 text-white cursor-pointer hover:bg-green-600"
                                 >
                                   <MdEdit size={18} />
                                 </button>
-                                {/* <button
-                                  onClick={() => setShowDeleteModal(true)}
-                                  className="flex justify-center items-center bg-red-500 hover:bg-red-600 text-white w-8 h-8  cursor-pointer rounded text-sm"
-                                >
-                                  <MdDelete size={18} />
-                                </button> */}
                               </div>
                             </td>
                           </tr>
@@ -238,7 +248,6 @@ function RestroGoodForList() {
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 <div className="mt-3 px-3">
                   <Pagination
                     currentPage={pagination.currentPage}
@@ -256,6 +265,7 @@ function RestroGoodForList() {
           </div>
         </div>
       </div>
+
       <DeleteModel
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}

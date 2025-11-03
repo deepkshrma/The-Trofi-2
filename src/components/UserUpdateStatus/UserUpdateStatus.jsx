@@ -45,7 +45,7 @@ const UserUpdateStatus = ({ userId, status, reason, onClose, onSuccess }) => {
 
       if (response.data.success) {
         toast.success("Status updated successfully");
-        onSuccess(); // Notify parent
+        onSuccess();
       } else {
         toast.error("Failed to update status");
       }

@@ -59,7 +59,7 @@ const UserDropdown = ({
         ref={dropdownRef}
         className={`relative ${userDropdown ? "block" : "hidden"}`}
       >
-        <div className="absolute right-10 top-12 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px] z-11">
+        <div className="fixed  right-10 top-12 mt-[17px] flex flex-col rounded-xl border border-gray-200 bg-white shadow-lg min-w-[220px] z-11">
           {/* Center fullName and role */}
           {/* <div className="w-full flex flex-col justify-center items-center text-center py-2">
             <span className="block font-medium text-gray-700 text-sm">
@@ -70,16 +70,22 @@ const UserDropdown = ({
 
           {/* <hr className="text-[#E0E0E0]" /> */}
           <ul className="flex flex-col ">
-            {/* Profile */}
+
             <li onClick={handleuserDropdown}>
               <Link
-                to="/AdminProfile"
+                to={
+                  user?.role?.toLowerCase() === "restaurant_owner"
+                    ? "/RestroOwnerProfile"
+                    : "/AdminProfile"
+                }
                 className="flex items-center gap-3 py-2 px-5 text-gray-700 group text-[14px] hover:bg-gray-100"
               >
                 <FaUser size={16} className="text-orange-500" />
                 <span className="whitespace-nowrap">Profile</span>
               </Link>
             </li>
+
+
 
             <hr className="text-[#E0E0E0]" />
 

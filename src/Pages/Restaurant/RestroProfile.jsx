@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Star, Phone, MapPin, Clock, Utensils } from "lucide-react";
+import { Star, Phone, MapPin, Clock, Utensils, ChevronLeft } from "lucide-react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { LayoutContext } from "../../Layout/Layout";
@@ -14,11 +14,15 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { BASE_URL } from "../../config/Config";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import AVATAR_PLACEHOLDER from "../../assets/images/guest.png";
 import PLACEHOLDER_IMG from "../../assets/images/logo.jpg";
+import { XCircle } from "lucide-react";
+import { Trophy } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
-const IMAGE_URL = "http://trofi-backend.apponedemo.top";
 
 function RestroProfile() {
   const { isToggle } = useContext(LayoutContext);
@@ -26,11 +30,210 @@ function RestroProfile() {
   const [loading, setLoading] = useState(true);
 
   const banners = [banner1, banner2, banner3];
+  const navigate = useNavigate();
+
 
   const [restaurant, setRestaurant] = useState([]);
 
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const [statusHistory, setStatusHistory] = useState([]);
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [statusReason, setStatusReason] = useState('');
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
+
+  const openImageModal = (imgUrl) => {
+    setSelectedImage(imgUrl);
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+    setIsImageModalOpen(false);
+  };
+
   const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
   if (!token) return toast.error("Please login first");
+
+  const handleViewReport = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) return toast.error("Please login first");
+
+      const res = await axios.get(`${BASE_URL}/admin/${id}/report`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = res.data.data;
+
+      const newWindow = window.open("", "_blank");
+      newWindow.document.write(`<html><head><title>${data.restro_name} Report</title></head><body style="font-family:sans-serif;padding:20px;background:#f9f9f9">
+      <h1>${data.restro_name} — Restaurant Report</h1>
+      <p>Email: ${data.email || "N/A"}</p>
+      <p>Phone: ${data.fullPhone || "N/A"}</p>
+      <p>Address: ${data.address}, ${data.city}, ${data.state}, ${data.country}</p>
+      <p>Status: ${data.account_status}</p>
+      <p>Average Rating: ${data.avgRating?.toFixed(2) || "N/A"} (${data.totalRatings} reviews)</p>
+      <h2>Cuisines: ${data.cuisines.map(c => c.name).join(", ") || "N/A"}</h2>
+      <h2>Restaurant Types: ${data.restaurant_type.map(r => r.name).join(", ") || "N/A"}</h2>
+      <h2>Amenities: ${data.amenities.map(a => a.amenity_name).join(", ") || "N/A"}</h2>
+      <h2>Good For: ${data.good_for.map(g => g.name).join(", ") || "N/A"}</h2>
+    </body></html>`);
+      newWindow.document.close();
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load report");
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    try {
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) return toast.error("Please login first");
+
+      const response = await axios.get(
+        `${BASE_URL}/admin/${id}/report/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "blob", // important for file download
+        }
+      );
+
+      // Create a blob link to download
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${restaurant.restro_name || "restaurant"}_report.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast.error("Failed to generate report");
+    }
+  };
+
+  useEffect(() => {
+    const fetchStatusHistory = async () => {
+      try {
+        const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+        if (!token) return;
+
+        const res = await axios.get(
+          `${BASE_URL}/admin/restaurant/${id}/status-history`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.data.success) {
+          setStatusHistory(res.data.data.statusHistory || []);
+        }
+      } catch (error) {
+        console.error("Error fetching status history:", error);
+      }
+    };
+
+    if (id) {
+      fetchStatusHistory();
+    }
+  }, [id]);
+
+
+  useEffect(() => {
+    if (isStatusModalOpen && restaurant) {
+
+      setSelectedStatus(restaurant.account_status || '');
+      setStatusReason(restaurant.account_status_reason || '');
+    }
+  }, [isStatusModalOpen, restaurant]);
+
+
+  const handleStatusChange = async () => {
+    if (!selectedStatus) {
+      toast.error("Please select a status");
+      return;
+    }
+
+    if ((selectedStatus === 'suspended' || selectedStatus === 'banned') && !statusReason.trim()) {
+      toast.error("Reason is required for suspended or banned status");
+      return;
+    }
+
+    try {
+      setIsLoadingStatus(true);
+      const token = JSON.parse(localStorage.getItem("trofi_user"))?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      const res = await axios.patch(
+        `${BASE_URL}/admin/restaurant/${id}/status`,
+        {
+          status: selectedStatus,
+          reason: statusReason.trim() || null,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        toast.success(res.data.message || "Status updated successfully");
+
+        // Update restaurant status in state immediately
+        setRestaurant(prev => ({
+          ...prev,
+          account_status: selectedStatus,
+          account_status_reason: statusReason.trim() || null
+        }));
+
+        // Refresh status history
+        try {
+          const historyRes = await axios.get(
+            `${BASE_URL}/admin/restaurant/${id}/status-history`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (historyRes.data.success) {
+            setStatusHistory(historyRes.data.data.statusHistory || []);
+          }
+        } catch (historyError) {
+          console.error("Error refreshing history:", historyError);
+          // Don't show error to user, history will refresh on next page load
+        }
+
+        // Close modal after successful update
+        setIsStatusModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error changing status:", error);
+      toast.error(error.response?.data?.message || "Failed to change status");
+    } finally {
+      setIsLoadingStatus(false);
+    }
+  };
+
+  // Add function to get status badge color
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-700';
+      case 'suspended':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'banned':
+        return 'bg-red-100 text-red-700';
+      case 'deleted':
+        return 'bg-gray-100 text-gray-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
 
   useEffect(() => {
     const fetchRestaurant = async () => {
@@ -38,11 +241,15 @@ function RestroProfile() {
       if (!token) return toast.error("Please login first");
       try {
         setLoading(true);
-        const res = await axios.get(`${BASE_URL}/restro/get-restaurant-list/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axios.get(
+          `${BASE_URL}/restro/get-restaurant-list/${id}?includeDeleted=true`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
 
         setRestaurant(res.data.data);
       } catch (error) {
@@ -131,8 +338,18 @@ function RestroProfile() {
     !Number.isNaN(lat) && !Number.isNaN(lng) && lat !== 0 && lng !== 0;
 
   if (loading) {
-    return <div className="p-6 text-gray-600">Loading...</div>;
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">
+            Loading restaurant details...
+          </p>
+        </div>
+      </div>
+    );
   }
+
 
   if (!restaurant) {
     return <div className="p-6 text-red-500">Restaurant not found</div>;
@@ -151,14 +368,14 @@ function RestroProfile() {
   const bannerImages = Array.isArray(restaurant.restaurant_images)
     ? restaurant.restaurant_images
     : Array.isArray(restaurant.images)
-    ? restaurant.images
-    : [];
+      ? restaurant.images
+      : [];
 
   const menuImagesRaw = Array.isArray(restaurant.restaurant_menu_images)
     ? restaurant.restaurant_menu_images
     : Array.isArray(restaurant.menu)
-    ? restaurant.menu
-    : [];
+      ? restaurant.menu
+      : [];
 
   const amenitiesRaw =
     restaurant.amenities ??
@@ -175,12 +392,27 @@ function RestroProfile() {
 
   return (
     <div
-      className={`w-[100%] pt-[1.5rem] pb-[1rem] ${
-        isToggle ? "pl-[19.3rem]" : ""
-      } duration-900 min-h-screen `}
+      className={`w-full pt-[1.5rem] pb-[1rem] ${isToggle ? "pl-[19.3rem]" : ""
+        } min-h-screen duration-900 ${restaurant.isDeleted
+          ? "bg-red-50 border-t-4 border-red-300"
+          : "bg-white"
+        }`}
     >
+
+
+
       {/* Banner Carousel */}
       <div className="relative w-full h-100">
+
+        {/* Floating Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-5 left-5 z-5 flex items-center cursor-pointer gap-2 px-3 py-2 bg-white/80 backdrop-blur-md text-gray-800 rounded-full shadow-md border border-white hover:bg-[#F9832B] hover:text-white transition-all duration-300 transform hover:-translate-x-1 hover:scale-105 active:scale-95"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          {/* <span className="font-medium hidden sm:block">Back</span> */}
+        </button>
+
         <Carousel
           autoPlay
           infiniteLoop
@@ -201,8 +433,10 @@ function RestroProfile() {
                   <img
                     src={src}
                     alt={`Banner-${i}`}
-                    className="w-full h-100 object-cover"
+                    className="w-full h-100 object-cover cursor-pointer"
+                    onClick={() => openImageModal(src)}
                   />
+
                   <div className="absolute inset-0 bg-black/20 bg-opacity-30 z-0"></div>
                 </div>
               );
@@ -214,14 +448,22 @@ function RestroProfile() {
           )}
         </Carousel>
 
+        {restaurant.isDeleted && (
+          <div className="absolute top-4 right-6 bg-red-100 text-red-700 px-4 py-1 rounded-full text-sm font-semibold shadow">
+            Deleted Restaurant
+          </div>
+        )}
+
         {/* Logo, Name & Rating */}
         <div className="absolute bottom-4 left-6 flex items-center gap-4 z-[1]">
           <img
             src={getImageUrl(restaurant.logo)}
             alt="Logo"
-            className="w-20 h-20 rounded-full shadow-md border-4 border-white"
+            className="w-20 h-20 rounded-full shadow-md border-4 border-white cursor-pointer"
+            onClick={() => openImageModal(getImageUrl(restaurant.logo))}
             onError={(e) => (e.currentTarget.src = AVATAR_PLACEHOLDER)}
           />
+
           <div className="text-white">
             <h1 className="text-2xl font-bold">
               {restaurant.restro_name || restaurant.name}
@@ -231,52 +473,314 @@ function RestroProfile() {
             </p>
           </div>
         </div>
+        {/* View Report Button */}
+        {/* <div className="absolute bottom-16 right-6 z-[2]">
+          <button
+            onClick={handleViewReport}
+            className="bg-white/80 backdrop-blur-md text-gray-800 cursor-pointer font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300 hover:bg-white hover:text-gray-900"
+          >
+            View Report
+          </button>
+
+        </div> */}
       </div>
+
+
 
       {/* Restaurant Details */}
       <div className="p-6 space-y-6">
+        {/* Restaurant Details (kept outer card look; inner split when deleted) */}
         <div className="bg-white p-5 rounded-xl shadow-md">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             About {restaurant.restro_name || restaurant.name}
           </h2>
-          <p className="text-gray-600">{longDescription}</p>
 
-          <div className="mt-4 grid sm:grid-cols-2 gap-4 text-gray-700">
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.address || restaurant.location || "N/A"}
-            </p>
+          {/* Long description (kept as-is, full width) */}
+          <p className="text-gray-600 mb-4">{longDescription}</p>
 
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
-            </p>
-            <p className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.postalCode || "N/A"}
-            </p>
+          {/* If deleted → show left (current/deleted) and right (original) columns.
+      Otherwise → show single-column content (keeps exact previous markup). */}
+          {restaurant.isDeleted ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {/* LEFT: Current (deleted) data — keep same paragraph layout you had */}
+              <div className="p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+                <div className="grid gap-3 text-gray-700">
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.address || restaurant.location || "N/A"}
+                  </p>
 
-            <p className="flex items-center gap-2">
-              <Phone className="w-5 h-5 text-[#F9832B]" />{" "}
-              {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
-                (restaurant.phone || "N/A")}
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.postalCode || "N/A"}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Phone className="w-5 h-5 text-[#F9832B]" />
+                    {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                      (restaurant.phone || "N/A")}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-[#F9832B]" />
+                    {Array.isArray(restaurant.food_type)
+                      ? restaurant.food_type.join(", ")
+                      : restaurant.food_type || "N/A"}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#F9832B]" />
+                    {restaurant.time
+                      ? (() => {
+                        const [hours, minutes] = restaurant.time.split(":").map(Number);
+                        const period = hours >= 12 ? "PM" : "AM";
+                        const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                        return `Till ${formattedHour}:${minutes
+                          .toString()
+                          .padStart(2, "0")} ${period} `;
+                      })()
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT: Original info before deletion */}
+              <div className="p-4 rounded-lg border border-gray-200 shadow-sm bg-white">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">
+                  Original (Pre-deletion) Information
+                </h3>
+
+                <div className="grid gap-3 text-gray-700 text-sm">
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {restaurant.deleted_restro_name || restaurant.restro_name || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Email:</strong> {restaurant.deleted_email || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Phone:</strong>{" "}
+                    {restaurant.deleted_phone
+                      ? // if deleted_phone maybe stored without country code, prefer deleted_phone
+                      (restaurant.deleted_phone.startsWith("+") ||
+                        restaurant.deleted_phone.startsWith("00")
+                        ? restaurant.deleted_phone
+                        : (restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                        restaurant.deleted_phone)
+                      : "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Address:</strong> {restaurant.address || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>City:</strong> {restaurant.city || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>State:</strong> {restaurant.state || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Postal Code:</strong> {restaurant.postalCode || "N/A"}
+                  </p>
+
+                  {/* optional: show deleted_restro_name separate label if different */}
+                  {restaurant.deleted_restro_name && (
+                    <p>
+                      <strong>Saved As (deleted):</strong> {restaurant.resto_name || restaurant.restro_name || "N/A"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            // NON-deleted (original layout preserved exactly)
+            <div className="mt-4 grid sm:grid-cols-2 gap-4 text-gray-700">
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.address || restaurant.location || "N/A"}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.city || "N/A"}, {restaurant.state || "N/A"}
+              </p>
+              <p className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.postalCode || "N/A"}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <Phone className="w-5 h-5 text-[#F9832B]" />{" "}
+                {(restaurant.country_code ? `${restaurant.country_code} ` : "") +
+                  (restaurant.phone || "N/A")}
+              </p>
+              <p className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-[#F9832B]" />{" "}
+                {Array.isArray(restaurant.food_type)
+                  ? restaurant.food_type.join(", ")
+                  : restaurant.food_type || "N/A"}
+              </p>
+              <p className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
+                {restaurant.time
+                  ? (() => {
+                    const [hours, minutes] = restaurant.time.split(":").map(Number);
+                    const period = hours >= 12 ? "PM" : "AM";
+                    const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                    return `Till ${formattedHour}:${minutes.toString().padStart(2, "0")} ${period} `;
+                  })()
+                  : "N/A"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Restaurant Group Section - ADD THIS AFTER "About Restaurant" */}
+        {restaurant.group_id && (
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Restaurant Group</h2>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Group Image */}
+              {restaurant.group_id.group_image && (
+                <img
+                  src={getImageUrl(restaurant.group_id.group_image)}
+                  alt={restaurant.group_id.group_name}
+                  className="w-20 h-20 rounded-lg object-cover shadow-sm cursor-pointer"
+                  onClick={() => openImageModal(getImageUrl(restaurant.group_id.group_image))}
+                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMG)}
+                />
+              )}
+
+              {/* Group Details */}
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {restaurant.group_id.group_name}
+                  </h3>
+                  {restaurant.group_id.is_active && (
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+
+                {restaurant.group_id.description && (
+                  <p className="text-gray-600 text-sm">
+                    {restaurant.group_id.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        {/* ⭐ Average Rating Section */}
+        <div className="bg-white p-5 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+          <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <Star className="w-5 h-5 text-[#F9832B]" />
+            Average Rating
+          </h2>
+
+          <div className="flex items-center gap-3">
+            <div className="relative flex items-center justify-center w-14 h-14 rounded-full bg-[#F9832B]/10">
+              <Star className="w-6 h-6 text-[#F9832B] animate-pulse" />
+              <span className="absolute text-lg font-semibold text-[#F9832B]">
+                {/* {restaurant.avgRating ? restaurant.avgRating.toFixed(1) : "N/A"} */}
+              </span>
+            </div>
+
+            <div className="flex flex-col">
+              <p className="text-gray-800 text-sm font-medium">
+                Based on user reviews
+              </p>
+              <p className="text-sm text-gray-500">
+                {restaurant.avgRating
+                  ? `${restaurant.avgRating} / 5 Reviews`
+                  : "No reviews yet"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+
+        <div className="grid sm:grid-cols-2 gap-6 mt-6">
+          {/* Pricing Section */}
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Pricing</h2>
+            <p className="flex items-center gap-2 text-gray-700">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Price Per Person:{" "}
+              <span className="font-semibold text-gray-800">
+                {restaurant.price ? `₹${restaurant.price}` : "N/A"}
+              </span>
             </p>
-            <p className="flex items-center gap-2">
-              <Utensils className="w-5 h-5 text-[#F9832B]" />{" "}
-              {Array.isArray(restaurant.food_type)
-                ? restaurant.food_type.join(", ")
-                : restaurant.food_type || "N/A"}
-            </p>
-            <p className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#F9832B]" />{" "}
-              {restaurant.time || "N/A"}
+          </div>
+
+          {/* Best Seller Section */}
+          <div className="bg-white p-5 rounded-xl shadow-md">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">Best Seller</h2>
+            <p className="flex items-center gap-2 text-gray-700">
+              {restaurant.is_best_seller ? (
+                <>
+                  <Trophy className="w-5 h-5 text-[#F9832B]" />{" "}
+                  <span className="font-semibold text-green-600">Yes</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-5 h-5 text-gray-400" />{" "}
+                  <span className="font-semibold text-red-500">No</span>
+                </>
+              )}
             </p>
           </div>
         </div>
+
+
+
         <div className="bg-white p-5 rounded-xl shadow-md mt-6">
           <h2 className="text-lg font-bold text-gray-800 mb-3">
             Status Information
           </h2>
+          {restaurant.isDeleted && restaurant.deletion_info && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <h3 className="text-red-700 font-semibold text-lg mb-2">
+                ⚠️ Deleted Restaurant Information
+              </h3>
+              <p className="text-gray-700">
+                <strong>Deleted At:</strong>{" "}
+                {new Date(restaurant.deletion_info.deletedAt).toLocaleString("en-IN", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
+              </p>
+              <p className="text-gray-700">
+                <strong>Deleted By:</strong>{" "}
+                {restaurant.deletion_info.deletedBy?.name || "Unknown"} (
+                {restaurant.deletion_info.deletedBy?.email || "N/A"})
+              </p>
+              <p className="text-gray-700">
+                <strong>Reason:</strong>{" "}
+                {restaurant.deletion_info.reason || "No reason provided"}
+              </p>
+              {restaurant.deletion_info.comment && (
+                <p className="text-gray-700">
+                  <strong>Comment:</strong> {restaurant.deletion_info.comment}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="grid sm:grid-cols-3 gap-4 text-gray-700">
             <p className="flex items-center gap-2">
               <Star className="w-5 h-5 text-[#F9832B]" /> Status:{" "}
@@ -290,8 +794,51 @@ function RestroProfile() {
               <Clock className="w-5 h-5 text-[#F9832B]" /> Working Days:{" "}
               {restaurant.days || "N/A"}
             </p>
+            <p className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-[#F9832B]" /> Established Year:{" "}
+              {restaurant.birth_year ? restaurant.birth_year : "N/A"}
+            </p>
           </div>
         </div>
+
+
+        {/* Menu Section */}
+        {Array.isArray(menuImagesRaw) && menuImagesRaw.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {menuImagesRaw.map((menu, i) => {
+                const menuImg =
+                  typeof menu === "string"
+                    ? menu
+                    : menu.image || menu.url || menu.path || menu.src || "";
+                const src = getImageUrl(menuImg);
+                return (
+                  <div
+                    key={i}
+                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
+                  >
+                    <img
+                      src={src}
+                      alt={`Menu-${i}`}
+                      className="w-full h-40 object-cover rounded-lg cursor-pointer"
+                      onClick={() => openImageModal(src)}
+                    />
+                    <div className="mt-3">
+                      {/* If menu items have name/price fields, you may show them here */}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {/* <div className="flex justify-end text-blue-500 mt-5">
+              <Link to="" className="link">
+                View all
+              </Link>
+            </div> */}
+          </div>
+        )}
+
 
         {/* Amenities */}
         <div>
@@ -318,6 +865,93 @@ function RestroProfile() {
             )}
           </ul>
         </div>
+
+        {/* Dish Types */}
+        {Array.isArray(restaurant.dish_type) && restaurant.dish_type.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Dish Types</h2>
+            <div className="flex flex-wrap gap-3">
+              {restaurant.dish_type.map((dish) => (
+                <div
+                  key={dish._id}
+                  className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm"
+                >
+                  <img
+                    src={getImageUrl(dish.icon)}
+                    alt={dish.name}
+                    className="w-6 h-6 object-contain"
+                  />
+                  <span className="text-gray-700">{dish.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Restaurant Type */}
+        {Array.isArray(restaurant.restaurant_type) &&
+          restaurant.restaurant_type.length > 0 && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Restaurant Type</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {restaurant.restaurant_type.map((type) => (
+                  <div
+                    key={type._id}
+                    className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"
+                  >
+                    <img
+                      src={getImageUrl(type.icon)}
+                      alt={type.name}
+                      className="w-10 h-10 object-contain mb-2"
+                    />
+                    <span className="text-gray-700 font-medium">{type.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
+        {/* Good For */}
+        {Array.isArray(restaurant.good_for) && restaurant.good_for.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Good For</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {restaurant.good_for.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm"
+                >
+                  <img
+                    src={getImageUrl(item.icon)}
+                    alt={item.name}
+                    className="w-10 h-10 object-contain mb-2"
+                  />
+                  <span className="text-gray-700">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+
+        {/* Cuisines */}
+        {Array.isArray(restaurant.cuisines) && restaurant.cuisines.length > 0 && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Cuisines</h2>
+            <div className="flex flex-wrap gap-3">
+              {restaurant.cuisines.map((cuisine) => (
+                <span
+                  key={cuisine._id}
+                  className="px-4 py-2 bg-[#F9832B]/10 text-[#F9832B] rounded-full text-sm font-medium"
+                >
+                  {cuisine.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
 
         {/* Top Dishes Section */}
         {Array.isArray(restaurant.top_dishes) &&
@@ -346,46 +980,10 @@ function RestroProfile() {
             </div>
           )}
 
-        {/* Menu Section */}
-        {Array.isArray(menuImagesRaw) && menuImagesRaw.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Our Menu</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {menuImagesRaw.map((menu, i) => {
-                const menuImg =
-                  typeof menu === "string"
-                    ? menu
-                    : menu.image || menu.url || menu.path || menu.src || "";
-                const src = getImageUrl(menuImg);
-                return (
-                  <div
-                    key={i}
-                    className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-3"
-                  >
-                    <img
-                      src={src}
-                      alt={`Menu-${i}`}
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
-                    <div className="mt-3">
-                      {/* If menu items have name/price fields, you may show them here */}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-end text-blue-500 mt-5">
-              <Link to="" className="link">
-                View all
-              </Link>
-            </div>
-          </div>
-        )}
-
         {/* Map Section */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Location</h2>
-          <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+          <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
             {hasLocation ? (
               <MapContainer
                 center={[lat, lng]}
@@ -408,24 +1006,233 @@ function RestroProfile() {
             )}
           </div>
         </div>
-        <div className="bg-white p-5 rounded-xl shadow-md mt-6">
-          <h2 className="text-lg font-bold text-gray-800 mb-3">
-            Additional Info
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
-            <p className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
-              {restaurant.lastMenuUpdated
-                ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
-                : "N/A"}
-            </p>
-            <p className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-[#F9832B]" /> Avg Rating:{" "}
-              {restaurant.avgRating || "N/A"} / 5
-            </p>
+
+        {/* Account Management Section - ADD THIS BEFORE ADDITIONAL INFO */}
+        {!restaurant.isDeleted && (
+          <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Account Management</h2>
+              <button
+                onClick={() => {
+                  // Use current restaurant state, not stale closure
+                  setSelectedStatus(restaurant?.account_status || '');
+                  setStatusReason(restaurant?.account_status_reason || '');
+                  console.log('Opening modal with:', {
+                    status: restaurant?.account_status,
+                    reason: restaurant?.account_status_reason
+                  });
+                  setIsStatusModalOpen(true);
+                }}
+                className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-300"
+              >
+                Change Status
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Current Status */}
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 font-medium">Current Status:</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadgeColor(restaurant.account_status)}`}>
+                  {restaurant.account_status?.toUpperCase() || 'N/A'}
+                </span>
+              </div>
+
+              {/* Current Reason */}
+              {restaurant.account_status_reason && (
+                <div className="flex items-start gap-3">
+                  <span className="text-gray-600 font-medium">Reason:</span>
+                  <span className="text-gray-700">{restaurant.account_status_reason}</span>
+                </div>
+              )}
+
+              {/* Status History */}
+              {statusHistory.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3">Status History</h3>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {statusHistory.map((history, idx) => (
+                      <div key={idx} className="border-l-4 border-[#F9832B] pl-4 py-2 bg-gray-50 rounded">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusBadgeColor(history.status)}`}>
+                            {history.status?.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(history.changedAt).toLocaleString('en-IN', {
+                              dateStyle: 'medium',
+                              timeStyle: 'short'
+                            })}
+                          </span>
+                        </div>
+                        {history.reason && (
+                          <p className="text-sm text-gray-600 mt-1">
+                            <span className="font-medium">Reason:</span> {history.reason}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Additional Info Section */}
+        {!restaurant.isDeleted && (
+          <div className="bg-white p-5 rounded-xl shadow-md mt-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-3">
+              Additional Info
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 text-gray-700">
+              <p className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#F9832B]" /> Last Menu Update:{" "}
+                {restaurant.lastMenuUpdated
+                  ? new Date(restaurant.lastMenuUpdated).toLocaleDateString()
+                  : "N/A"}
+              </p>
+              <button
+                onClick={handleGenerateReport}
+                className="bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer ml-7  font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300"
+              >
+                Generate Report
+              </button>
+
+
+
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Status Change Modal */}
+      {isStatusModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+          {/* Background Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => {
+              if (!isLoadingStatus) {
+                setIsStatusModalOpen(false);
+                setSelectedStatus('');
+                setStatusReason('');
+              }
+            }}
+          ></div>
+
+          {/* Modal Box */}
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-[90%] p-6 z-10">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                if (!isLoadingStatus) {
+                  setIsStatusModalOpen(false);
+                  setSelectedStatus('');
+                  setStatusReason('');
+                }
+              }}
+              className="absolute top-3 right-3 text-gray-700 text-xl  font-bold hover:text-red-600 cursor-pointer"
+              disabled={isLoadingStatus}
+            >
+              ✕
+            </button>
+
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Change Account Status</h3>
+
+            {/* Status Dropdown */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Select Status <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedStatus || ''}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9832B] focus:outline-none"
+                disabled={isLoadingStatus}
+              >
+                <option value="">-- Select Status --</option>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
+                <option value="banned">Banned</option>
+              </select>
+            </div>
+
+            {/* Reason Textarea */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">
+                Reason {(selectedStatus === 'suspended' || selectedStatus === 'banned') && (
+                  <span className="text-red-500">*</span>
+                )}
+              </label>
+              <textarea
+                value={statusReason || ''}
+                onChange={(e) => setStatusReason(e.target.value)}
+                placeholder="Enter reason for status change..."
+                rows="4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9832B] focus:outline-none resize-none"
+                disabled={isLoadingStatus}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  if (!isLoadingStatus) {
+                    setIsStatusModalOpen(false);
+                    // Reset to empty only on cancel
+                    setSelectedStatus('');
+                    setStatusReason('');
+                  }
+                }}
+                className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 cursor-pointer font-semibold rounded-lg transition-all duration-300"
+                disabled={isLoadingStatus}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStatusChange}
+                disabled={isLoadingStatus}
+                className="flex-1 px-4 py-2 bg-[#F9832B] hover:bg-[#d46e1e] text-white cursor-pointer font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingStatus ? 'Updating...' : 'Update Status'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+
+      {isImageModalOpen && selectedImage && (
+        <div className="fixed inset-0 flex items-center justify-center z-[9999]">
+          {/* Background Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={closeImageModal}
+          ></div>
+
+          {/* Modal Box */}
+          <div className="relative bg-white rounded-xl shadow-2xl max-w-3xl w-[90%] sm:w-auto p-4 z-10 flex flex-col items-center">
+            {/* Close Button */}
+            <button
+              onClick={closeImageModal}
+              className="absolute top-3 right-3 text-gray-700 text-xl font-bold hover:text-red-600 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Image */}
+            <img
+              src={selectedImage}
+              alt="Restaurant Preview"
+              className="max-h-[80vh] w-100 object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
+
+
+
     </div>
   );
 }

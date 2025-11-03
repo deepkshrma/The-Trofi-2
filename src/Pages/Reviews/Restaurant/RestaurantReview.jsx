@@ -1,33 +1,24 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { BASE_URL, IMAGE_URL } from "../../../config/Config";
+import PageTitle from "../../../components/PageTitle/PageTitle";
+import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import star1 from "../../../assets/images/untitled_folder_6/star1.png";
 import star2 from "../../../assets/images/untitled_folder_6/star2.png";
 import star3 from "../../../assets/images/untitled_folder_6/star3.png";
 import star4 from "../../../assets/images/untitled_folder_6/star4.png";
 import star5 from "../../../assets/images/untitled_folder_6/star5.png";
-import PageTitle from "../../../components/PageTitle/PageTitle";
-import DynamicBreadcrumbs from "../../../components/common/BreadcrumbsNav/DynamicBreadcrumbs";
+import AdminUpdateReviewStatus from "../../../components/AdminUpdateReviewStatus/AdminUpdateReviewStatus ";
+import dummyimg from "../../../assets/images/logo.jpg";
 
 function RestaurantReview() {
-  const [editMode, setEditMode] = useState(false);
-
-  const [review, setReview] = useState({
-    restaurantImage:
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=600",
-    restroName: "Taj Palace",
-    rating_label: "Excellent experience!",
-    star_value: 3,
-    comment:
-      "The food was delicious, ambiance was wonderful, and service was top-notch. Definitely visiting again!",
-    qa: [
-      { question: "Was the food served hot?", answer: "Yes, perfectly hot." },
-      { question: "Would you recommend us to others?", answer: "Absolutely!" },
-    ],
-    images: [
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-      "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400",
-    ],
-  });
-
+  const { id: ratingId } = useParams();
+  const [loading, setLoading] = useState(false);
+  const [review, setReview] = useState(null);
+  const [processing, setProcessing] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
   const faceStars = [
     { img: star1, label: "Very Bad" },
     { img: star2, label: "Bad" },
@@ -36,201 +27,418 @@ function RestaurantReview() {
     { img: star5, label: "Excellent" },
   ];
 
-  // Handle input changes
-  const handleChange = (field, value) => {
-    setReview((prev) => ({ ...prev, [field]: value }));
-  };
+  useEffect(() => {
+    if (ratingId) fetchRating();
+  }, [ratingId]);
 
-  // Handle Q&A changes
-  const handleQAChange = (idx, key, value) => {
-    const newQA = [...review.qa];
-    newQA[idx][key] = value;
-    setReview((prev) => ({ ...prev, qa: newQA }));
-  };
+  async function fetchRating() {
+    setLoading(true);
+    try {
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        setLoading(false);
+        return;
+      }
+
+      const res = await axios.get(`${BASE_URL}/admin/get-ratings/${ratingId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const api = res?.data?.data;
+      if (!api) throw new Error("Invalid API response");
+
+      const images = (api.images || []).map((it) => ({
+        _id: it._id,
+        src: it.image?.startsWith("http") ? it.image : `${IMAGE_URL}/${it.image}`,
+        status: it.is_view ? "approved" : "pending",
+      }));
+
+      const mappedQA = (api.tell_us || []).map((t) => ({
+        question: t.question || "",
+        answer: typeof t.answer === "boolean" ? (t.answer ? "Yes" : "No") : String(t.answer || ""),
+      }));
+
+      setReview({
+        id: api._id,
+        user: api.userId || {},
+        restaurant: api.typeId || {},
+        rating_label: api.rating_label,
+        star_value: api.star_value,
+        comment: api.reviewComment,
+        qa: mappedQA,
+        images,
+        status: api.status || "pending",
+        hashTags: api.hashTags || [],
+        views: {
+          is_hashtag_view: !!api.is_hashtag_view,
+          is_rating_view: !!api.is_rating_view,
+          is_comment_view: !!api.is_comment_view,
+          is_tellus_view: !!api.is_tellus_view,
+        },
+        notes: api.notes || "",
+        createdAt: api.createdAt,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch rating details");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Section-level toggle
+  async function handleSectionToggle(section) {
+    if (!review) return;
+    try {
+      setProcessing(true);
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        setProcessing(false);
+        return;
+      }
+
+      const currentValue = review.views[`is_${section}_view`] || false;
+      const payload = { [`is_${section}_view`]: !currentValue };
+
+      await axios.patch(`${BASE_URL}/admin/update-rating-status/${review.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setReview((prev) => ({
+        ...prev,
+        views: {
+          ...prev.views,
+          [`is_${section}_view`]: !currentValue,
+        },
+      }));
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to toggle ${section}`);
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Image approval
+  async function handleImageDecision(imageId, decision) {
+    if (!review) return;
+    try {
+      setProcessing(true);
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        setProcessing(false);
+        return;
+      }
+
+      const payload = { imageUpdates: [{ id: imageId, is_view: decision === "accept" }] };
+
+      await axios.patch(`${BASE_URL}/admin/update-rating-status/${review.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setReview((prev) => ({
+        ...prev,
+        images: prev.images.map((img) =>
+          img._id === imageId ? { ...img, status: decision === "accept" ? "approved" : "pending" } : img
+        ),
+      }));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update image status");
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+  // Final publish/reject with admin notes
+  async function handlePublishDecision(decision) {
+    if (!review) return;
+    const notes = review.notes?.trim() || "";
+
+    try {
+      setProcessing(true);
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        setProcessing(false);
+        return;
+      }
+
+      const payload = {
+        status: decision === "accept" ? "published" : "rejected",
+        notes,
+      };
+
+      await axios.patch(`${BASE_URL}/admin/update-rating-status/${review.id}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setReview((prev) => ({
+        ...prev,
+        status: payload.status,
+        notes,
+      }));
+
+      toast.success(`Review ${decision}ed successfully`);
+    } catch (err) {
+      console.error(err);
+      toast.error(`Failed to ${decision} review`);
+    } finally {
+      setProcessing(false);
+    }
+  }
+
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-start min-h-screen">
+        <div className="flex flex-col items-center justify-center ml-64 w-full">
+          <div className="w-16 h-16 border-4 border-[#F9832B] border-dashed rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-700 font-bold text-lg">Loading review details...</p>
+        </div>
+      </div>
+    );
+
+  if (!review) return <div className="p-4 text-gray-500">No review data found.</div>;
+
+
+  const face = faceStars[Math.max(0, Math.min(4, (review.star_value || 3) - 1))];
+  const badgeClass = (active) => (active ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600");
 
   return (
-    <div className="main main_page p-4 md:p-6 space-y-6 md:space-y-8 duration-900">
-      <DynamicBreadcrumbs />
-      {/* Header with Edit/Save button */}
-      <div className="flex justify-between items-center">
-        <PageTitle title={"Review Details"} />
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className="px-4 py-2 bg-orange-500 text-white rounded shadow hover:bg-orange-600 transition cursor-pointer"
-        >
-          {editMode ? "Save" : "Edit"}
-        </button>
+    <div className="main main_page w-full p-4 md:p-6 space-y-6 md:space-y-8 min-h-screen">
+      <BreadcrumbsNav
+        customTrail={[
+          { label: "Restaurant Review List", path: "/RestaurantReviewList" },
+          { label: "Review Detail", path: `/RestaurantReviewList/${ratingId}` },
+        ]}
+      />
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <PageTitle title={`Review — ${review.restaurant.restro_name || "Restaurant"}`} />
+        <div className="text-sm text-gray-500">Submitted: {new Date(review.createdAt).toLocaleString()}</div>
       </div>
 
-      {/* Restaurant Info */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg flex flex-col md:flex-row gap-4 md:gap-6">
-        <img
-          src={review.restaurantImage}
-          alt={review.restroName}
-          className="w-full md:w-40 h-40 object-cover rounded-lg"
-        />
-        <div className="flex flex-col justify-center gap-3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-            {review.restroName}
-          </h2>
-
-          <p className="text-gray-600 mb-1">
-            {faceStars[review.star_value - 1].label}
-          </p>
-
-          {/* Editable Stars */}
-          {editMode ? (
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                Rating
-              </label>
-              <select
-                value={review.star_value}
-                onChange={(e) =>
-                  handleChange("star_value", Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-              >
-                {faceStars.map((s, i) => (
-                  <option key={i} value={i + 1}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <img
-              src={faceStars[review.star_value - 1].img}
-              alt={faceStars[review.star_value - 1].label}
-              className="w-10 h-10 md:w-12 md:h-12"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Review Comment */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-3">Review Comment</h3>
-        {editMode ? (
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Comment</label>
-            <textarea
-              value={review.comment}
-              onChange={(e) => handleChange("comment", e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-            />
+      {/* ⭐ Rating Section */}
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-md space-y-4">
+        <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+          <h3 className="text-lg font-semibold text-gray-800">Rating Details</h3>
+          <div
+            className={`cursor-pointer font-semibold px-3 py-1 rounded-full ${badgeClass(
+              review.views.is_rating_view
+            )}`}
+            onClick={() => handleSectionToggle("rating")}
+          >
+            {review.views.is_rating_view ? "Active" : "Inactive"}
           </div>
-        ) : (
-          <p className="text-gray-700 italic">{review.comment}</p>
-        )}
-      </div>
+        </div>
 
-      {/* Q&A Section */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-3">Q&A</h3>
-        <div className="space-y-3">
-          {review.qa.map((item, idx) => (
-            <div key={idx} className="border-b border-gray-300 pb-2">
-              {editMode ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Q: {idx + 1}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.question}
-                      onChange={(e) =>
-                        handleQAChange(idx, "question", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      A: {idx + 1}
-                    </label>
-                    <input
-                      type="text"
-                      value={item.answer}
-                      onChange={(e) =>
-                        handleQAChange(idx, "answer", e.target.value)
-                      }
-                      className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                    />
-                  </div>
+        <div className="flex flex-wrap items-center gap-4">
+          <img
+            src={
+              review.restaurant.image
+                ? `${IMAGE_URL}/${review.restaurant.image}`
+                : dummyimg
+            }
+            alt="resto"
+            className="w-24 h-24 rounded-lg object-cover"
+          />
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              {review.restaurant.restro_name || "Restaurant"}
+            </h2>
+            <div className="flex items-center gap-3 mt-1">
+              <img src={face.img} alt={face.label} className="w-10 h-10" />
+              <div>
+                <div className="text-gray-600">{face.label}</div>
+                <div className="text-sm text-gray-500">
+                  {review.rating_label} — {review.star_value} / 5
                 </div>
-              ) : (
-                <>
-                  <p className="font-medium text-gray-800">
-                    Q: {item.question}
-                  </p>
-                  <p className="text-gray-600">A: {item.answer}</p>
-                </>
-              )}
+              </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
 
-      {/* Review Images (Approve/Reject stays same) */}
-      <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg">
-        <h3 className="text-lg font-semibold mb-4">Review Images</h3>
-        <div className="flex flex-col gap-6">
-          {review.images.map((img, idx) => (
+      {/* 💬 Comment Section */}
+      <div className="bg-white p-4 md:p-6 rounded-xl shadow-md space-y-4">
+        <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+          <h3 className="text-lg font-semibold text-gray-800">User Comment</h3>
+          <div
+            className={`cursor-pointer font-semibold px-3 py-1 rounded-full ${badgeClass(
+              review.views.is_comment_view
+            )}`}
+            onClick={() => handleSectionToggle("comment")}
+          >
+            {review.views.is_comment_view ? "Active" : "Inactive"}
+          </div>
+        </div>
+        <p className="text-gray-700 italic">{review.comment || "No comment available"}</p>
+      </div>
+
+      {/* 🏷️ Hashtags Section */}
+      {review.hashTags.length > 0 && (
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-md space-y-4">
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <h3 className="text-lg font-semibold text-gray-800">Hashtags</h3>
             <div
-              key={idx}
-              className="flex flex-col md:flex-row items-start gap-4 md:gap-6 p-4 border border-gray-200 rounded-lg shadow-sm"
+              className={`cursor-pointer font-semibold px-3 py-1 rounded-full ${badgeClass(
+                review.views.is_hashtag_view
+              )}`}
+              onClick={() => handleSectionToggle("hashtag")}
             >
-              <img
-                src={img}
-                alt={`review-${idx}`}
-                className="w-full md:w-60 h-48 object-cover rounded-lg shadow-md"
-              />
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  console.log("Image Action:", formData.get("action"));
-                  console.log("Reason:", formData.get("reason"));
-                }}
-                className="flex flex-col gap-3 flex-1 w-full"
-              >
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name={`action-${idx}`}
-                      value="approve"
-                    />
-                    Approve
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="radio" name={`action-${idx}`} value="reject" />
-                    Reject
-                  </label>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm font-medium text-gray-700">
-                    Reason
-                  </label>
-                  <textarea
-                    name="reason"
-                    placeholder="Reason for this action..."
-                    className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2 h-20 focus:border-orange-400 focus:ring-2 focus:ring-orange-400 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 transition cursor-pointer"
-                >
-                  Done
-                </button>
-              </form>
+              {review.views.is_hashtag_view ? "Active" : "Inactive"}
             </div>
-          ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {review.hashTags.map((t) => (
+              <span
+                key={t._id}
+                className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
+              >
+                {t.hashTagTitle}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ❓Q&A Section */}
+      {review.qa.length > 0 && (
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-md space-y-4">
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <h3 className="text-lg font-semibold text-gray-800">Tell Us Answers</h3>
+            <div
+              className={`cursor-pointer font-semibold px-3 py-1 rounded-full ${badgeClass(
+                review.views.is_tellus_view
+              )}`}
+              onClick={() => handleSectionToggle("tellus")}
+            >
+              {review.views.is_tellus_view ? "Active" : "Inactive"}
+            </div>
+          </div>
+
+          <div className="grid gap-3">
+            {review.qa.map((q, i) => (
+              <div
+                key={i}
+                className="p-3 border border-gray-100 rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+              >
+                <div className="font-medium text-gray-800">Q: {q.question}</div>
+                <div className="text-gray-600 mt-1">A: {q.answer}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 📸 Images Section */}
+      {review.images.length > 0 && (
+        <div className="bg-white p-4 md:p-6 rounded-xl shadow-md space-y-4">
+          <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+            <h3 className="text-lg font-semibold text-gray-800">User Uploaded Images</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {review.images.map((img) => (
+              <div
+                key={img._id}
+                className="bg-gray-50 rounded-lg overflow-hidden shadow-sm border border-gray-100"
+              >
+                <img
+                  src={img.src}
+                  alt={img._id}
+                  className="w-full h-48 object-cover"
+                />
+                <div
+                  className={`cursor-pointer text-center font-semibold px-3 py-1 ${badgeClass(
+                    img.status === "approved"
+                  )}`}
+                  onClick={() =>
+                    handleImageDecision(
+                      img._id,
+                      img.status === "approved" ? "reject" : "accept"
+                    )
+                  }
+                >
+                  {img.status === "approved" ? "Active" : "Inactive"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 🌟 Final Publish / Reject */}
+      <div className="bg-gradient-to-b from-white to-gray-50 p-6 md:p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
+        {/* Heading */}
+        <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
+          Final Review Decision
+        </h3>
+
+        {/* Status Info */}
+        <p className="text-sm text-gray-600 mb-1">
+          Current Status:{" "}
+          <span
+            className={`font-semibold capitalize ${review.status === "published"
+              ? "text-green-600"
+              : review.status === "rejected"
+                ? "text-red-600"
+                : "text-gray-700"
+              }`}
+          >
+            {review.status}
+          </span>
+        </p>
+
+        {/* Notes if available */}
+        {review.notes && (
+          <div className="text-gray-700 mt-2 max-w-2xl mx-auto">
+            <strong>Admin Notes:</strong> {review.notes}
+          </div>
+        )}
+
+        {/* Helper text */}
+        <p className="text-xs text-gray-400 mt-3">
+          Add or update admin notes before making your final decision.
+        </p>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200 my-5 w-3/4 mx-auto"></div>
+
+        {/* Centered Button */}
+        <div className="flex justify-center">
+          <button
+            onClick={() => setShowStatusModal(true)}
+            className="group relative px-8 py-3 text-white bg-[#F9832B] rounded-full font-semibold text-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+          >
+            <span className="relative z-10">Change Review Status</span>
+            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-[#F9832B] to-[#e86b00] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+          </button>
         </div>
       </div>
+
+
+      {/* Modal */}
+      {showStatusModal && (
+        <AdminUpdateReviewStatus
+          reviewId={review.id}
+          currentStatus={review.status}
+          notes={review.notes}
+          onClose={() => setShowStatusModal(false)}
+          onSuccess={() => {
+            fetchRating();
+            setShowStatusModal(false);
+          }}
+        />
+      )}
+
     </div>
   );
 }

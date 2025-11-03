@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { TiTick } from "react-icons/ti";
 import { RiDeleteBin5Line } from "react-icons/ri";
+import { BASE_URL, IMAGE_URL } from "../../config/Config";
 import { MdEdit } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -42,7 +43,7 @@ function RoleList() {
       }
 
       const res = await axios.get(
-        "http://trofi-backend.apponedemo.top/api/admin/admins-roles",
+        `${BASE_URL}/admin/admins-roles`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -78,8 +79,8 @@ function RoleList() {
       statusFilter === "All"
         ? roles
         : roles.filter(
-            (r) => r.status.toLowerCase() === statusFilter.toLowerCase()
-          );
+          (r) => r.status.toLowerCase() === statusFilter.toLowerCase()
+        );
     if (!search) return base;
     return base.filter(
       (r) =>
@@ -108,7 +109,7 @@ function RoleList() {
       const authData = JSON.parse(localStorage.getItem("broom_auth"));
       const token = authData?.token;
       await axios.delete(
-        `http://trofi-backend.apponedemo.top/api/admin/delete-role/${selectedRoleId}`,
+        `${BASE_URL}/admin/delete-role/${selectedRoleId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Role deleted");
@@ -128,7 +129,7 @@ function RoleList() {
       const token = authData?.token;
       const newStatus = currentStatus === "active" ? "inactive" : "active";
       await axios.patch(
-        `http://trofi-backend.apponedemo.top/api/admin/change-status/${roleId}`,
+        `${BASE_URL}/admin/change-status/${roleId}`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -155,9 +156,8 @@ function RoleList() {
           const { name, status } = info.row.original;
           return (
             <span
-              className={`font-semibold ${
-                status === "inactive" ? "text-red-500" : "text-green-500"
-              }`}
+              className={`font-semibold ${status === "inactive" ? "text-red-500" : "text-green-500"
+                }`}
             >
               {name}
             </span>
@@ -170,11 +170,10 @@ function RoleList() {
         accessorKey: "status",
         cell: (info) => (
           <div
-            className={`flex gap-1 justify-center items-center rounded-full px-4 py-1 ${
-              info.row.original.status === "active"
-                ? "bg-green-100 text-green-500 font-semibold"
-                : "bg-red-100 text-red-500 font-semibold"
-            }`}
+            className={`flex gap-1 justify-center items-center rounded-full px-4 py-1 ${info.row.original.status === "active"
+              ? "bg-green-100 text-green-500 font-semibold"
+              : "bg-red-100 text-red-500 font-semibold"
+              }`}
           >
             <span className="text-[14px] capitalize">
               {info.row.original.status}
@@ -182,42 +181,40 @@ function RoleList() {
           </div>
         ),
       },
-      {
-        header: "Action",
-        cell: (info) => (
-          <div className="flex items-center gap-2 text-[14px] px-4 py-2 text-left">
-            <div
-              onClick={() => navigate(`/RoleUpdate/${info.row.original.id}`)}
-              className="flex justify-center items-center w-[25px] h-[25px] border border-blue-500 rounded hover:bg-blue-500 text-blue-500 hover:text-white cursor-pointer"
-            >
-              <MdEdit className="text-[15px]" />
-            </div>
-            <div
-              onClick={() =>
-                toggleRoleStatus(info.row.original.id, info.row.original.status)
-              }
-              title={`Make ${
-                info.row.original.status === "active" ? "Inactive" : "Active"
-              }`}
-              className={`flex justify-center items-center w-[25px] h-[25px] border rounded
-    border-red-500 text-red-500
-    pointer-events-none cursor-not-allowed opacity-50  ${
-      info.row.original.status === "active"
-        ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-        : "border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-    }`}
-            >
-              <TiTick className="text-[15px]" />
-            </div>
-            {/* <div
-              onClick={() => openDeleteModal(info.row.original.id)}
-              className="flex justify-center items-center w-[25px] h-[25px] border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded cursor-pointer"
-            >
-              <RiDeleteBin5Line className="text-[15px]" />
-            </div> */}
-          </div>
-        ),
-      },
+    //   {
+    //     header: "Action",
+    //     cell: (info) => (
+    //       <div className="flex items-center gap-2 text-[14px] px-4 py-2 text-left">
+    //         <div
+    //           onClick={() => navigate(`/RoleUpdate/${info.row.original.id}`)}
+    //           className="flex justify-center items-center w-[25px] h-[25px] border pointer-events-none cursor-not-allowed border-blue-500 rounded hover:bg-blue-500 text-blue-500 hover:text-white"
+    //         >
+    //           <MdEdit className="text-[15px]" />
+    //         </div>
+    //         <div
+    //           onClick={() =>
+    //             toggleRoleStatus(info.row.original.id, info.row.original.status)
+    //           }
+    //           title={`Make ${info.row.original.status === "active" ? "Inactive" : "Active"
+    //             }`}
+    //           className={`flex justify-center items-center w-[25px] h-[25px] border rounded
+    // border-red-500 text-red-500
+    // pointer-events-none cursor-not-allowed opacity-50  ${info.row.original.status === "active"
+    //               ? "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+    //               : "border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+    //             }`}
+    //         >
+    //           <TiTick className="text-[15px]" />
+    //         </div>
+    //         {/* <div
+    //           onClick={() => openDeleteModal(info.row.original.id)}
+    //           className="flex justify-center items-center w-[25px] h-[25px] border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded cursor-pointer"
+    //         >
+    //           <RiDeleteBin5Line className="text-[15px]" />
+    //         </div> */}
+    //       </div>
+    //     ),
+    //   },
     ],
     [navigate, currentPage, pageSize]
   );
@@ -234,7 +231,7 @@ function RoleList() {
 
   return (
     <div className="main main_page w-full h-full font-Montserrat space-y-4 duration-900">
-      <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/Roles" }]} />
+      <BreadcrumbsNav customTrail={[{ label: "Role List", path: "/RoleList" }]} />
       <div className="flex justify-between items-center">
         <PageTitle title={"All Roles"} />
       </div>
@@ -245,11 +242,10 @@ function RoleList() {
             <li
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`p-2 cursor-pointer capitalize ${
-                statusFilter === status
-                  ? "text-black font-semibold"
-                  : "text-gray-400"
-              }`}
+              className={`p-2 cursor-pointer capitalize ${statusFilter === status
+                ? "text-black font-semibold"
+                : "text-gray-400"
+                }`}
             >
               {status}
             </li>
@@ -283,13 +279,12 @@ function RoleList() {
                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className={`p-3 ${
-                      ["Status", "Action"].includes(
-                        header.column.columnDef.header
-                      )
-                        ? "text-center w-[140px]"
-                        : "text-left"
-                    }`}
+                    className={`p-3 ${["Status", "Action"].includes(
+                      header.column.columnDef.header
+                    )
+                      ? "text-center w-[140px]"
+                      : "text-left"
+                      }`}
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -310,11 +305,10 @@ function RoleList() {
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className={`p-3 ${
-                        cell.column.columnDef.header === "Status"
-                          ? "text-center px-10"
-                          : "text-left"
-                      }`}
+                      className={`p-3 ${cell.column.columnDef.header === "Status"
+                        ? "text-center px-10"
+                        : "text-left"
+                        }`}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -333,8 +327,8 @@ function RoleList() {
                   {statusFilter === "Inactive"
                     ? "No role is inactive."
                     : statusFilter === "Active"
-                    ? "No active roles found."
-                    : "No roles available."}
+                      ? "No active roles found."
+                      : "No roles available."}
                 </td>
               </tr>
             )}

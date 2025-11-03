@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import PageTitle from "../../components/PageTitle/PageTitle";
-import { PlusCircle, Upload, MapPin, Utensils } from "lucide-react";
+import { PlusCircle, Upload, MapPin, Utensils, Info } from "lucide-react";
 import LocationPicker from "../../components/LocationPicker/LocationPicker";
 import { BASE_URL } from "../../config/Config.js";
 import DynamicBreadcrumbs from "../../components/common/BreadcrumbsNav/DynamicBreadcrumbs.jsx";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav.jsx";
+import { STAR_RATINGS } from "../../config/hashtagconfig.js";
 
 function UpdateRestaurant() {
   const { id } = useParams();
@@ -23,6 +26,7 @@ function UpdateRestaurant() {
     address: "",
     country_code: "",
     phone: "",
+    price: "",
     birthYear: "",
     city: "",
     state: "",
@@ -34,7 +38,6 @@ function UpdateRestaurant() {
     description: "",
     longDescription: "",
     hygieneStatus: "general",
-    openingTime: "", // will be in "HH:MM" format for <input type="time" />
     closingTime: "",
     openDays: [], // ["Monday","Tuesday"...]
     dish_type: [], // array of IDs
@@ -42,6 +45,8 @@ function UpdateRestaurant() {
     good_for: [],
     cuisines: [],
     amenities: [],
+    is_best_seller: false,
+    avgRating: 0,
   });
 
   // dropdown options
@@ -54,6 +59,37 @@ function UpdateRestaurant() {
   const [gallery, setGallery] = useState([]);
   const [menuFiles, setMenuFiles] = useState([]);
   const [profileImage, setProfileImage] = useState(null);
+
+  const [existingGallery, setExistingGallery] = useState([]);
+  const [existingMenus, setExistingMenus] = useState([]);
+
+  const [deletedMenus, setDeletedMenus] = useState([]);
+  const [deletedGallery, setDeletedGallery] = useState([]);
+
+  // Add these state variables with your other useState hooks (around line 40-50)
+  const [groups, setGroups] = useState([]);
+  const [groupId, setGroupId] = useState(null);
+  const [groupSearch, setGroupSearch] = useState("");
+  const [showGroupDropdown, setShowGroupDropdown] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+
+  // Group Add Modal States
+  const [groupName, setGroupName] = useState("");
+  const [description, setDescription] = useState("");
+
+
+  // Add with your other useState hooks
+  const [showDishTypeModal, setShowDishTypeModal] = useState(false);
+  const [pendingDishType, setPendingDishType] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false); // optional spinner state
+
+  const [locationAddress, setLocationAddress] = useState("");
+
+
+
+
+
+
 
   const [loading, setLoading] = useState(true);
 
@@ -99,6 +135,55 @@ function UpdateRestaurant() {
     return `${hh}:${mm}`;
   };
 
+  // Add filtered groups logic (after state declarations, around line 60)
+  const filteredGroups = groups.filter((g) =>
+    g.group_name.toLowerCase().includes(groupSearch.toLowerCase())
+  );
+
+
+  // Add handleCreateGroup function (around line 220, before handleChange)
+  const handleCreateGroup = async () => {
+    if (!groupName.trim()) {
+      toast.error("Group name is required");
+      return;
+    }
+
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/admin/restaurant-group`,
+        {
+          group_name: groupName.trim(),
+          description,
+          is_active: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (res.data.success) {
+        toast.success("Group created ✅");
+        setGroups((prev) => [...prev, res.data.data]);
+        setGroupId(res.data.data._id);
+        setGroupName("");
+        setDescription("");
+        setShowGroupModal(false);
+      } else {
+        toast.error(res.data.message);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Something went wrong");
+    }
+  };
+
+
+
   const parseDaysToFullNames = (daysStr) => {
     if (!daysStr) return [];
     const abbMap = {
@@ -126,10 +211,50 @@ function UpdateRestaurant() {
       .filter(Boolean);
   };
 
+  // Add this useEffect to fetch groups (add after other useEffect hooks, around line 180)
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+
+        const res = await axios.get(`${BASE_URL}/admin/restaurant-groups`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (res.data.success) {
+          setGroups(res.data.data);
+        }
+      } catch (err) {
+        toast.error("Failed to load groups");
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  // Add useEffect for dropdown close (after other useEffects, around line 200)
+  useEffect(() => {
+    const close = (e) => {
+      if (!e.target.closest(".relative")) setShowGroupDropdown(false);
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+
+
   // Fetch dropdowns and restaurant details (axios)
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+        const token = authData?.token;
+
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
         const urls = [
           `${BASE_URL}/restro/get-dish-type`,
           `${BASE_URL}/restro/get-cusine`,
@@ -140,7 +265,7 @@ function UpdateRestaurant() {
         const responses = await Promise.all(
           urls.map((u) =>
             axios
-              .get(u)
+              .get(u, { headers })
               .then((r) => r.data)
               .catch(() => ({ data: [] }))
           )
@@ -151,6 +276,8 @@ function UpdateRestaurant() {
         setGoodFors(responses[2].data || []);
         setRestroTypes(responses[3].data || []);
         setAmenities(responses[4].data || []);
+
+
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
       }
@@ -183,6 +310,7 @@ function UpdateRestaurant() {
           address: data.address || "",
           country_code: data.country_code || "",
           phone: data.phone || "",
+          price: data.price || "",
           birthYear: data.birth_year || "",
           city: data.city || "",
           state: data.state || "",
@@ -200,8 +328,9 @@ function UpdateRestaurant() {
           description: data.description || "",
           longDescription: data.long_description || "",
           hygieneStatus: data.hygiene_status || "general",
-          openingTime: parseTimeToInput(rawOpen),
-          closingTime: parseTimeToInput(rawClose),
+          is_best_seller: data.is_best_seller || false,
+          avgRating: data.avgRating ?? 0,
+          closingTime: parseTimeToInput(data.time),
           openDays: parseDaysToFullNames(data.days),
           dish_type: normalizeIdArray(data.dish_type),
           restaurant_type: normalizeIdArray(data.restaurant_type),
@@ -210,6 +339,23 @@ function UpdateRestaurant() {
           amenities: normalizeIdArray(data.amenities),
           role_id: data.role_id || prev.role_id || "",
         }));
+
+        setGroupId(data.group_id?._id || null);
+
+        setExistingMenus(
+          (data.restaurant_menu_images || []).map((img) => ({
+            url: `${BASE_URL.replace("/api", "")}/${img}`, // for displaying
+            path: img, // relative path to send to backend
+          }))
+        );
+
+        setExistingGallery(
+          (data.restaurant_images || []).map((img) => ({
+            url: `${BASE_URL.replace("/api", "")}/${img}`, // for displaying
+            path: img, // relative path to send to backend
+          }))
+        );
+
 
         // If you want to preview existing images (not required), you can store their URLs in a separate state:
         // setExistingImageUrls(data.restaurant_images || []);
@@ -229,10 +375,54 @@ function UpdateRestaurant() {
     const { name, value, type, checked } = e.target;
     if (type === "checkbox") {
       setRestaurantData((prev) => ({ ...prev, [name]: checked }));
+
     } else {
       setRestaurantData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
+  // Add this handler near your other functions inside the component
+  const handleConfirmDishTypeRemove = async (dishType) => {
+    try {
+      setConfirmLoading(true);
+
+      const authData = JSON.parse(localStorage.getItem("trofi_user"));
+      const token = authData?.token;
+      if (!token) {
+        toast.error("Please login first");
+        return;
+      }
+
+      // API call to disable dishes that belong to dishType._id
+      // Ensure your backend endpoint matches this path; change if needed.
+      const res = await axios.put(
+        `${BASE_URL}/admin/disable-dishes-by-type/${dishType._id}`,
+        { restaurantId: id }, // <-- send current restaurant id
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+
+      if (res?.data?.success) {
+        toast.success(`${dishType.name || "Dish Type"} removed. Related dishes disabled.`);
+
+        // Remove the dishType id from restaurantData.dish_type
+        setRestaurantData((prev) => ({
+          ...prev,
+          dish_type: prev.dish_type.filter((id) => id !== dishType._id),
+        }));
+      } else {
+        toast.error(res?.data?.message || "Failed to disable related dishes.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong while disabling dishes.");
+    } finally {
+      setConfirmLoading(false);
+      setShowDishTypeModal(false);
+      setPendingDishType(null);
+    }
+  };
+
 
   const handleSubmit = async () => {
     try {
@@ -244,12 +434,15 @@ function UpdateRestaurant() {
       formData.append("country", restaurantData.country || "");
       formData.append("country_code", restaurantData.country_code || "");
       formData.append("phone", restaurantData.phone || "");
+      formData.append("price", restaurantData.price || "");
       formData.append("birth_year", restaurantData.birthYear || "");
       formData.append("city", restaurantData.city || "");
       formData.append("state", restaurantData.state || "");
       formData.append("latitude", restaurantData.latitude || "");
       formData.append("longitude", restaurantData.longitude || "");
       formData.append("food_type", restaurantData.food_type || "both");
+      formData.append("is_best_seller", restaurantData.is_best_seller);
+      formData.append("avgRating", restaurantData.avgRating || 0);
       formData.append("description", restaurantData.description || "");
       formData.append("long_description", restaurantData.longDescription || "");
       formData.append("dish_type", JSON.stringify(restaurantData.dish_type));
@@ -257,6 +450,9 @@ function UpdateRestaurant() {
         "restaurant_type",
         JSON.stringify(restaurantData.restaurant_type)
       );
+      formData.append("deleted_menus", JSON.stringify(deletedMenus));
+      formData.append("deleted_gallery", JSON.stringify(deletedGallery));
+
       formData.append("good_for", JSON.stringify(restaurantData.good_for));
       formData.append("cuisines", JSON.stringify(restaurantData.cuisines));
       formData.append("amenities", JSON.stringify(restaurantData.amenities));
@@ -264,14 +460,14 @@ function UpdateRestaurant() {
         "hygiene_status",
         restaurantData.hygieneStatus || "general"
       );
-      if (restaurantData.openingTime && restaurantData.closingTime) {
-        formData.append(
-          "time",
-          `${restaurantData.openingTime} to ${restaurantData.closingTime}`
-        );
+      if (restaurantData.closingTime) {
+        formData.append("time", restaurantData.closingTime);
+      }
+      // Update handleSubmit - add this line before formData.append for other fields (around line 260)
+      if (groupId) {
+        formData.append("group_id", groupId);
       }
       if (restaurantData.openDays.length > 0) {
-        // backend may expect abbreviations — transform back if needed
         formData.append("days", restaurantData.openDays.join(", "));
       }
 
@@ -312,15 +508,98 @@ function UpdateRestaurant() {
 
   return (
     <div className="main main_page p-6 min-h-screen duration-900">
-      {/* <Breadcrumbs
+      <BreadcrumbsNav
         customTrail={[
-          {
-            label: "Update Restaurant",
-            path: `/UpdateRestaurant/:${restaurantData.role_id}`,
-          },
+          { label: "Restaurant List", path: "/RestroList" },
+          { label: "Update Restaurant", path: `/UpdateRestaurant/${restaurantData.id}` },
         ]}
-      /> */}
+      />
       <PageTitle title={"Update Restaurant"} />
+
+      {/* ================== Average Rating Section ================== */}
+      <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl shadow-lg mb-4 mt-4 border-2 border-orange-200">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          {/* Left Side - Title & Description */}
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+              <span className="text-3xl">⭐</span>
+              Average Rating
+            </h2>
+            <p className="text-sm text-gray-600 mb-2">
+              Click on a star to set the restaurant's rating
+            </p>
+
+            {/* Selected Rating with Icon */}
+            {restaurantData.avgRating > 0 && restaurantData.avgRating <= 5 ? (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-600">Selected Rating:</span>
+                <img
+                  src={STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.img}
+                  alt={STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.label}
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="font-bold text-orange-600 text-base">
+                  {STAR_RATINGS[Math.round(restaurantData.avgRating) - 1]?.label}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-500">No rating set</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side - Star Selection Row */}
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            {/* Star Images Row - Click to Select */}
+            <div className="flex items-center gap-2">
+              {STAR_RATINGS.map((rating, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setRestaurantData((prev) => ({ ...prev, avgRating: index + 1 }));
+                  }}
+                  className={`cursor-pointer transition-all duration-200 p-2 rounded-lg ${Math.round(restaurantData.avgRating) === index + 1
+                    ? "bg-orange-200 shadow-md scale-110"
+                    : "hover:bg-orange-100 hover:scale-105"
+                    }`}
+                  title={rating.label}
+                >
+                  <img
+                    src={rating.img}
+                    alt={rating.label}
+                    className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Rating Display Badge - Editable Input */}
+            <div className="relative">
+              <input
+                type="number"
+                name="avgRating"
+                value={restaurantData.avgRating || 0}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? 0 : parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0 && val <= 5) {
+                    setRestaurantData((prev) => ({ ...prev, avgRating: val }));
+                  }
+                }}
+                step="0.1"
+                min="0"
+                max="5"
+                className="w-24 px-3 py-2 bg-white rounded-full shadow-md border-2 border-orange-200 text-center text-lg font-bold text-orange-600 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 outline-none"
+                placeholder="0.0"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs pointer-events-none">
+                ★
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/*  Basic Info */}
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200 mt-5">
         <h2
@@ -329,36 +608,79 @@ function UpdateRestaurant() {
         >
           <Utensils size={20} /> Basic Information
         </h2>
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={restaurantData.email || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-600 font-medium mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={restaurantData.password || ""}
-              onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-            />
-          </div>
-        </div> */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           {" "}
+
+          {/* Restaurant Group */}
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Restaurant Group
+            </label>
+
+            <div className="relative w-full">
+              {/* Main Select Button */}
+              <button
+                onClick={() => setShowGroupDropdown(!showGroupDropdown)}
+                type="button"
+                className="w-full border border-gray-300 p-2 rounded-lg bg-white text-gray-700 shadow-sm 
+text-left flex justify-between items-center focus:ring focus:ring-orange-300 focus:border-orange-400 outline-none"
+              >
+                {groupId
+                  ? groups.find((g) => g._id === groupId)?.group_name
+                  : "Select Group"}
+
+                <span className="text-gray-500 text-xs">▼</span>
+              </button>
+
+              {/* Dropdown */}
+              {showGroupDropdown && (
+                <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-md mt-1 max-h-60 overflow-auto">
+                  {/* Search input inside dropdown */}
+                  <div className="p-2 border-b">
+                    <input
+                      type="text"
+                      value={groupSearch}
+                      onChange={(e) => setGroupSearch(e.target.value)}
+                      placeholder="Search..."
+                      className="w-full px-3 py-1 rounded-md border border-gray-300 text-sm 
+      focus:ring focus:ring-orange-300 outline-none"
+                    />
+                  </div>
+
+                  {/* Group List */}
+                  {filteredGroups.length > 0 ? (
+                    filteredGroups.map((g) => (
+                      <div
+                        key={g._id}
+                        onClick={() => {
+                          setGroupId(g._id);
+                          setShowGroupDropdown(false);
+                        }}
+                        className="px-3 py-2 hover:bg-orange-100 cursor-pointer text-sm text-gray-700"
+                      >
+                        {g.group_name}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-3 text-center text-gray-500 text-sm">
+                      No group found
+                    </div>
+                  )}
+
+                  <div className="border-t">
+                    <button
+                      type="button"
+                      className="text-blue-500 text-xs hover:underline p-2"
+                      onClick={() => setShowGroupModal(true)}
+                    >
+                      + Create New Group
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <div>
             <label className="block text-gray-600 font-medium mb-2">
               Restaurant Name
@@ -368,38 +690,64 @@ function UpdateRestaurant() {
               name="name"
               value={restaurantData.name}
               onChange={handleChange}
-              className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
+              placeholder="Enter restaurant name"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm !h-[42px] !text-base focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
-          <div>
+
+          {/* <div>
             <label className="block text-gray-600 font-medium mb-2">Role</label>
             <select
-  name="role_id"
-  value={restaurantData.role_id}
-  onChange={handleChange}
-  disabled
-  className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 text-gray-700 cursor-not-allowed"
->
-  <option value="68aead7b9db7925a61de75bb">Restro Owner</option>
-</select>
+              name="role_id"
+              value={restaurantData.role_id}
+              onChange={handleChange}
+              disabled
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-gray-100 text-gray-700 cursor-not-allowed"
+            >
+              <option value="68aead7b9db7925a61de75bb">Restro Owner</option>
+            </select>
 
-          </div>
+          </div> */}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
           <div>
             <label className="block text-gray-600 font-medium mb-2">
               Phone Number
             </label>
-            <PhoneInput
-              country="us" // default country
-              value={restaurantData.phone}
-              onChange={(phone) =>
-                setRestaurantData((prev) => ({ ...prev, phone }))
-              }
-              inputClass="!w-full !h-12 !p-3 !pl-14 !rounded-lg !border-gray-300"
+            <div className="w-full">
+              <PhoneInput
+                country="in"
+                value={restaurantData.phone}
+                onChange={(phone, country) =>
+                  setRestaurantData((prev) => ({
+                    ...prev,
+                    phone,
+                    country_code: `+${country.dialCode}`,
+                  }))
+                }
+                inputClass="!w-full !h-[42px] !text-base !pl-12 !pr-3 !border !border-gray-300 !rounded-lg !shadow-sm !focus:ring !focus:ring-[#F9832B] !focus:border-[#F9832B] !outline-none"
+                buttonClass="!border-gray-300 !rounded-l-lg"
+                containerClass="!w-full"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-gray-600 font-medium mb-2">
+              Price Per Person (₹)
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={restaurantData.price || ""}
+              onChange={handleChange}
+              placeholder="Enter average cost per person"
+              className="w-full border border-gray-300 p-2 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
             />
           </div>
         </div>
+
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
           <div>
@@ -432,11 +780,12 @@ function UpdateRestaurant() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 mb-6">
           {/* Profile Image */}
+          {/* Menu Upload Section */}
           <div>
-            {/* Menu Upload */}
             <label className="block mb-2 font-medium text-gray-600">
               Upload Menu (PDF/Images)
             </label>
+
             <input
               id="menuInput"
               type="file"
@@ -452,33 +801,68 @@ function UpdateRestaurant() {
               onClick={() => document.getElementById("menuInput").click()}
               className="px-4 py-2 bg-[#F9832B] text-white rounded-lg cursor-pointer shadow hover:shadow-md"
             >
-              Choose Images
+              Choose Files
             </button>
+
             <div className="flex gap-4 flex-wrap mt-4">
-              {menuFiles.map((file, idx) => (
+              {/* ✅ Existing Menu Images */}
+              {existingMenus.map((item, idx) => (
                 <div
-                  key={idx}
+                  key={`menu-existing-${idx}`}
                   className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
                 >
-                  {/* File name */}
-                  <p className="text-xs text-gray-700 truncate mb-1">
-                    {file.name}
-                  </p>
+                  {item.url.endsWith(".pdf") ? (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-xs text-blue-600 underline"
+                    >
+                      View PDF
+                    </a>
+                  ) : (
+                    <img
+                      src={item.url}
+                      alt={`menu-existing-${idx}`}
+                      className="w-20 h-20 object-cover rounded-md border mx-auto"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeletedMenus((prev) => [...prev, item.path]); // send relative path
+                      setExistingMenus((prev) => prev.filter((_, i) => i !== idx));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
 
-                  {/* Image preview */}
-                  <img
-                    src={URL.createObjectURL(file)}
-                    alt={`menu-${idx}`}
-                    className="w-20 h-20 object-cover rounded-md border mx-auto"
-                  />
 
-                  {/* Remove button */}
+              {/* ✅ Newly Uploaded Menus */}
+              {menuFiles.map((file, idx) => (
+                <div
+                  key={`menu-new-${idx}`}
+                  className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
+                >
+                  <p className="text-xs text-gray-700 truncate mb-1">{file.name}</p>
+                  {file.type === "application/pdf" ? (
+                    <p className="text-xs text-blue-600">PDF</p>
+                  ) : (
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`menu-${idx}`}
+                      className="w-20 h-20 object-cover rounded-md border mx-auto"
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() =>
                       setMenuFiles((prev) => prev.filter((_, i) => i !== idx))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 cursor-pointer flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full cursor-pointer w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
@@ -487,7 +871,9 @@ function UpdateRestaurant() {
             </div>
           </div>
 
-          {/* Gallery */}
+
+
+          {/* Gallery Section */}
           <div>
             <label className="block mb-2 font-medium text-gray-600">
               Gallery Uploads
@@ -500,46 +886,58 @@ function UpdateRestaurant() {
               accept="image/*"
               multiple
               onChange={(e) =>
-                setGallery([...gallery, ...Array.from(e.target.files)])
+                setGallery((prev) => [...prev, ...Array.from(e.target.files)])
               }
               className="hidden"
             />
 
-            {/* Custom button to trigger input */}
+            {/* Trigger button */}
             <button
               type="button"
               onClick={() => document.getElementById("galleryInput").click()}
-              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow cursor-pointer  hover:shadow-md"
+              className="px-4 py-2 bg-[#F9832B] text-white rounded-lg shadow cursor-pointer hover:shadow-md"
             >
               Choose Images
             </button>
 
-            {/* Previews with file names */}
+            {/* ✅ Show existing + newly uploaded gallery images */}
             <div className="flex gap-4 flex-wrap mt-4">
+              {/* Existing gallery images */}
+              {existingGallery.map((item, idx) => (
+                <div key={`gallery-existing-${idx}`} className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2">
+                  <img src={item.url} alt={`existing-gallery-${idx}`} className="w-20 h-20 object-cover rounded-md border mx-auto" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeletedGallery((prev) => [...prev, item.path]);
+                      setExistingGallery((prev) => prev.filter((_, i) => i !== idx));
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+
+
+              {/* Newly uploaded gallery images */}
               {gallery.map((file, idx) => (
                 <div
-                  key={idx}
+                  key={`gallery-new-${idx}`}
                   className="relative w-24 text-center border rounded-lg shadow-sm bg-gray-50 p-2"
                 >
-                  {/* File name */}
-                  <p className="text-xs text-gray-700 truncate mb-1">
-                    {file.name}
-                  </p>
-
-                  {/* Image preview */}
+                  <p className="text-xs text-gray-700 truncate mb-1">{file.name}</p>
                   <img
                     src={URL.createObjectURL(file)}
                     alt={`gallery-${idx}`}
                     className="w-20 h-20 object-cover rounded-md border mx-auto"
                   />
-
-                  {/* Remove button */}
                   <button
                     type="button"
                     onClick={() =>
                       setGallery((prev) => prev.filter((_, i) => i !== idx))
                     }
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full cursor-pointer w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-md"
                   >
                     ✕
                   </button>
@@ -547,6 +945,7 @@ function UpdateRestaurant() {
               ))}
             </div>
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -609,7 +1008,7 @@ function UpdateRestaurant() {
               htmlFor="birthYear"
               className="block mb-1 font-medium text-gray-600"
             >
-              Select Birth Year
+              Established Year
             </label>
             <select
               name="birthYear"
@@ -632,18 +1031,6 @@ function UpdateRestaurant() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block mb-1 font-medium text-gray-600">
-                Opening Time
-              </label>
-              <input
-                type="time"
-                name="openingTime"
-                value={restaurantData.openingTime}
-                onChange={handleChange}
-                className="w-full border border-gray-300 p-3 rounded-lg shadow-sm focus:ring focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
-              />
-            </div>
             <div>
               <label className="block mb-1 font-medium text-gray-600">
                 Closing Time
@@ -687,11 +1074,10 @@ function UpdateRestaurant() {
                     });
                   }}
                   className={`px-4 py-2 rounded-full text-sm cursor-pointer font-medium shadow-sm transition 
-                  ${
-                    isSelected
+                  ${isSelected
                       ? "bg-[#F9832B] text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                    }`}
                 >
                   {day}
                 </button>
@@ -700,12 +1086,57 @@ function UpdateRestaurant() {
           </div>
         </div>
       </div>
+
+
+      {/* ================== Best Seller Section ================== */}
+      <div className="mt-6 mb-4 bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          🏆 Best Seller
+        </h2>
+
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 text-gray-700 font-medium">
+            <input
+              type="radio"
+              name="is_best_seller"
+              value="true"
+              checked={restaurantData.is_best_seller === true}
+              onChange={() =>
+                setRestaurantData((prev) => ({ ...prev, is_best_seller: true }))
+              }
+              className="w-5 h-5 accent-[#F9832B] cursor-pointer"
+            />
+            Yes
+          </label>
+
+          <label className="flex items-center gap-2 text-gray-700 font-medium">
+            <input
+              type="radio"
+              name="is_best_seller"
+              value="false"
+              checked={restaurantData.is_best_seller === false}
+              onChange={() =>
+                setRestaurantData((prev) => ({ ...prev, is_best_seller: false }))
+              }
+              className="w-5 h-5 accent-[#F9832B] cursor-pointer"
+            />
+            No
+          </label>
+        </div>
+
+        <p className="text-sm text-gray-500 mt-3">
+          Select <span className="text-[#F9832B] font-medium">Yes</span> if this
+          restaurant should appear as a featured or popular restaurant.
+        </p>
+      </div>
+
+
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
           style={{ color: "#F9832B" }}
         >
-          <PlusCircle size={20} /> Additional Details
+          <Info size={20} /> Additional Details
         </h2>
 
         {/* Helper function for rendering selection buttons */}
@@ -713,56 +1144,134 @@ function UpdateRestaurant() {
           { label: "Dish Type", field: "dish_type", options: dishTypes },
           { label: "Cuisines", field: "cuisines", options: cuisines },
           { label: "Good For", field: "good_for", options: goodFors },
-          {
-            label: "Restaurant Type",
-            field: "restaurant_type",
-            options: restroTypes,
-          },
+          { label: "Restaurant Type", field: "restaurant_type", options: restroTypes },
           { label: "Amenities", field: "amenities", options: amenities },
         ].map(({ label, field, options }) => (
-          <div
-            key={field}
-            className="mb-6 shadow-xl p-3 rounded-lg bg-gray-100"
-          >
-            <label className="block mb-2 text-lg font-bold text-gray-700">
-              {label}
-            </label>
+          <div key={field} className="mb-6 shadow-xl p-3 rounded-lg bg-gray-100">
+            <label className="block mb-2 text-lg font-bold text-gray-700">{label}</label>
             <div className="flex gap-3 flex-wrap">
               {options.map((item) => {
-                const isSelected = restaurantData[field].includes(item._id);
+                const isSelected = Array.isArray(restaurantData[field]) && restaurantData[field].includes(item._id);
+
+                // Label text fallback (same as your original)
+                const displayName =
+                  item.name ||
+                  item.amenity_name ||
+                  item.cuisine_name ||
+                  item.good_for_name ||
+                  item.restaurant_type_name ||
+                  "Unnamed";
+
                 return (
                   <button
                     key={item._id}
                     type="button"
-                    onClick={() =>
-                      setRestaurantData((prev) => {
-                        const updatedArray = isSelected
-                          ? prev[field].filter((id) => id !== item._id)
-                          : [...prev[field], item._id];
-                        return { ...prev, [field]: updatedArray };
-                      })
-                    }
-                    className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer shadow-sm transition ${
-                      isSelected
-                        ? "bg-[#F9832B] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    onClick={() => {
+                      // Special behavior ONLY for Dish Type unselect -> show modal
+                      if (label === "Dish Type") {
+                        if (isSelected) {
+                          // user is attempting to remove a selected dish type -> ask for confirmation
+                          setPendingDishType(item);
+                          setShowDishTypeModal(true);
+                        } else {
+                          // normal select
+                          setRestaurantData((prev) => ({
+                            ...prev,
+                            [field]: [...(prev[field] || []), item._id],
+                          }));
+                        }
+                      } else {
+                        // Keep other fields exactly as before (toggle behavior)
+                        setRestaurantData((prev) => {
+                          const updatedArray = isSelected
+                            ? (prev[field] || []).filter((id) => id !== item._id)
+                            : [...(prev[field] || []), item._id];
+                          return { ...prev, [field]: updatedArray };
+                        });
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer shadow-sm transition ${isSelected
+                      ? "bg-[#F9832B] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
-                    {item.name ||
-                      item.amenity_name ||
-                      item.cuisine_name ||
-                      item.good_for_name ||
-                      item.restaurant_type_name ||
-                      "Unnamed"}
+                    {displayName}
                   </button>
                 );
               })}
             </div>
           </div>
         ))}
+
+
+
+        {/* Dish Type confirmation modal (only displayed when attempting to remove a selected Dish Type) */}
+        {showDishTypeModal && pendingDishType && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* backdrop */}
+            <div
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => {
+                if (!confirmLoading) {
+                  setShowDishTypeModal(false);
+                  setPendingDishType(null);
+                }
+              }}
+            />
+
+            {/* modal card */}
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 z-10">
+              {/* Close */}
+              <button
+                onClick={() => {
+                  if (!confirmLoading) {
+                    setShowDishTypeModal(false);
+                    setPendingDishType(null);
+                  }
+                }}
+                className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-lg"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">Remove Dish Type</h3>
+              <p className="text-gray-600 text-sm mb-6">
+                If you remove{" "}
+                <span className="font-semibold text-gray-800">{pendingDishType.name || "this dish type"}</span>, all related dishes will be{" "}
+                <span className="text-red-500 font-semibold">disabled</span>. Do you want to continue?
+              </p>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    if (!confirmLoading) {
+                      setShowDishTypeModal(false);
+                      setPendingDishType(null);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer"
+                  disabled={confirmLoading}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={() => handleConfirmDishTypeRemove(pendingDishType)}
+                  className={`px-4 py-2 rounded-lg text-white cursor-pointer ${confirmLoading ? "bg-[#e67600] opacity-80" : "bg-[#F9832B] hover:bg-[#e67600]"}`}
+                  disabled={confirmLoading}
+                >
+                  {confirmLoading ? "Processing..." : "Confirm"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
+
       {/* Location Info */}
+
       <div className="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-200">
         <h2
           className="text-xl font-semibold flex items-center gap-2 mb-4 border-b pb-2"
@@ -771,7 +1280,7 @@ function UpdateRestaurant() {
           <MapPin size={20} /> Location Details
         </h2>
 
-        <input
+        {/* <input
           type="text"
           name="address"
           placeholder="Full Address + Landmark"
@@ -805,30 +1314,53 @@ function UpdateRestaurant() {
             onChange={handleChange}
             className="border border-gray-300 p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F9832B] focus:border-[#F9832B] outline-none"
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3"></div>
+        </div> */}
 
         {/* ✅ Interactive Map */}
-        <div className="w-full h-72 bg-white p-1 rounded-xl overflow-hidden shadow-md">
+        <div className="w-full h-100 bg-white p-1 rounded-xl overflow-hidden shadow-md">
           <LocationPicker
-            onLocationSelect={({ lat, lng }) =>
-              setRestaurantData({
-                ...restaurantData,
+            defaultLocation={
+              restaurantData.latitude && restaurantData.longitude
+                ? {
+                  lat: parseFloat(restaurantData.latitude),
+                  lng: parseFloat(restaurantData.longitude),
+                }
+                : null
+            }
+            defaultAddress={locationAddress}
+            onLocationSelect={({ lat, lng, address, streetAddress, city, state, postalCode }) => {
+              setRestaurantData((prev) => ({
+                ...prev,
                 latitude: lat,
                 longitude: lng,
-              })
-            }
+                // Update address fields if they are provided
+                ...(streetAddress && { address: streetAddress }),
+                ...(city && { city }),
+                ...(state && { state }),
+                ...(postalCode && { postalCode }),
+              }));
+              setLocationAddress(address || "");
+            }}
           />
         </div>
 
-        {/* Show selected lat/lng */}
+        {/* Show selected address */}
         {restaurantData.latitude != null &&
           restaurantData.longitude != null && (
-            <p className="mt-3 text-gray-700">
-              📍 Selected: {parseFloat(restaurantData.latitude).toFixed(5)},{" "}
-              {parseFloat(restaurantData.longitude).toFixed(5)}
-            </p>
+            <div className="mt-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+              <p className="text-gray-700 flex items-start gap-2">
+                <span className="text-lg">📍</span>
+                <span className="flex-1">
+                  <strong className="text-orange-600">Selected Location:</strong>
+                  <br />
+                  {locationAddress || "Loading address..."}
+                </span>
+              </p>
+
+            </div>
+
           )}
+
       </div>
       <button
         className="text-white font-semibold px-6 py-3 cursor-pointer rounded-lg shadow-md"
@@ -837,8 +1369,87 @@ function UpdateRestaurant() {
       >
         Update Restaurant
       </button>
+
     </div>
+
+
   );
+  // Add the Group Modal JSX before the closing </div> of the main component (before the last </div>, around line 850)
+  {
+    showGroupModal && (
+      <AnimatePresence>
+        <motion.div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 md:p-6"
+          >
+            <h2 className="text-lg md:text-xl font-semibold text-gray-700 mb-4">
+              Create Restaurant Group
+            </h2>
+
+            {/* Form */}
+            <div className="space-y-5">
+              {/* Group Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Group Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  placeholder="Enter Group Name"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-[#F9832B] outline-none text-sm"
+                  placeholder="Enter Description"
+                  rows={3}
+                ></textarea>
+              </div>
+
+              {/* Footer Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 cursor-pointer font-medium text-sm transition"
+                  onClick={() => {
+                    setGroupName("");
+                    setDescription("");
+                    setShowGroupModal(false);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="px-4 py-2 rounded-lg bg-[#F9832B] text-white hover:bg-[#e67600] cursor-pointer font-medium text-sm transition"
+                  onClick={handleCreateGroup}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
 }
 
 export default UpdateRestaurant;

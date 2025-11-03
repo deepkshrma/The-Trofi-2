@@ -42,27 +42,75 @@ import UpdateAdmin from "./Pages/Admin/UpdateAdmin";
 import UpdateDishes from "./Pages/Dishes/UpdateDishes";
 import HashtagList from "./Pages/HashTag/HashtagList";
 import CreateHashtag from "./Pages/HashTag/CreateHashtag";
+import FAQList from "./Pages/FAQ/FAQList";
+import CreateFAQ from "./Pages/FAQ/CreateFAQ";
+import NotFound from "./Pages/NotFound/NotFound";
+import QueryFAQ from "./Pages/FAQ/QueryFAQ";
+import FAQInDetail from "./Pages/FAQ/FAQInDetail";
+import QueryFAQSee from "./Pages/FAQ/QueryFAQSee";
+import Policies from "./Pages/Policies/Policies";
+import PoliciesList from "./Pages/Policies/PoliciesList";
+import CreatePolicy from "./Pages/Policies/CreatePolicy";
+import AppFeedback from "./Pages/FAQ/AppFeedback";
+import AppFeedbackSee from "./Pages/FAQ/AppFeedbackSee";
+import RestroOwnerProfile from "./Pages/RestroOwner/RestroOwnerProfile";
+import RestaurantProfile from "./Pages/RestroOwner/RestaurantProfile";
+import RestaurantDishes from "./Pages/RestroOwner/RestaurantDishes";
+import RestaurantReviews from "./Pages/RestroOwner/RestaurantReviews";
+import SingleDishReview from "./Pages/RestroOwner/SingleDishReview";
+import NotificationList from "./Pages/Notification/NotificationList";
+import NotificationView from "./Pages/Notification/NotificationView";
+import NotificationPost from "./Pages/Notification/NotificationPost";
+import ReportList from "./Pages/Reports/ReportList";
+import RestroReportDetails from "./Pages/Reports/RestroReportDetails";
+import PermissionAssign from "./Pages/Permission/PermissionAssign";
+import DishDetails from "./Pages/Dishes/DishDetails";
+import PermissionAssignRestro from "./Pages/Permission/PermissionAssignRestro";
+import CreateGroup from "./Pages/Restaurant/CreateGroup";
+import RestroGroup from "./Pages/Restaurant/RestroGroup";
+import RestroGroupDetail from "./Pages/Restaurant/RestroGroupDetail";
+import DeletedUserList from "./Pages/User/DeletedUserList";
+import DeletedUserDetails from "./Pages/User/DeletedUserDetails";
+import RestroDishDetails from "./Pages/RestroOwner/RestroDishDetails";
+import ReviewDetails from "./Pages/RestroOwner/ReviewDetails";
+import CreateReview from "./Pages/Reviews/Admin/CreateReview";
+import AdminReview from "./Pages/Reviews/Admin/AdminReview";
+import AdminProfileView from "./Pages/Admin/AdminProfileView";
+import { Create } from "@mui/icons-material";
+import CreateRestroDish from "./Pages/RestroOwner/CreateRestroDish";
 
 const Allroutes = () => {
   const [authData, setAuthData] = useState(() =>
     JSON.parse(localStorage.getItem("trofi_user"))
   );
+
   return (
     <ContextApi.Provider value={{ authData, setAuthData }}>
       <Router>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Login />} />
           <Route path="/Login" element={<Login />} />
+
+          {/* Protected Routes for admin + superadmin */}
           <Route element={<Layout />}>
-            <Route element={<ProtectedRoute />}>
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["admin", "superadmin"]} />
+              }
+            >
               <Route path="/Dashboard" element={<Dashboard />} />
               <Route path="/RoleList" element={<RoleList />} />
               <Route path="/RoleCreate" element={<RoleCreate />} />
+              <Route path="/PermissionAssign/:type/:id" element={<PermissionAssign />} />
+              <Route path="/PermissionAssignRestro/:type/:id" element={<PermissionAssignRestro />} />
               <Route path="/AdminProfile" element={<AdminProfile />} />
               <Route path="/CreateAdmin" element={<CreateAdmin />} />
               <Route path="/UpdateAdmin/:id" element={<UpdateAdmin />} />
               <Route path="/AdminList" element={<AdminList />} />
               <Route path="/UserList" element={<UserList />} />
+              <Route path="/DeletedUserList" element={<DeletedUserList />} />
+              <Route path="/DeletedUserDetails/:id" element={<DeletedUserDetails />} />
               <Route path="/RestroAdd" element={<RestroAdd />} />
               <Route path="/RestroList" element={<RestroList />} />
               <Route path="/UserProfile" element={<UserProfile />} />
@@ -75,16 +123,12 @@ const Allroutes = () => {
               <Route path="/RestroGoodFor/:id" element={<RestroGoodFor />} />
               <Route path="/RestroCuisine" element={<RestroCuisine />} />
               <Route path="/RestroCuisine/:id" element={<RestroCuisine />} />
-
               <Route
                 path="/RestroAmenityList"
                 element={<RestroAmenityList />}
               />
               <Route path="/RestroTypeList" element={<RestroTypeList />} />
-              <Route
-                path="/RestroCuisineList"
-                element={<RestroCuisineList />}
-              />
+              <Route path="/RestroCuisineList" element={<RestroCuisineList />} />
               <Route
                 path="/RestroGoodForList"
                 element={<RestroGoodForList />}
@@ -94,21 +138,15 @@ const Allroutes = () => {
                 element={<UpdateRestaurant />}
               />
               <Route path="/UpdateRestaurant" element={<UpdateRestaurant />} />
-              <Route path="/AddDishes" element={<AddDishes />} />
+              <Route path="/AddDishes/:restaurantId" element={<AddDishes />} />
               <Route path="/UpdateDishes/:id" element={<UpdateDishes />} />
               <Route path="/AddDishes/:id" element={<AddDishes />} />
-
+              <Route path="/DishDetails/:id" element={<DishDetails />} />
               <Route path="/RestroDishType" element={<RestroDishType />} />
-              <Route
-                path="/RestroDishTypeList"
-                element={<RestroDishTypeList />}
-              />
-              <Route path="/DishesList" element={<DishesList />} />
+              <Route path="/RestroDishTypeList" element={<RestroDishTypeList />} />
+              <Route path="/DishesList/:restaurantId" element={<DishesList />} />
               <Route path="/RestroProfile" element={<RestroProfile />} />
-              <Route
-                path="/RestroDishCategory"
-                element={<RestroDishCategory />}
-              />
+              <Route path="/RestroDishCategory" element={<RestroDishCategory />} />
               <Route
                 path="/RestroDishCategoryList"
                 element={<RestroDishCategoryList />}
@@ -127,20 +165,64 @@ const Allroutes = () => {
                 element={<RestaurantReviewList />}
               />
               <Route path="/RestaurantReview" element={<RestaurantReview />} />
+              <Route
+                path="/RestaurantReview/:id"
+                element={<RestaurantReview />}
+              />
               <Route path="/DishReviewList" element={<DishReviewList />} />
               <Route path="/DishReview" element={<DishReview />} />
+              <Route path="/DishReview/:id" element={<DishReview />} />
+              <Route path="/HashtagList" element={<HashtagList />} />
+              <Route path="/CreateHashtag" element={<CreateHashtag />} />
+              <Route path="/RoleUpdate/:id" element={<UpdateRole />} />
+              <Route path="/FAQList" element={<FAQList />} />
+              <Route path="/CreateFAQ" element={<CreateFAQ />} />
+              <Route path="/FAQInDetail/:id" element={<FAQInDetail />} />
+              <Route path="/QueryFAQ" element={<QueryFAQ />} />
+              <Route path="/QueryFAQSee/:id" element={<QueryFAQSee />} />
+              <Route path="/Policies/:id" element={<Policies />} />
+              <Route path="/PoliciesList" element={<PoliciesList />} />
+              <Route path="/CreatePolicy" element={<CreatePolicy />} />
+              <Route path="/AppFeedback" element={<AppFeedback />} />
+              <Route path="/AppFeedback/:id" element={<AppFeedbackSee />} />
+              <Route path="/NotificationList" element={<NotificationList />} />
+              <Route path="/NotificationView" element={<NotificationView />} />
+              <Route path="/NotificationView?notificationId=${item._id}" element={<NotificationView />} />
+              <Route path="/NotificationPost" element={<NotificationPost />} />
+              <Route path="/ReportList" element={<ReportList />} />
+              <Route path="/RestroReportDetails/:id" element={<RestroReportDetails />} />
+              <Route path="/CreateGroup" element={<CreateGroup />} />
+              <Route path="/UpdateGroup/:id" element={<CreateGroup />} />
+              <Route path="/RestroGroup" element={<RestroGroup />} />
+              <Route path="/GroupInDetail/:id" element={<RestroGroupDetail />} />
+              <Route path="/CreateReview" element={<CreateReview />} />
+              <Route path="/AdminReview" element={<AdminReview />} />
+              <Route path="/AdminProfileView/:id" element={<AdminProfileView />} />
+            </Route>
+          </Route>
+
+          {/* Protected Routes for restaurant_owner */}
+          <Route element={<Layout />}>
+            <Route
+              element={<ProtectedRoute allowedRoles={["restaurant_owner"]} />}
+            >
               <Route
                 path="/RestroOwnerDashboard"
                 element={<RestroOwnerDashboard />}
               />
-              <Route path="/HashtagList" element={<HashtagList />} />
-              <Route path="/CreateHashtag" element={<CreateHashtag />} />
-              <Route
-                path="/RoleUpdate/:id"
-                element={<UpdateRole />}
-              />
+              <Route path="/RestroOwnerProfile" element={<RestroOwnerProfile />} />
+              <Route path="/RestaurantProfile" element={<RestaurantProfile />} />
+              <Route path="/RestaurantDishes" element={<RestaurantDishes />} />
+              <Route path="/RestaurantReviews" element={<RestaurantReviews />} />
+              <Route path="/ReviewDetails/:reviewId" element={<ReviewDetails />} />
+              <Route path="/SingleDishReview/:id" element={<SingleDishReview />} />
+              <Route path="/RestroDishDetails/:id" element={<RestroDishDetails />} />
+              <Route path="/AddDishesRestro" element={<CreateRestroDish />} />
             </Route>
           </Route>
+
+          {/* Fallback 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ContextApi.Provider>

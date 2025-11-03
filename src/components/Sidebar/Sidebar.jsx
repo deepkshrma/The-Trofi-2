@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaChevronDown, FaCog } from "react-icons/fa";
-import { FaStore, FaConciergeBell,FaCommentDots } from "react-icons/fa";
+import { FaStore, FaConciergeBell, FaCommentDots } from "react-icons/fa";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import PeopleIcon from "@mui/icons-material/People";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import headerlogo from "/trofititle.png";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import DescriptionIcon from "@mui/icons-material/Description";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 /* 🔹 Recursive Sidebar Item */
 const SidebarItem = ({
@@ -56,9 +59,8 @@ const SidebarItem = ({
             {item.name}
           </div>
           <FaChevronDown
-            className={`w-3 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`}
+            className={`w-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+              }`}
           />
         </div>
       ) : (
@@ -108,223 +110,388 @@ function Sidebar({ setIs_Toggle, isToggle }) {
   const [activeItem, setActiveItem] = useState("Dashboard");
   const location = useLocation();
   const navigate = useNavigate();
-  const userRole = "admin";
+  const storedUser = JSON.parse(localStorage.getItem("trofi_user"));
+  const userRole = storedUser?.role || "restaurant_owner";
   const activePath = location.pathname;
 
-  const filteredSidebarData = [
-    {
-      section: null,
-      items: [
-        ...(userRole === "admin"
-          ? [
-              {
-                name: "Dashboard",
-                icon: <DashboardIcon className="w-4 h-4" />,
-                link: "/Dashboard",
-                dropdown: false,
-                // subItems: [{ name: "Dashboard", link: "/Dashboard" }],
-              },
-            ]
-          : []),
-        ...(userRole === "superadmin"
-          ? [
-              {
-                name: "Dashboard",
-                icon: <DashboardIcon className="w-4 h-4" />,
-                link: "#",
-                dropdown: false,
-                subItems: [{ name: "Dashboard", link: "/Dashboard" }],
-              },
-            ]
-          : []),
-      ],
-    },
-    {
-      section: "",
-      items: [
-        {
-          name: "Admin Management",
-          icon: <AdminPanelSettingsIcon />,
-          link: "#",
-          dropdown: true,
-          subItems: [{ name: "Admins", link: "AdminList", dropdown: false }],
-        },
-      ],
-      border: true,
-    },
-    {
-      section: "",
-      items: [
-        {
-          name: "Role Management",
-          icon: <GroupWorkIcon />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            // { name: "Add Role", link: "RoleCreate", dropdown: false },
-            { name: "Roles", link: "RoleList", dropdown: false },
-          ],
-        },
-      ],
-      border: true,
-    },
-    {
-      section: "",
-      items: [
-        {
-          name: "User Management",
-          icon: <PeopleIcon />,
-          link: "#",
-          dropdown: true,
-          subItems: [{ name: "Users", link: "UserList", dropdown: false }],
-        },
-      ],
-      border: true,
-    },
-    {
-      section: "",
-      items: [
-        {
-          name: "Restaurant Management",
-          icon: <FaCog />,
-          link: "#",
-          dropdown: true,
-          subItems: [
+  // Role-based Sidebar Data
+  const sidebarDataByRole = {
+    superadmin: [
+      {
+        section: null,
+        items: [
+          {
+            name: "Dashboard",
+            icon: <DashboardIcon className="w-4 h-4" />,
+            link: "/Dashboard",
+            dropdown: false,
+          },
+        ],
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Admin Management",
+            icon: <AdminPanelSettingsIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Admins", link: "AdminList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Master Tools",
+            icon: <SettingsIcon className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Manage Restro Group", link: "RestroGroup", dropdown: false },{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }, { name: "Manage Dish Category", link: "RestroDishCategoryList", dropdown: false },
             {
-              name: "Restaurant Amenity",
-              link: "RestroAmenityList",
-              dropdown: false,
-              indent: true,
-            },
-            {
-              name: "Restaurant Type",
-              link: "RestroTypeList",
-              dropdown: false,
-              indent: true,
-            },
-            {
-              name: "Restaurant Good For",
-              link: "RestroGoodForList",
-              dropdown: false,
-              indent: true,
-            },
-            {
-              name: "Restaurant Cuisine",
-              link: "RestroCuisineList",
-              dropdown: false,
-              indent: true,
-            },
-          ],
-        },
-      ],
-    },
-
-    ,
-    {
-      section: "",
-      items: [
-        {
-          name: "Dish Management",
-          icon: <FaConciergeBell />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            {
-              name: "Dish Type",
-              link: "RestroDishTypeList",
-              dropdown: false,
-              indent: true,
-            },
-            {
-              name: "Dish Category ",
-              link: "RestroDishCategoryList",
-              dropdown: false,
-              indent: true,
-            },
-            {
-              name: "Dish Sub Category ",
+              name: "Manage Dish Sub Category",
               link: "RestroDishSubCategoryList",
               dropdown: false,
-              indent: true,
-            },
-          ],
-        },
-      ],
-      border: true,
-    },
-    {
-      section: "",
-      items: [
-        {
-          name: "Restaurant",
-          icon: <FaStore />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            // {
-            //   name: "Add Restaurant",
-            //   link: "RestroAdd",
-            //   dropdown: false,
-            // },
-            {
-              name: " Restaurant's",
-              link: "RestroList",
-              dropdown: false,
-            },
-          ],
-        },
-      ],
-      border: true,
-    },
+            },],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Restaurant",
+            icon: <FaStore className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [
 
-    {
-      section: "",
-      items: [
-        {
-          name: "Dish",
-          icon: <RestaurantIcon />,
-          link: "#",
-          dropdown: true,
-          subItems: [
-            // { name: "Add Dish", link: "AddDishes", dropdown: false },
-            { name: "Dishes", link: "DishesList", dropdown: false },
-          ],
-        },
-      ],
-      border: true,
-    },
+              {
+                name: "Restaurant Management",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Amenities", link: "RestroAmenityList", dropdown: false },
+                  {
+                    name: "Type",
+                    link: "RestroTypeList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Good For",
+                    link: "RestroGoodForList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Cuisine",
+                    link: "RestroCuisineList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Restaurant's List", link: "RestroList", dropdown: false },
 
-    {
-      section: "",
-      items: [
-        {
-          name: "Feedback Management",
-          icon: <FaCommentDots />,
-          link: "#",
-          dropdown: true,
-          subItems: [
+            ],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "User Management",
+            icon: <PeopleIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Users", link: "UserList", dropdown: false },{ name: "Deleted Users", link: "DeletedUserList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "CMS Management",
+            icon: <GroupWorkIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+
+              { name: "FAQ", link: "FAQList", dropdown: false },
+              { name: "Policies", link: "PoliciesList", dropdown: false },
+            ],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Report & Feedback Management",
+            icon: <GroupWorkIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+              { name: "Reports", link: "ReportList", dropdown: false },
+              {
+                name: "Query & Feedback",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Query FAQ", link: "QueryFAQ", dropdown: false },
+                  {
+                    name: "App Feedback",
+                    link: "AppFeedback",
+                    dropdown: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Review & Notification",
+            icon: <FaCommentDots className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+              {
+                name: "Feedback",
+                link: "#",
+                dropdown: true,
+                subItems: [{ name: "Add Review", link: "CreateReview", dropdown: false },
+                  { name: "Restaurants Review", link: "RestaurantReviewList", dropdown: false },
+                  {
+                    name: "Dishes Review",
+                    link: "DishReviewList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Notification", link: "NotificationList", dropdown: false },
+
+            ],
+          },
+        ],
+        border: true,
+      },
+
+
+
+    ],
+
+    admin: [
             {
-              name: "Restaurants Review",
-              link: "RestaurantReviewList",
-              dropdown: false,
-            },
+        section: null,
+        items: [
+          {
+            name: "Dashboard",
+            icon: <DashboardIcon className="w-4 h-4" />,
+            link: "/Dashboard",
+            dropdown: false,
+          },
+        ],
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Master Tools",
+            icon: <SettingsIcon className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Manage HashTag's", link: "HashtagList", dropdown: false }, { name: "Manage Dish Type", link: "RestroDishTypeList", dropdown: false }, { name: "Manage Dish Category", link: "RestroDishCategoryList", dropdown: false },
             {
-              name: "Dishes Review",
-              link: "DishReviewList",
+              name: "Manage Dish Sub Category",
+              link: "RestroDishSubCategoryList",
               dropdown: false,
-            },
-            {
-              name: "Manage HashTag's",
-              link: "HashtagList",
-              dropdown: false,
-            },
-          ],
-        },
-      ],
-      border: true,
-    },
-    
-  ];
+            },],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Restaurant",
+            icon: <FaStore className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+
+              {
+                name: "Restaurant Management",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Amenities", link: "RestroAmenityList", dropdown: false },
+                  {
+                    name: "Type",
+                    link: "RestroTypeList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Good For",
+                    link: "RestroGoodForList",
+                    dropdown: false,
+                  },
+                  {
+                    name: "Cuisine",
+                    link: "RestroCuisineList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Restaurant's List", link: "RestroList", dropdown: false },
+
+            ],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "User Management",
+            icon: <PeopleIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [{ name: "Users", link: "UserList", dropdown: false }],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "CMS Management",
+            icon: <GroupWorkIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+
+              { name: "FAQ", link: "FAQList", dropdown: false },
+              { name: "Policies", link: "PoliciesList", dropdown: false },
+            ],
+          },
+        ],
+        border: true,
+      },
+      {
+        section: "",
+        items: [
+          {
+            name: "Report & Feedback Management",
+            icon: <GroupWorkIcon />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+              { name: "Reports", link: "ReportList", dropdown: false },
+              {
+                name: "Query & Feedback",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Query FAQ", link: "QueryFAQ", dropdown: false },
+                  {
+                    name: "App Feedback",
+                    link: "AppFeedback",
+                    dropdown: false,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        border: true,
+      },
+
+
+      {
+        section: "",
+        items: [
+          {
+            name: "Review & Notification",
+            icon: <FaCommentDots className="w-5 h-5" />,
+            link: "#",
+            dropdown: true,
+            subItems: [
+              {
+                name: "Feedback",
+                link: "#",
+                dropdown: true,
+                subItems: [
+                  { name: "Restaurants Review", link: "RestaurantReviewList", dropdown: false },
+                  {
+                    name: "Dishes Review",
+                    link: "DishReviewList",
+                    dropdown: false,
+                  },
+                ],
+              },
+              { name: "Notification", link: "NotificationList", dropdown: false },
+
+            ],
+          },
+        ],
+        border: true,
+      },
+
+
+
+      
+      ...[],
+    ],
+
+    restaurant_owner: [
+      {
+        section: null,
+        items: [
+          {
+            name: "Dashboard",
+            icon: <DashboardIcon className="w-4 h-4" />,
+            link: "/RestroOwnerDashboard",
+            dropdown: false,
+          },
+          {
+            name: "Restaurant ",
+            icon: <FaStore className="w-5 h-5" />,
+            link: "/RestaurantProfile",
+            dropdown: false,
+          },
+          {
+            name: "Dishes ",
+            icon: <FaConciergeBell className="w-5 h-5" />,
+            link: "/RestaurantDishes",
+            dropdown: false,
+          },
+          {
+            name: "Reviews ",
+            icon: <FaCommentDots className="w-5 h-5" />,
+            link: "/RestaurantReviews",
+            dropdown: false,
+          },
+        ],
+      },
+    ],
+  };
+
+  // Use role-based sidebar
+  const filteredSidebarData = sidebarDataByRole[userRole] || [];
 
   const handleSubClick = (link) => {
     setActiveItem(link);

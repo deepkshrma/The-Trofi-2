@@ -1,15 +1,20 @@
-import React, { useState, useEffect ,useRef} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PageTitle from "../../components/PageTitle/PageTitle";
 import { BASE_URL } from "../../config/Config";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
-import { toast } from "react-toastify"; 
+import { toast } from "react-toastify";
 
 function RestroGoodFor() {
   const location = useLocation();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+
   const editData = location.state || null;
+
+  const authData = JSON.parse(localStorage.getItem("trofi_user"));
+  const token = authData?.token;
 
   const [goodFor, setGoodFor] = useState(editData?.name || "");
   const [icon, setIcon] = useState(null);
@@ -30,6 +35,11 @@ function RestroGoodFor() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
     if (!goodFor) {
       toast.error("Please enter a value");
       return;
@@ -40,45 +50,54 @@ function RestroGoodFor() {
       formData.append("name", goodFor);
       if (icon) formData.append("icon", icon);
 
+      let res;
+
       if (isEdit) {
         // Update
-        const res = await axios.patch(
+        res = await axios.patch(
           `${BASE_URL}/restro/edit-good-for/${editData.id}`,
           formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-
-        if (res.status === 200 || res.data?.status) {
-          
-          toast.success(res.data?.message || "Updated successfully")
-          navigate("/RestroGoodForList");
-        } else {
-        
-          toast.error(res.data?.message || "Something went wrong");
-        }
       } else {
         // Create
-        const res = await axios.post(
-          `${BASE_URL}/restro/create-good-for`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        res = await axios.post(`${BASE_URL}/restro/create-good-for`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
 
-        if (res.status === 201 || res.data?.status) {
-        
-          toast.success(res.data?.message || "Created successfully")
-          setGoodFor("");
-          setIcon(null);
-          setPreview(null);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-          navigate("/RestroGoodForList");
-        } else {
-          toast.error(res.data?.message || "Something went wrong");
-        }
+      // ✅ Handle success/error from backend (like { success: false, message: "Permission denied" })
+      if (res.data?.success === false || res.data?.sucess === false) {
+        toast.error(res.data?.message || "Permission denied");
+        return;
+      }
+
+      if (res.status === 200 || res.status === 201 || res.data?.status) {
+        toast.success(res.data?.message || (isEdit ? "Updated successfully" : "Created successfully"));
+        setGoodFor("");
+        setIcon(null);
+        setPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        navigate("/RestroGoodForList");
+      } else {
+        toast.error(res.data?.message || "Something went wrong");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Error while saving Good For");
+      console.error("Error while saving Good For:", err);
+      // 🔥 Show backend error message if available
+      const backendMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Error while saving Good For";
+      toast.error(backendMessage);
     }
   };
 
@@ -114,7 +133,6 @@ function RestroGoodFor() {
           </div>
 
           {/* Icon Upload */}
-          {/* Icon Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Upload Icon Image
@@ -122,27 +140,13 @@ function RestroGoodFor() {
             <input
               type="file"
               accept="image/*"
+              ref={fileInputRef}
               onChange={handleFileChange}
-              className="
-      w-full 
-      cursor-pointer 
-      rounded-xl 
-      border border-gray-300 
-      bg-gray-50 
-      px-3 py-2 text-sm text-gray-700 
-      shadow-sm
-      file:mr-4 
-      file:rounded-lg 
-      file:border-0 
-      file:bg-orange-500 
-      file:px-4 
-      file:py-2 
-      file:text-white 
-      file:cursor-pointer 
-      hover:file:bg-orange-600 
-      focus:ring-2 focus:ring-orange-300
-      transition
-    "
+              className="w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 
+                 px-3 py-2 text-sm text-gray-700 shadow-sm file:mr-4 file:rounded-lg 
+                 file:border-0 file:bg-orange-500 file:px-4 file:py-2 file:text-white 
+                 file:cursor-pointer hover:file:bg-orange-600 focus:ring-2 
+                 focus:ring-orange-300 transition"
             />
 
             {preview && (

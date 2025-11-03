@@ -9,9 +9,11 @@ import { CiExport } from "react-icons/ci";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { PlusCircle } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { BASE_URL } from "../../config/Config";
 
 function RestroTypeList() {
-  const API_BASE = "http://trofi-backend.apponedemo.top/api/";
   const PAGE_SIZE = 10;
   const navigate = useNavigate();
 
@@ -19,6 +21,7 @@ function RestroTypeList() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -27,46 +30,76 @@ function RestroTypeList() {
     totalRecords: 0,
   });
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const closeDeleteModal = () => setShowDeleteModal(false);
 
   const confirmDelete = async () => {
-    // implement delete logic here
+    // delete logic will go here
   };
 
   useEffect(() => {
     fetchTypes();
   }, []);
 
+  // ✅ Fetch Restaurant Types using axios + token
   async function fetchTypes() {
     setLoading(true);
     setError(null);
+
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    if (!token) {
+      toast.error("Please login first");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}restro/get-restaurant-types`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = await res.json();
-      if (!json?.success) throw new Error(json.message || "API Error");
+      const res = await axios.get(`${BASE_URL}/restro/get-restaurant-types`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const normalized = json.data.map((t) => ({
-        id: t._id,
-        name: t.name,
-        icon: t.icon,
-      }));
-
-      setTypes(normalized);
-    } catch (err) {
-      setError(err.message || "Failed to fetch types");
+      if (res.data?.success) {
+        const normalized = res.data.data.map((t) => ({
+          id: t._id,
+          name: t.name,
+          icon: t.icon,
+        }));
+        setTypes(normalized);
+      } else {
+        toast.error(res.data?.message || "Failed to load restaurant types");
+      }
+    } catch (error) {
+      console.error("Error fetching types:", error);
+      if (error.response) {
+        const message =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          "Something went wrong on the server.";
+        toast.error(message);
+        setError(message);
+      } else if (error.request) {
+        toast.error("No response from server. Please try again.");
+        setError("No response from server.");
+      } else {
+        toast.error("Error fetching Restaurant Types");
+        setError("Error fetching Restaurant Types");
+      }
     } finally {
       setLoading(false);
     }
   }
 
+  // ✅ Filter list by search query
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return types;
     return types.filter((t) => t.name.toLowerCase().includes(q));
   }, [types, search]);
 
+  // ✅ Pagination calculations
   useEffect(() => {
     const total = filtered.length;
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -83,6 +116,7 @@ function RestroTypeList() {
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, pagination.currentPage]);
 
+  // ✅ Export to Excel
   const handleExport = () => {
     const exportData = filtered.map((type, index) => ({
       "S.No.": index + 1,
@@ -109,6 +143,7 @@ function RestroTypeList() {
         <BreadcrumbsNav
           customTrail={[{ label: "Restaurant Type List", path: "/RestroTypeList" }]}
         />
+
         <div className="flex justify-between items-center mb-3">
           <PageTitle title="Restaurant Type List" />
           <button
@@ -119,7 +154,6 @@ function RestroTypeList() {
             <PlusCircle size={18} /> Add Type List
           </button>
         </div>
-        
 
         <div className="bg-white rounded-2xl shadow-md mt-3">
           <div className="pb-3 overflow-x-auto">
@@ -169,26 +203,22 @@ function RestroTypeList() {
                             className="border-b border-gray-300 hover:bg-gray-50 transition"
                           >
                             <td className="px-4 py-2">{serial}</td>
-
-                            {/* Icon column */}
                             <td className="px-4 py-2">
                               {type.icon ? (
                                 <img
-                                  src={`${API_BASE.replace(/\/api\/?$/, "/")}${type.icon}`}
+                                  src={`${BASE_URL.replace(/\/api\/?$/, "/")}${type.icon}`}
                                   alt={type.name}
                                   className="w-10 h-10 object-cover rounded-md border border-gray-300"
                                 />
                               ) : (
-                                <span className="text-gray-400 text-sm italic">No Icon</span>
+                                <span className="text-gray-400 text-sm italic">
+                                  No Icon
+                                </span>
                               )}
                             </td>
-
-                            <td className="px-4 py-2">
-                              <span className="text-gray-700 px-3 py-1 rounded-full text-md">
-                                {type.name}
-                              </span>
+                            <td className="px-4 py-2 text-gray-700">
+                              {type.name}
                             </td>
-
                             <td className="px-4 py-2">
                               <div className="flex gap-3">
                                 <button
@@ -205,13 +235,6 @@ function RestroTypeList() {
                                 >
                                   <MdEdit size={16} />
                                 </button>
-
-                                {/* <button
-                                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500 text-white cursor-pointer hover:bg-red-600"
-                                  onClick={() => setShowDeleteModal(true)}
-                                >
-                                  <MdDelete size={16} />
-                                </button> */}
                               </div>
                             </td>
                           </tr>

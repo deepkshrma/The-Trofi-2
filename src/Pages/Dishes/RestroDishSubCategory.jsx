@@ -27,16 +27,29 @@ function RestroDishSubCategory() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/restro/get-dish-category`);
-        if (res.status === 200) {
-          setParentCategories(res.data?.data || []); // store fetched categories
+        const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+        const res = await axios.get(`${BASE_URL}/restro/get-dish-category`,{
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}` 
+            },
+          })
+        ;
+        if ( res.data?.success) {
+          setParentCategories(res.data.data || []);
+        } else {
+          toast.error(res.data?.message || "Failed to fetch parent categories");
         }
       } catch (err) {
         console.error("Error fetching categories:", err);
+        toast.error(err.response?.data?.message || "Server error while fetching categories");
       }
     };
     fetchCategories();
   }, []);
+
 
   // Agar edit mode hai to form prefill karo
   useEffect(() => {
@@ -61,6 +74,14 @@ function RestroDishSubCategory() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const authData = JSON.parse(localStorage.getItem("trofi_user"));
+    const token = authData?.token;
+
+    if (!token) {
+      toast.error("Please login first");
+      return;
+    }
+
 
     if (!parentCategoryId || !subCategoryName || !description) {
       toast.error("Please provide all fields");
@@ -73,33 +94,25 @@ function RestroDishSubCategory() {
     formData.append("description", description);
     if (file) formData.append("icon", file);
 
-    try {
-      let res;
-      if (isEdit) {
-        res = await axios.patch(
-          `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-      } else {
-        // CREATE
-        res = await axios.post(
-          `${BASE_URL}/restro/create-dish-sub-category`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-      }
+    const res = await axios[isEdit ? "patch" : "post"](
+  isEdit
+    ? `${BASE_URL}/restro/edit-dish-sub-category/${editData._id}`
+    : `${BASE_URL}/restro/create-dish-sub-category`,
+  formData,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  }
+);
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success(res.data?.message || "Success");
-        navigate("/RestroDishSubCategoryList"); 
-      } else {
-        toast.error(res.data?.message || "Something went wrong");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error while saving sub-category");
-    }
+if (res.data?.success === true) {
+  toast.success(res.data.message || "Sub-category saved successfully");
+  navigate("/RestroDishSubCategoryList");
+} else {
+  toast.error(res.data?.message || "Something went wrong on the server");
+}
+
   };
 
   return (
