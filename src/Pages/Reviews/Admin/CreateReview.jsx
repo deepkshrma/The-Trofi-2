@@ -220,8 +220,8 @@ function CreateReview() {
 
     const handleImageUpload = (e) => {
         const files = Array.from(e.target.files);
-        if (images.length + files.length > 10) {
-            toast.warning("Maximum 10 images allowed");
+        if (images.length + files.length > 5) {
+            toast.warning("Maximum 5 images allowed");
             return;
         }
         setImages((prev) => [...prev, ...files]);
@@ -719,9 +719,9 @@ function CreateReview() {
                         onClick={() => document.getElementById("imageInput").click()}
                         className="px-4 py-2 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-600 cursor-pointer transition"
                     >
-                        Choose Images ({images.length}/10)
+                        Choose Images ({images.length}/5)
                     </button>
-                    <p className="text-xs text-gray-500 mt-1">Maximum 10 images, each under 5MB</p>
+                    <p className="text-xs text-gray-500 mt-1">Maximum 5 images, each under 5MB</p>
 
                     {images.length > 0 && (
                         <div className="flex gap-3 flex-wrap mt-4">
