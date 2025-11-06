@@ -1,3 +1,93 @@
+// import { useState } from "react";
+// import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
+
+// const Pagination = ({
+//   currentPage,
+//   totalItems,
+//   itemsPerPage,
+//   onPageChange,
+//   type = "frontend", // "frontend" | "backend"
+// }) => {
+//   const totalPages = Math.ceil(totalItems / itemsPerPage);
+//   const [jumpPage, setJumpPage] = useState("");
+
+//   const PaginationButton = ({ onClick, icon, label, active }) => (
+//     <div
+//       onClick={onClick}
+//       className={`flex justify-center items-center w-[30px] h-[30px] rounded cursor-pointer transition transform 
+//   shadow-md active:scale-95
+//   ${
+//     active
+//       ? "bg-[#F9832B] text-white"
+//       : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+//   }`}
+//     >
+//       {icon || label}
+//     </div>
+//   );
+
+//   const getPaginationRange = () => {
+//     if (totalPages <= 3) return [...Array(totalPages)].map((_, i) => i + 1);
+//     if (currentPage === 1) return [1, 2, 3];
+//     if (currentPage === totalPages)
+//       return [totalPages - 2, totalPages - 1, totalPages];
+//     return [currentPage - 1, currentPage, currentPage + 1];
+//   };
+
+//   const handleJump = () => {
+//     const page = Number(jumpPage);
+//     if (page >= 1 && page <= totalPages) {
+//       onPageChange(page);
+//       setJumpPage("");
+//     }
+//   };
+
+//   return (
+//     <div className="flex items-center justify-end gap-2 mt-4 text-sm px-4">
+//       {/* Previous Button */}
+//       <PaginationButton
+//         onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+//         icon={<FaCaretLeft />}
+//       />
+
+//       {/* Page Buttons */}
+//       {getPaginationRange().map((page) => (
+//         <PaginationButton
+//           key={page}
+//           onClick={() => onPageChange(page)}
+//           label={page}
+//           active={currentPage === page}
+//         />
+//       ))}
+
+//       {/* Next Button */}
+//       <PaginationButton
+//         onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
+//         icon={<FaCaretRight />}
+//       />
+
+//       {/* Direct Jump Input */}
+//       <div className="flex items-center gap-1">
+//         <input
+//           type="number"
+//           placeholder="Page"
+//           value={jumpPage}
+//           onChange={(e) => setJumpPage(e.target.value)}
+//           className="w-[50px] text-center font-serif border border-gray-300 rounded py-1.5 text-sm outline-none shadow-sm"
+//         />
+//         <button
+//           onClick={handleJump}
+//           className="bg-[#F9832B] hover:bg-[#e67220] text-white font-bold px-4 py-2 rounded text-xs shadow-md active:scale-95 transition transform cursor-pointer"
+//         >
+//           Go
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Pagination;
+
 import { useState } from "react";
 import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
 
@@ -6,20 +96,27 @@ const Pagination = ({
   totalItems,
   itemsPerPage,
   onPageChange,
-  type = "frontend", // "frontend" | "backend"
+  totalPages, // ✅ Optional: Use this from backend if provided
+  type = "frontend",
 }) => {
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  // ✅ Backward compatible: Use totalPages if provided, otherwise calculate
+  const pages = totalPages !== undefined && totalPages !== null 
+    ? totalPages 
+    : Math.ceil(totalItems / itemsPerPage);
+    
   const [jumpPage, setJumpPage] = useState("");
 
-  const PaginationButton = ({ onClick, icon, label, active }) => (
+  const PaginationButton = ({ onClick, icon, label, active, disabled }) => (
     <div
-      onClick={onClick}
-      className={`flex justify-center items-center w-[30px] h-[30px] rounded cursor-pointer transition transform 
-  shadow-md active:scale-95
+      onClick={disabled ? undefined : onClick}
+      className={`flex justify-center items-center w-[30px] h-[30px] rounded transition transform 
+  shadow-md
   ${
-    active
-      ? "bg-[#F9832B] text-white"
-      : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+    disabled
+      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+      : active
+      ? "bg-[#F9832B] text-white cursor-pointer active:scale-95"
+      : "bg-gray-200 text-gray-800 hover:bg-gray-300 cursor-pointer active:scale-95"
   }`}
     >
       {icon || label}
@@ -27,20 +124,22 @@ const Pagination = ({
   );
 
   const getPaginationRange = () => {
-    if (totalPages <= 3) return [...Array(totalPages)].map((_, i) => i + 1);
+    if (pages <= 3) return [...Array(pages)].map((_, i) => i + 1);
     if (currentPage === 1) return [1, 2, 3];
-    if (currentPage === totalPages)
-      return [totalPages - 2, totalPages - 1, totalPages];
+    if (currentPage === pages) return [pages - 2, pages - 1, pages];
     return [currentPage - 1, currentPage, currentPage + 1];
   };
 
   const handleJump = () => {
     const page = Number(jumpPage);
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= pages) {
       onPageChange(page);
       setJumpPage("");
     }
   };
+
+  // ✅ Don't render if no pages or invalid data
+  if (!pages || pages <= 0 || isNaN(pages)) return null;
 
   return (
     <div className="flex items-center justify-end gap-2 mt-4 text-sm px-4">
@@ -48,6 +147,7 @@ const Pagination = ({
       <PaginationButton
         onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
         icon={<FaCaretLeft />}
+        disabled={currentPage === 1}
       />
 
       {/* Page Buttons */}
@@ -62,26 +162,32 @@ const Pagination = ({
 
       {/* Next Button */}
       <PaginationButton
-        onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
+        onClick={() => onPageChange(Math.min(currentPage + 1, pages))}
         icon={<FaCaretRight />}
+        disabled={currentPage === pages}
       />
 
-      {/* Direct Jump Input */}
-      <div className="flex items-center gap-1">
-        <input
-          type="number"
-          placeholder="Page"
-          value={jumpPage}
-          onChange={(e) => setJumpPage(e.target.value)}
-          className="w-[50px] text-center font-serif border border-gray-300 rounded py-1.5 text-sm outline-none shadow-sm"
-        />
-        <button
-          onClick={handleJump}
-          className="bg-[#F9832B] hover:bg-[#e67220] text-white font-bold px-4 py-2 rounded text-xs shadow-md active:scale-95 transition transform cursor-pointer"
-        >
-          Go
-        </button>
-      </div>
+      {/* Direct Jump Input - Only show if more than 3 pages */}
+      {pages > 3 && (
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            placeholder="Page"
+            value={jumpPage}
+            onChange={(e) => setJumpPage(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleJump()}
+            min="1"
+            max={pages}
+            className="w-[50px] text-center font-serif border border-gray-300 rounded py-1.5 text-sm outline-none shadow-sm"
+          />
+          <button
+            onClick={handleJump}
+            className="bg-[#F9832B] hover:bg-[#e67220] text-white font-bold px-4 py-2 rounded text-xs shadow-md active:scale-95 transition transform cursor-pointer"
+          >
+            Go
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { Star } from "lucide-react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import guestImg from "../../assets/images/guest.png";
+import BreadcrumbsNav from "../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 
 function SingleDishReview() {
   const { isToggle } = useContext(LayoutContext);
@@ -72,6 +73,13 @@ function SingleDishReview() {
         isToggle ? "pl-[19.3rem]" : ""
       } duration-900 min-h-screen bg-gray-50`}
     >
+       <BreadcrumbsNav
+                customTrail={[
+                   
+                    { label: "Restaurant Dishes", path: `/RestaurantDishes/${id}` },
+                    { label: "Dish Reviews", path: `/` },
+                ]}
+            />
       {/* Header */}
       <div className="bg-white p-6 shadow-md rounded-xl mb-6">
         <h1 className="text-2xl font-bold text-gray-800">

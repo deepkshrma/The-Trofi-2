@@ -169,7 +169,7 @@ function ReviewDetails() {
     <div className="main main_page p-6 min-h-screen duration-900">
       <BreadcrumbsNav
         customTrail={[
-          { label: "Reviews", path: `/reviews/${review.typeId}` },
+          { label: "Reviews", path: `/RestaurantReviews` },
           { label: "Review Details", path: `/ReviewDetails/${reviewId}` },
         ]}
       />

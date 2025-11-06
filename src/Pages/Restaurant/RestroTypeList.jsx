@@ -208,7 +208,7 @@ function RestroTypeList() {
                                 <img
                                   src={`${BASE_URL.replace(/\/api\/?$/, "/")}${type.icon}`}
                                   alt={type.name}
-                                  className="w-10 h-10 object-cover rounded-md border border-gray-300"
+                                  className="w-10 h-10 object-cover rounded-md border bg-gray-600  border-gray-300"
                                 />
                               ) : (
                                 <span className="text-gray-400 text-sm italic">

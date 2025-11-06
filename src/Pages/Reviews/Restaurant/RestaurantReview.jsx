@@ -7,7 +7,7 @@ import { BASE_URL, IMAGE_URL } from "../../../config/Config";
 import PageTitle from "../../../components/PageTitle/PageTitle";
 import BreadcrumbsNav from "../../../components/common/BreadcrumbsNav/BreadcrumbsNav";
 import AdminUpdateReviewStatus from "../../../components/AdminUpdateReviewStatus/AdminUpdateReviewStatus ";
-import dummyimg from "../../../assets/images/logo.jpg";
+import guest from "../../../assets/images/dishh.png";
 import { STAR_RATINGS } from "../../../config/hashtagconfig";
 
 function RestaurantReview() {
@@ -430,7 +430,7 @@ function RestaurantReview() {
             src={
               review.restaurant.image
                 ? `${IMAGE_URL}/${review.restaurant.image}`
-                : dummyimg
+                : guest
             }
             alt="resto"
             className="w-24 h-24 rounded-lg object-cover"

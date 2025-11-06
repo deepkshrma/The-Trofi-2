@@ -87,19 +87,19 @@ function CreateRestroDish() {
 
         // Fetch Categories
         axios
-            .get(`${BASE_URL}/restro/get-dish-category`, config)
+            .get(`${BASE_URL}/restro/get-dish-category-dropdown`, config)
             .then((res) => setDishCategories(res.data?.data || []))
             .catch((err) => console.error("Error fetching categories:", err));
 
         // Fetch Subcategories
         axios
-            .get(`${BASE_URL}/restro/get-dish-sub-category`, config)
+            .get(`${BASE_URL}/restro/get-dish-sub-category-dropdown`, config)
             .then((res) => setDishSubCategories(res.data?.data || []))
             .catch((err) => console.error("Error fetching sub-categories:", err));
 
         // Fetch Cuisines
         axios
-            .get(`${BASE_URL}/restro/get-cusine`, config)
+            .get(`${BASE_URL}/restro/get-cusine-dropdown`, config)
             .then((res) => setCuisines(res.data?.data || []))
             .catch((err) => console.error("Error fetching cuisines:", err));
     }, [restaurantId]); // ✅ Keep restaurantId dependency
@@ -156,7 +156,7 @@ function CreateRestroDish() {
             .post(`${BASE_URL}/dishes/create-dish`, formData, config)
             .then(() => {
                 toast.success("Dish created successfully!");
-                navigate(`/DishesList/${restaurantId}`);
+                navigate(`/RestaurantDishes/${restaurantId}`);
             })
             .catch((err) => {
                 console.error(err);
@@ -168,8 +168,8 @@ function CreateRestroDish() {
         <div className="main main_page min-h-screen py-10 px-6 lg:px-20 duration-900">
             <BreadcrumbsNav
                 customTrail={[
-                    { label: "Restaurant List", path: "/RestroList" },
-                    { label: "Dishes List", path: `/DishesList/${restaurantId}` },
+                   
+                    { label: "Dishes List", path: `/RestaurantDishes/${restaurantId}` },
                     { label: "Add New Dish", path: `/AddDishes/${restaurantId}` },
                 ]}
             />
